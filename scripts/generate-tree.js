@@ -2,12 +2,13 @@ import fs from 'fs';
 import path from 'path';
 
 const rootDir = process.cwd();
-const notesDir = path.join(rootDir, 'notes');
-// Write to public/files.json so Vite copies it to dist/files.json during build
 const publicDir = path.join(rootDir, 'public');
 const outputFile = path.join(publicDir, 'files.json'); 
 
-console.log("🌸 Scanning notes directory:", notesDir);
+// Directories to scan at the project root
+const SCAN_ROOTS = ['notes', 'VUE学习笔记'];
+
+console.log("🌸 Scanning directories:", SCAN_ROOTS);
 
 // Ensure public directory exists
 if (!fs.existsSync(publicDir)) {
@@ -31,6 +32,7 @@ function scanDirectory(dirPath, relativePath) {
 
     if (stat.isDirectory()) {
       const children = scanDirectory(fullPath, itemRelativePath);
+      // Only add directories if they have content or are specific folders
       result.push({
         name: item,
         path: itemRelativePath,
@@ -38,14 +40,11 @@ function scanDirectory(dirPath, relativePath) {
         children: children
       });
     } else if (item.endsWith('.md')) {
-      // NOTE: We do NOT read content here anymore to keep files.json small.
-      // Content is fetched at runtime.
       result.push({
         name: item,
         path: itemRelativePath,
         type: 'file',
         lastModified: stat.mtime.toISOString()
-        // Content is omitted
       });
     }
   }
@@ -54,17 +53,21 @@ function scanDirectory(dirPath, relativePath) {
 
 // Generate structure
 try {
-  if (!fs.existsSync(notesDir)) {
-    console.log('No "notes" folder found. Creating empty one.');
-    fs.mkdirSync(notesDir);
-  }
+  const fileTree = [];
 
-  const fileTree = [{
-    name: 'notes',
-    path: 'notes',
-    type: 'directory',
-    children: scanDirectory(notesDir, 'notes')
-  }];
+  SCAN_ROOTS.forEach(folderName => {
+    const folderPath = path.join(rootDir, folderName);
+    if (fs.existsSync(folderPath)) {
+      fileTree.push({
+        name: folderName,
+        path: folderName,
+        type: 'directory',
+        children: scanDirectory(folderPath, folderName)
+      });
+    } else {
+      console.warn(`⚠️ Warning: Folder '${folderName}' not found at root.`);
+    }
+  });
 
   fs.writeFileSync(outputFile, JSON.stringify(fileTree, null, 2));
   console.log('✅ Successfully generated public/files.json (Metadata only)');

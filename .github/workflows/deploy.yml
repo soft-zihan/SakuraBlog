@@ -36,9 +36,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      # 3. Copy actual markdown notes to dist/notes so they can be fetched
-      - name: Copy Notes to Dist
-        run: cp -r notes dist/notes
+      # 3. Copy actual markdown notes to dist/ so they can be fetched
+      # We explicitly copy the folders we scanned in generate-tree.js
+      - name: Copy Content to Dist
+        run: |
+          mkdir -p dist/notes
+          mkdir -p dist/VUE学习笔记
+          if [ -d "notes" ]; then cp -r notes/* dist/notes/ || true; fi
+          if [ -d "VUE学习笔记" ]; then cp -r VUE学习笔记/* dist/VUE学习笔记/ || true; fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
