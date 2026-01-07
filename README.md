@@ -26,39 +26,36 @@
 
 本项目采用 **Build-time Indexing (构建时索引)** 与 **Runtime Fetching (运行时获取)** 相结合的策略，实现了无后端动态感。
 
-### 1. 文件结构映射
-项目并没有使用复杂的路由配置（如 `vue-router`），而是直接映射文件系统：
+### 1. 项目文件结构
 ```
 .
 ├── index.html           # 页面入口 (Shell)
-├── App.vue              # 核心应用逻辑
+├── App.vue              # 核心应用逻辑 (路由、布局、状态管理)
 ├── components/          # Vue 组件
 │   ├── LabReactivity.vue # 实验台：响应式原理 (交互组件)
 │   ├── LabLifecycle.vue  # 实验台：生命周期 (交互组件)
 │   └── FileTree.vue      # 递归目录树组件
 ├── scripts/
 │   └── generate-tree.js # 核心构建脚本 (Node.js)
-├── notes/               # 数据源 (Markdown文件)
+├── notes/               # 你的笔记数据源 (Markdown文件)
 └── package.json         # 项目依赖与脚本配置
 ```
 
-### 2. 设计原理 (Design Principles)
+### 2. 核心工作流 (The Build Loop)
+当代码 Push 到 GitHub 时，GitHub Actions 会执行以下步骤：
 
-*   **数据驱动 (Data-Driven)**: 
-    不手动编写 HTML 列表。构建脚本扫描 `notes/` 目录，生成 `files.json`。前端 Vue 应用启动时，读取这个 JSON，动态渲染出目录树和文件列表。
-    
-*   **内容即代码 (Content as Code)**:
-    博客内容完全由 Markdown 文件决定。`VUE学习笔记` 文件夹被特殊处理，映射到前端的 "Lab" 视图，实现了内容分类的逻辑解耦。
+1.  **Scanner (扫描)**: Node.js 脚本 (`generate-tree.js`) 唤醒，递归遍历 `notes` 文件夹。
+2.  **Indexer (索引)**: 脚本读取所有 `.md` 文件的元数据（文件名、路径、修改时间），生成一个巨大的 JSON 索引文件 `public/files.json`。
+3.  **Bundler (打包)**: Vite 打包 Vue 代码，生成优化的 JS/CSS 静态资源。
+4.  **Publisher (发布)**: 最终的 `dist` 目录（包含前端资源 + JSON索引 + 原始MD文件）被发布到静态网页服务器。
 
-*   **组件化交互 (Component Interaction)**:
-    Lab 区域的教学组件（如生命周期演示）是内嵌的 Vue 组件。这展示了 Vue 相比传统静态博客生成器（如 Hexo/Jekyll）的优势：可以在 Markdown 内容旁边无缝嵌入复杂的交互式应用。
+### 3. 前端运行时
+当用户访问网页时：
+1.  Vue 应用启动，`fetch('/files.json')` 获取目录结构。
+2.  用户点击某个文件时，`fetch(filePath)` 获取 Markdown 内容。
+3.  利用 `marked.js` 将 Markdown 渲染为 HTML。
 
-### 3. 构建流程 (The Build Loop)
-当代码 Push 到 GitHub 时：
-1.  **Scanner**: Node.js 脚本 (`generate-tree.js`) 唤醒，递归遍历 `notes` 文件夹。
-2.  **Indexer**: 脚本读取所有 `.md` 文件的元数据（文件名、路径、修改时间），生成一个巨大的 JSON 索引文件 `files.json`。
-3.  **Bundler**: Vite 打包 Vue 代码，生成优化的 JS/CSS 静态资源。
-4.  **Publisher**: GitHub Actions 将 `dist` 目录（包含前端资源 + JSON索引 + 原始MD文件）发布到静态服务器。
+这种设计使得博客既拥有静态网站的速度和SEO（相对），又拥有单页应用 (SPA) 的流畅体验。
 
 ---
 

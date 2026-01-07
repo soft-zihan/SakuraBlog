@@ -2,7 +2,7 @@
   <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 backdrop-blur-[2px] font-sans" :class="userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans'">
     
     <!-- Left Sidebar: Navigation -->
-    <aside class="w-full md:w-80 flex-shrink-0 flex flex-col bg-white/80 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.02)] border-r border-white/60 h-full z-20 transition-all duration-300">
+    <aside class="w-full md:w-72 lg:w-80 flex-shrink-0 flex flex-col bg-white/80 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.02)] border-r border-white/60 h-full z-30 transition-all duration-300">
       <!-- Profile Header -->
       <div class="p-8 pb-4 flex flex-col items-center border-b border-sakura-100/50 flex-shrink-0 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-sakura-50/50 to-transparent pointer-events-none"></div>
@@ -18,7 +18,7 @@
           <div class="absolute bottom-4 right-0 bg-white rounded-full p-1 shadow-md border border-sakura-100 text-xs">🌸</div>
         </div>
         
-        <h1 class="text-xl font-bold text-sakura-800 tracking-tight z-10" @click="resetToHome">Sakura Notes</h1>
+        <h1 class="text-xl font-bold text-sakura-800 tracking-tight z-10 hover:text-sakura-600 transition-colors" @click="resetToHome">Sakura Notes</h1>
         <p class="text-xs text-sakura-400 mt-1 font-medium bg-sakura-50 px-3 py-1 rounded-full z-10">Frontend & Vue Learner</p>
       </div>
 
@@ -145,26 +145,16 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Main Content Wrapper -->
     <main class="flex-1 flex flex-col h-full overflow-hidden relative isolate">
       <!-- Decorative Background Elements for Widescreen Interest -->
       <div class="absolute inset-0 z-[-1] overflow-hidden pointer-events-none">
         <!-- Top Right Blob -->
-        <div class="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-sakura-100/40 to-purple-100/40 blur-3xl animate-float opacity-60"></div>
+        <div class="absolute -top-[20%] -right-[10%] w-[800px] h-[800px] rounded-full bg-gradient-to-br from-sakura-100/40 to-purple-100/30 blur-3xl animate-float opacity-60"></div>
         <!-- Bottom Left Blob -->
-        <div class="absolute top-[40%] -left-[10%] w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-sakura-200/30 to-sakura-50/30 blur-3xl animate-pulse-fast opacity-50" style="animation-duration: 8s;"></div>
-        <!-- Center Subtle Glow -->
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white/20 blur-xl"></div>
-      </div>
-
-      <div class="absolute bottom-0 right-0 pointer-events-none opacity-20 z-0 select-none">
-        <svg width="600" height="600" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M250 250C250 250 300 150 400 180C400 180 320 250 250 250Z" fill="#fda4b8"/>
-          <path d="M250 250C250 250 350 300 380 400C380 400 280 320 250 250Z" fill="#fecdd7"/>
-          <path d="M250 250C250 250 200 350 100 320C100 320 180 250 250 250Z" fill="#ffe4e9"/>
-          <path d="M250 250C250 250 150 200 120 100C120 100 220 180 250 250Z" fill="#fff0f5"/>
-          <circle cx="250" cy="250" r="30" fill="#f43f72" fill-opacity="0.3"/>
-        </svg>
+        <div class="absolute top-[30%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-sakura-200/30 to-sakura-50/20 blur-3xl animate-pulse-fast opacity-50" style="animation-duration: 8s;"></div>
+        <!-- Pattern Overlay -->
+        <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#9f123f 1px, transparent 1px); background-size: 32px 32px;"></div>
       </div>
 
       <!-- Navbar -->
@@ -201,47 +191,25 @@
         </div>
       </header>
 
-      <!-- Content -->
-      <div class="flex-1 flex overflow-hidden z-10">
-        <div v-if="viewMode === 'lab' && currentTool" class="flex-1 overflow-y-auto custom-scrollbar p-8">
-           <div class="w-[95%] max-w-[1400px] mx-auto animate-fade-in">
+      <!-- Content Area -->
+      <div class="flex-1 flex overflow-hidden z-10 relative">
+        
+        <!-- Center Stage: The Note -->
+        <div 
+          v-if="currentFile || (viewMode === 'lab' && currentTool) || currentFolder" 
+          id="scroll-container" 
+          class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full" 
+          @mouseup="handleTextSelection"
+        >
+          
+          <!-- Lab Tool View -->
+          <div v-if="viewMode === 'lab' && currentTool" class="w-full max-w-4xl mx-auto animate-fade-in">
              <LabReactivity v-if="currentTool === 'reactivity'" />
              <LabLifecycle v-if="currentTool === 'lifecycle'" />
-           </div>
-        </div>
-
-        <div v-else-if="currentFile" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-8 relative w-full" @mouseup="handleTextSelection">
-          <!-- Main Paper Container: Increased max-width and added subtle border for paper feel -->
-          <div 
-             class="w-[98%] max-w-[1920px] mx-auto bg-white/70 p-8 md:p-16 rounded-[2rem] shadow-sm border border-white/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-2xl transition-all duration-300"
-             :class="userSettings.fontSize === 'large' ? 'text-lg' : ''"
-          >
-             <div class="mb-8 flex items-center gap-3 border-b border-gray-100 pb-6">
-                <span class="text-3xl bg-sakura-50 p-2 rounded-xl">{{ viewMode === 'lab' ? '🧪' : '📄' }}</span>
-                <div>
-                  <h1 class="text-3xl font-bold text-gray-800 tracking-tight">{{ currentFile.name.replace('.md', '') }}</h1>
-                  <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
-                     <span>{{ getParentPath(currentFile.path) }}</span>
-                     <span>•</span>
-                     <span>{{ formatDate(currentFile.lastModified) }}</span>
-                  </div>
-                </div>
-             </div>
-
-            <!-- Content Area: Center aligned with readable max-width inside the large container -->
-            <div class="max-w-[1200px] mx-auto">
-               <div v-html="renderedContent" class="markdown-body"></div>
-            </div>
-            
-            <div class="mt-12 pt-8 border-t border-sakura-100 flex justify-between text-xs text-sakura-300 max-w-[1200px] mx-auto">
-              <span class="italic">Sakura Notes</span>
-              <span>Updated: {{ formatDate(currentFile.lastModified) }}</span>
-            </div>
           </div>
-        </div>
 
-        <div v-else-if="currentFolder" class="flex-1 overflow-y-auto custom-scrollbar p-8">
-           <div class="w-[95%] max-w-[1920px] mx-auto">
+          <!-- Folder View -->
+          <div v-else-if="currentFolder" class="w-full max-w-[1600px] mx-auto">
              <div class="flex items-center gap-4 mb-8 p-8 bg-white/60 rounded-[2rem] border border-white shadow-sm backdrop-blur-md">
                <span class="text-5xl bg-sakura-100 p-4 rounded-2xl shadow-inner text-sakura-500">📁</span>
                <div>
@@ -249,8 +217,7 @@
                  <p class="text-sakura-500 mt-1 font-medium">{{ currentFolder.children?.length || 0 }} items inside</p>
                </div>
              </div>
-
-             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                <div 
                   v-for="child in sortedFolderChildren" 
                   :key="child.path"
@@ -270,9 +237,35 @@
                  </div>
                </div>
              </div>
-           </div>
+          </div>
+
+          <!-- Note Content View -->
+          <div v-else-if="currentFile" 
+             class="w-full max-w-4xl mx-auto bg-white/70 p-8 md:p-12 lg:p-16 rounded-[2rem] shadow-sm border border-white/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-2xl transition-all duration-300"
+             :class="userSettings.fontSize === 'large' ? 'text-lg' : ''"
+          >
+             <div class="mb-8 flex items-center gap-3 border-b border-gray-100 pb-6">
+                <span class="text-3xl bg-sakura-50 p-2 rounded-xl">📄</span>
+                <div>
+                  <h1 class="text-3xl font-bold text-gray-800 tracking-tight leading-tight">{{ currentFile.name.replace('.md', '') }}</h1>
+                  <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                     <span>{{ getParentPath(currentFile.path) }}</span>
+                     <span>•</span>
+                     <span>{{ formatDate(currentFile.lastModified) }}</span>
+                  </div>
+                </div>
+             </div>
+
+            <div v-html="renderedContent" class="markdown-body"></div>
+            
+            <div class="mt-12 pt-8 border-t border-sakura-100 flex justify-between text-xs text-sakura-300">
+              <span class="italic">Sakura Notes</span>
+              <span>Updated: {{ formatDate(currentFile.lastModified) }}</span>
+            </div>
+          </div>
         </div>
 
+        <!-- Empty State / Home -->
         <div v-else class="flex-1 flex flex-col items-center justify-center text-sakura-300 animate-fade-in p-6 text-center">
             <div class="relative group cursor-default">
                <div class="text-[12rem] mb-6 opacity-90 animate-float drop-shadow-2xl filter saturate-150">🌸</div>
@@ -285,14 +278,17 @@
             </p>
         </div>
 
-        <aside v-if="currentFile && toc.length > 0 && !currentTool" class="hidden xl:block w-80 bg-white/20 border-l border-white/40 overflow-y-auto custom-scrollbar p-8 backdrop-blur-md z-10">
-          <div class="sticky top-6">
-            <h3 class="text-xs font-bold text-sakura-500 uppercase tracking-widest mb-6 flex items-center gap-2 opacity-80">
+        <!-- Right Sidebar (TOC) - Visible on XL screens -->
+        <aside v-if="currentFile && !currentTool" class="hidden xl:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 bg-white/20 backdrop-blur-md overflow-y-auto custom-scrollbar z-20">
+          
+          <!-- Table of Contents -->
+          <div v-if="toc.length > 0">
+            <h3 class="text-xs font-bold text-sakura-600 uppercase tracking-widest mb-4 flex items-center gap-2">
               <span>📑</span> On this page
             </h3>
             <nav class="space-y-1 relative border-l-2 border-sakura-100 pl-4">
               <div 
-                class="absolute left-[-2px] w-[2px] bg-sakura-500 transition-all duration-300 shadow-[0_0_10px_rgba(244,63,114,0.8)]"
+                class="absolute left-[-2px] w-[2px] bg-sakura-500 transition-all duration-300 shadow-[0_0_8px_rgba(244,63,114,0.6)]"
                 :style="{ top: activeIndicatorTop + 'px', height: '24px' }"
                 v-if="activeHeaderId"
               ></div>
@@ -300,7 +296,7 @@
                 v-for="item in toc" 
                 :key="item.id"
                 :href="`#${item.id}`"
-                class="block text-sm py-1.5 transition-all duration-200 leading-tight"
+                class="block text-sm py-1.5 transition-all duration-200 leading-tight pr-2"
                 :class="[
                   item.level === 1 ? 'font-bold mb-2 mt-4 text-sakura-800' : 'font-normal',
                   item.level > 1 ? `ml-${(item.level-1)*3} text-xs` : '',
@@ -312,8 +308,20 @@
               </a>
             </nav>
           </div>
+
+          <!-- Decorative / Meta Info -->
+          <div class="mt-auto bg-white/50 p-4 rounded-xl border border-white/60 shadow-sm">
+             <div class="text-[10px] uppercase font-bold text-sakura-400 mb-2">Note Details</div>
+             <div class="space-y-2 text-xs text-gray-500">
+               <div class="flex justify-between"><span>Words:</span> <span class="font-mono text-gray-700">{{ currentFile.content?.length || 0 }}</span></div>
+               <div class="flex justify-between"><span>Lines:</span> <span class="font-mono text-gray-700">{{ currentFile.content?.split('\n').length || 0 }}</span></div>
+               <div class="flex justify-between"><span>Format:</span> <span class="font-mono text-gray-700">Markdown</span></div>
+             </div>
+          </div>
+
         </aside>
 
+        <!-- Selection Tooltip -->
         <div 
           v-if="selectionRect" 
           class="fixed z-50 flex gap-1 p-1 bg-gray-800 rounded-lg shadow-xl text-white transform -translate-x-1/2 -translate-y-full animate-fade-in"
@@ -323,6 +331,7 @@
           <button @click="highlightSelection" class="p-2 hover:bg-gray-700 rounded transition-colors" title="Highlight">🖊️</button>
           <button @click="shareSelection" class="p-2 hover:bg-gray-700 rounded transition-colors" title="Share Quote">📤</button>
         </div>
+
       </div>
     </main>
 
