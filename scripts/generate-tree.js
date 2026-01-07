@@ -3,10 +3,16 @@ import path from 'path';
 
 const rootDir = process.cwd();
 const notesDir = path.join(rootDir, 'notes');
-// Write files.json to the root so it can be fetched as ./files.json
-const outputFile = path.join(rootDir, 'files.json'); 
+// Write to public/files.json so Vite copies it to dist/files.json during build
+const publicDir = path.join(rootDir, 'public');
+const outputFile = path.join(publicDir, 'files.json'); 
 
 console.log("🌸 Scanning notes directory:", notesDir);
+
+// Ensure public directory exists
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir);
+}
 
 // Helper to recursively scan directory
 function scanDirectory(dirPath, relativePath) {
@@ -60,7 +66,7 @@ try {
   }];
 
   fs.writeFileSync(outputFile, JSON.stringify(fileTree, null, 2));
-  console.log('✅ Successfully generated files.json');
+  console.log('✅ Successfully generated public/files.json');
 } catch (error) {
   console.error('❌ Error generating tree:', error);
   process.exit(1);

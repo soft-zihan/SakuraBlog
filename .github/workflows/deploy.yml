@@ -25,19 +25,29 @@ jobs:
         with:
           node-version: '20'
 
-      # Generate the JSON index of your markdown files
+      - name: Install Dependencies
+        run: npm install
+
+      # 1. Generate files.json into public/ folder
       - name: Generate File Tree
         run: node scripts/generate-tree.js
+
+      # 2. Build Vue App (Result goes to dist/)
+      - name: Build
+        run: npm run build
+
+      # 3. Copy actual markdown notes to dist/notes so they can be fetched
+      - name: Copy Notes to Dist
+        run: cp -r notes dist/notes
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # Upload the entire directory as a static site. 
-      # files.json generated above will be included.
+      # 4. Upload the dist folder
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: './dist'
 
   deploy:
     environment:

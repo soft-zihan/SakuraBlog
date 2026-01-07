@@ -4,24 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sakura Notes</title>
-    <!-- Tailwind CSS via CDN for simplicity in static deployment -->
+    <!-- Tailwind CSS via CDN (Vite can bundle it too, but keeping CDN for simplicity with existing config) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Marked for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- QRCode.js for client-side QR generation -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     
-    <!-- Import Map for Vue 3 -->
-    <script type="importmap">
-{
-  "imports": {
-    "vue": "https://unpkg.com/vue@3.3.4/dist/vue.esm-browser.js",
-    "path": "https://esm.sh/path@^0.12.7",
-    "fs": "https://esm.sh/fs@^0.0.1-security"
-  }
-}
-</script>
-
     <script>
       tailwind.config = {
         darkMode: 'class', // Manual dark mode
@@ -79,21 +68,15 @@
       }
       body {
         background-color: #fff0f5;
-        /* Complex Background: Gradient Mesh + Dot Pattern + Noise Texture */
         background-image: 
-          /* Subtle Noise for paper texture */
           url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"),
-          /* Dot Pattern */
           radial-gradient(#e11d59 0.5px, transparent 0.5px),
-          /* Gradients */
           radial-gradient(circle at 10% 20%, rgba(254, 205, 215, 0.4) 0%, transparent 40%),
           radial-gradient(circle at 90% 80%, rgba(253, 164, 184, 0.3) 0%, transparent 40%),
           radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 60%);
         background-size: 200px 200px, 24px 24px, 100% 100%, 100% 100%, 100% 100%;
         background-attachment: fixed;
       }
-      
-      /* Falling Petals Background */
       .petals-container {
         position: fixed;
         top: 0;
@@ -111,35 +94,16 @@
         opacity: 0.6;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       }
-
-      /* Custom Scrollbar */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #fecdd7;
-        border-radius: 10px;
-        border: 2px solid transparent;
-        background-clip: content-box;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: #fda4b8;
-      }
+      .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #fecdd7; border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #fda4b8; }
+      .mask-linear { mask-image: linear-gradient(to right, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%); }
       
-      .mask-linear {
-        mask-image: linear-gradient(to right, black 85%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
-      }
-
       /* Markdown Styles */
       .markdown-body { color: #374151; font-size: 17px; line-height: 1.8; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
       .font-serif .markdown-body { font-family: 'Songti SC', 'Noto Serif SC', serif; }
       .text-lg .markdown-body { font-size: 20px; }
-
       .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { scroll-margin-top: 100px; position: relative; } 
       .markdown-body h1 { font-size: 2.2em; font-weight: 800; margin-bottom: 1em; color: #88133b; border-bottom: 2px solid #ffe4e9; padding-bottom: 0.3em; letter-spacing: -0.025em; }
       .markdown-body h2 { font-size: 1.6em; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.8em; color: #9f123f; display: flex; align-items: center; }
@@ -152,47 +116,29 @@
       .markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1.5em; color: #be1245; font-weight: 500; }
       .markdown-body blockquote { border-left: 4px solid #fda4b8; background: linear-gradient(to right, #fff0f5, transparent); padding: 1rem 1.5rem; border-radius: 0 8px 8px 0; color: #be1245; margin: 2em 0; font-style: italic; }
       .markdown-body code { background: #fff0f5; color: #d61f69; padding: 0.2em 0.5em; border-radius: 6px; font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 0.9em; border: 1px solid #fecdd7; }
-      
-      /* Temporary Highlight Class */
       .temp-highlight { background-color: rgba(255, 228, 100, 0.5); border-bottom: 2px solid #ffd700; border-radius: 2px; }
-
-      /* Mac-style Code Blocks */
-      .markdown-body pre { 
-        background: #1f2937; 
-        color: #e5e7eb; 
-        padding: 3.5em 1.5em 1.5em 1.5em; 
-        border-radius: 16px; 
-        overflow-x: auto; 
-        margin: 2em 0; 
-        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2); 
-        position: relative;
-        font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-        line-height: 1.5;
-      }
-      .markdown-body pre::before {
-        content: '';
-        position: absolute;
-        top: 16px;
-        left: 16px;
-        width: 12px;
-        height: 12px;
-        background: #ff5f56; 
-        border-radius: 50%;
-        box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f; 
-      }
+      .markdown-body pre { background: #1f2937; color: #e5e7eb; padding: 3.5em 1.5em 1.5em 1.5em; border-radius: 16px; overflow-x: auto; margin: 2em 0; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2); position: relative; font-family: 'Menlo', 'Monaco', 'Courier New', monospace; line-height: 1.5; }
+      .markdown-body pre::before { content: ''; position: absolute; top: 16px; left: 16px; width: 12px; height: 12px; background: #ff5f56; border-radius: 50%; box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f; }
       .markdown-body pre code { background: transparent; color: inherit; padding: 0; border: none; font-size: 14px; }
-      
       .markdown-body img { max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px -10px rgba(244, 63, 114, 0.2); margin: 2em auto; display: block; }
       .markdown-body a { color: #e11d59; text-decoration: none; border-bottom: 2px solid rgba(225, 29, 89, 0.2); transition: all 0.2s; font-weight: 500; }
       .markdown-body a:hover { color: #be1245; background-color: rgba(254, 205, 215, 0.3); border-color: #be1245; }
-      
-      /* Folder Grid */
       .folder-card:hover { transform: translateY(-5px); }
     </style>
-  <link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+{
+  "imports": {
+    "fs": "https://esm.sh/fs@^0.0.1-security",
+    "path": "https://esm.sh/path@^0.12.7",
+    "vue": "https://esm.sh/vue@^3.5.26",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-vue": "https://esm.sh/@vitejs/plugin-vue@^6.0.3"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body>
-    <!-- Petals Background Animation -->
     <div class="petals-container" id="petals">
       <div class="petal" style="width: 10px; height: 10px; left: 10%; animation-duration: 12s; animation-delay: 0s;"></div>
       <div class="petal" style="width: 16px; height: 16px; left: 25%; animation-duration: 15s; animation-delay: 2s;"></div>
@@ -201,17 +147,14 @@
       <div class="petal" style="width: 14px; height: 14px; left: 85%; animation-duration: 14s; animation-delay: 5s;"></div>
       <div class="petal" style="width: 9px; height: 9px; left: 5%; animation-duration: 20s; animation-delay: 7s;"></div>
     </div>
-
     <div id="app" class="relative z-10">
-      <!-- Simple loading state before Vue mounts -->
       <div style="height: 100vh; display: flex; justify-content: center; align-items: center; color: #fc7096; flex-direction: column;">
         <div style="font-size: 4rem; margin-bottom: 1rem; animation: spin 4s linear infinite;">🌸</div>
         <div style="font-family: 'Quicksand', sans-serif; font-weight: bold; color: #be1245;">Loading Sakura Notes...</div>
       </div>
-      <style>
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-      </style>
+      <style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
     </div>
+    <!-- Vite entry point -->
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
