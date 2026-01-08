@@ -1,3 +1,4 @@
+
 <template>
   <aside class="w-full md:w-72 lg:w-80 flex-shrink-0 flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.02)] border-r border-white/60 dark:border-gray-700/50 h-full z-30 transition-all duration-300">
     <!-- Profile Header -->
@@ -85,6 +86,19 @@
               <div v-else class="text-[10px] text-gray-400 italic px-2">
                 {{ t.no_vue_notes }}
               </div>
+            </div>
+
+            <!-- Source Code Section (Appended via generate-tree.js virtual folder) -->
+            <div v-if="fileSystem.find(n => n.path === 'source-code')" class="mb-6">
+               <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Project Source</h3>
+               <FileTree 
+                  :nodes="fileSystem.find(n => n.path === 'source-code')?.children || []" 
+                  :expanded-paths="expandedFolders"
+                  :current-path="currentPath"
+                  @toggle-folder="$emit('toggle-folder', $event)"
+                  @select-file="$emit('select-file', $event)"
+                  @select-folder="$emit('select-folder', $event)"
+                />
             </div>
             
             <!-- External Resources Section -->

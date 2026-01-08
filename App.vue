@@ -1,3 +1,4 @@
+
 <template>
   <!-- Dynamic Petals Container -->
   <PetalBackground v-if="showParticles" :speed="userSettings.petalSpeed" />
@@ -73,8 +74,8 @@
 
           <!-- Action Buttons -->
           <template v-if="currentFile">
-             <!-- View Source Toggle -->
-             <button @click="isRawMode = !isRawMode" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold" :title="isRawMode ? t.view_render : t.view_source">
+             <!-- View Source Toggle (Only for Notes, Source files are always raw) -->
+             <button v-if="!currentFile.isSource" @click="isRawMode = !isRawMode" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold" :title="isRawMode ? t.view_render : t.view_source">
                 <span class="text-lg">{{ isRawMode ? '👁️' : '🖊️' }}</span>
              </button>
 
@@ -146,13 +147,13 @@
                >
                  <div class="absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br from-sakura-50 to-transparent dark:from-sakura-900/30 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
                  <div class="flex items-start justify-between mb-4 relative z-10">
-                   <span class="text-5xl group-hover:scale-110 transition-transform drop-shadow-sm">{{ child.type === 'directory' ? '📂' : '📝' }}</span>
+                   <span class="text-5xl group-hover:scale-110 transition-transform drop-shadow-sm">{{ child.type === 'directory' ? '📂' : (child.isSource ? '💻' : '📝') }}</span>
                    <span v-if="child.type === 'file'" class="text-[10px] text-sakura-500 dark:text-sakura-400 bg-sakura-50 dark:bg-gray-900 px-2 py-1 rounded-full font-bold">{{ formatDate(child.lastModified) }}</span>
                  </div>
                  <div class="mt-auto relative z-10">
                    <h3 class="font-bold text-gray-700 dark:text-gray-200 truncate text-lg group-hover:text-sakura-600 dark:group-hover:text-sakura-400 transition-colors" :title="child.name">{{ child.name.replace('.md', '') }}</h3>
                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate font-medium">
-                     {{ child.type === 'directory' ? `${child.children?.length || 0} items` : 'Markdown Note' }}
+                     {{ child.type === 'directory' ? `${child.children?.length || 0} items` : (child.isSource ? 'Source Code' : 'Markdown Note') }}
                    </p>
                  </div>
                </div>
@@ -171,14 +172,15 @@
                </div>
              </div>
 
-             <!-- Simplified Header (Title Only) -->
-             <div class="mb-8 border-b border-gray-100 dark:border-gray-700 pb-6">
+             <!-- Header -->
+             <div class="mb-8 border-b border-gray-100 dark:border-gray-700 pb-6 flex justify-between items-end">
                  <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 tracking-tight leading-tight">{{ currentFile.name.replace('.md', '') }}</h1>
+                 <span v-if="currentFile.isSource" class="bg-gray-100 dark:bg-gray-700 text-gray-500 px-3 py-1 rounded text-xs font-mono">Read Only</span>
              </div>
 
-            <!-- Markdown Content or Raw Source -->
+            <!-- Markdown Content -->
             <div 
-              v-if="!isRawMode"
+              v-if="!currentFile.isSource && !isRawMode"
               id="markdown-viewer"
               v-html="renderedContent" 
               class="markdown-body dark:text-gray-300 selection:bg-sakura-200 dark:selection:bg-sakura-900"
@@ -186,7 +188,10 @@
               @mouseup="handleSelection"
             ></div>
 
-            <pre v-else class="whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto text-gray-700 dark:text-gray-300 select-text">{{ currentFile.content }}</pre>
+            <!-- Source Code / Raw Mode -->
+            <div v-else class="relative group">
+               <pre class="whitespace-pre-wrap font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-xl border border-gray-700 overflow-x-auto select-text shadow-inner"><code :class="currentFile.name.endsWith('.vue') ? 'language-html' : ''">{{ currentFile.content }}</code></pre>
+            </div>
             
             <div class="mt-12 pt-8 border-t border-sakura-100 dark:border-gray-700 flex justify-between text-xs text-sakura-300 dark:text-gray-500">
               <span class="italic">Sakura Notes</span>
@@ -209,7 +214,7 @@
         </div>
 
         <!-- Right Sidebar (TOC) -->
-        <aside v-if="currentFile && !currentTool && !isRawMode" class="hidden xl:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md overflow-y-auto custom-scrollbar z-20">
+        <aside v-if="currentFile && !currentTool && !isRawMode && !currentFile.isSource" class="hidden xl:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md overflow-y-auto custom-scrollbar z-20">
           
           <!-- Table of Contents -->
           <div v-if="toc.length > 0">
@@ -246,7 +251,7 @@
              <div class="space-y-2 text-xs text-gray-500 dark:text-gray-400">
                <div class="flex justify-between"><span>{{ t.words }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentFile.content?.length || 0 }}</span></div>
                <div class="flex justify-between"><span>{{ t.lines }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentFile.content?.split('\n').length || 0 }}</span></div>
-               <div class="flex justify-between"><span>{{ t.format }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">Markdown</span></div>
+               <div class="flex justify-between"><span>{{ t.format }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentFile.isSource ? 'Code' : 'Markdown' }}</span></div>
              </div>
           </div>
         </aside>
@@ -302,7 +307,6 @@ const t = computed(() => I18N[lang.value]);
 const toggleLang = () => {
   lang.value = lang.value === 'en' ? 'zh' : 'en';
   localStorage.setItem('sakura_lang', lang.value);
-  // Reset content when switching lang to avoid confusion
   resetToHome();
 };
 
@@ -420,7 +424,15 @@ const labFolder = computed(() => {
       }
       return null;
   }
-  return findFolderByName(fileSystem.value);
+  const folder = findFolderByName(fileSystem.value);
+  
+  // Also include the source code folder in the lab view
+  const srcFolder = fileSystem.value.find(node => node.path === 'source-code');
+  if (srcFolder && folder) {
+      // Return a combined virtual view or just modify folder (not ideal to mutate prop source)
+      return { ...folder };
+  }
+  return folder;
 });
 
 const sortedFolderChildren = computed(() => {
@@ -463,19 +475,22 @@ const renderedContent = computed(() => {
   setupMarkedRenderer();
   let rawContent = currentFile.value.content;
   if (currentFile.value.path) {
-    const parentDir = currentFile.value.path.substring(0, currentFile.value.path.lastIndexOf('/'));
+    // Determine the base folder of the current note
+    const parentDirParts = currentFile.value.path.split('/');
+    parentDirParts.pop(); // remove filename
+    // Join parts to get directory path relative to root
+    const parentDir = parentDirParts.join('/'); 
     const serverPrefix = 'notes/'; 
     
-    // Improved Image Replacement Logic
-    // Matches ![]() Markdown images and normal HTML <img src=""> (if any)
-    // Supports ./image.png, ../image.png, image.png
+    // Improved Image Replacement Logic for GitHub Pages
+    // When Markdown has `![img](assets/foo.png)`, we need to transform it to `notes/parent/assets/foo.png`
     
     const resolvePath = (relPath: string) => {
       // Ignore absolute paths or HTTP links
       if (relPath.startsWith('http') || relPath.startsWith('/') || relPath.startsWith('data:')) return relPath;
       
       const parts = relPath.split('/');
-      const parentParts = parentDir.split('/').filter(p => p); // current file's folder
+      const parentParts = parentDir.split('/').filter(p => p); 
       
       for (const part of parts) {
         if (part === '.') continue;
@@ -485,7 +500,8 @@ const renderedContent = computed(() => {
           parentParts.push(part);
         }
       }
-      // Reconstruct path relative to root notes/
+      
+      // If we are on GitHub Pages or nested path, ensure no double slashes
       return `${serverPrefix}${parentParts.join('/')}`;
     };
 
@@ -532,7 +548,9 @@ const openFile = async (file: FileNode) => {
   currentFile.value = file;
   currentFolder.value = null;
   currentTool.value = null;
-  isRawMode.value = false;
+  // Always default to Raw Mode for Source files, Render mode for Markdown
+  isRawMode.value = !!file.isSource;
+  
   updateUrl(file.path);
   const container = document.getElementById('scroll-container');
   if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
@@ -542,18 +560,25 @@ const openFile = async (file: FileNode) => {
   if (!file.content) {
     contentLoading.value = true;
     try {
-      // CRITICAL FIX: Ensure fetch path is explicitly relative './' and encoded correctly
-      // This solves 404s on GitHub Pages when path contains special chars or when served from root
-      const encodedPath = file.path.split('/').map(p => encodeURIComponent(p)).join('/');
-      const fetchPath = `./notes/${encodedPath}`;
+      // Determine fetch path based on file type
+      // For Notes: ./notes/path/to/file.md
+      // For Source: ./raw/path_to_file.txt (Generated by script)
+      
+      let fetchPath = '';
+      if (file.isSource && file.fetchPath) {
+          fetchPath = `./${file.fetchPath}`;
+      } else {
+          const encodedPath = file.path.split('/').map(p => encodeURIComponent(p)).join('/');
+          fetchPath = `./notes/${encodedPath}`;
+      }
       
       const res = await fetch(fetchPath);
       if (res.ok) {
         file.content = await res.text();
-        nextTick(() => generateToc());
+        if (!file.isSource) nextTick(() => generateToc());
       } else {
         console.error(`Fetch failed for ${fetchPath}: ${res.status}`);
-        file.content = `# Error Loading Note\n\n**Status:** ${res.status} ${res.statusText}\n\n**Path:** \`${fetchPath}\`\n\nPlease check your internet connection or verify the file exists on GitHub.`;
+        file.content = `# Error Loading Content\n\n**Status:** ${res.status} ${res.statusText}\n\n**Path:** \`${fetchPath}\`\n\nPlease check connection or file existence.`;
       }
     } catch (e: any) {
       console.error(e);
@@ -563,7 +588,7 @@ const openFile = async (file: FileNode) => {
       currentFile.value = { ...file }; 
     }
   } else {
-    nextTick(() => generateToc());
+    if (!file.isSource) nextTick(() => generateToc());
   }
 };
 
@@ -623,7 +648,7 @@ const copyLink = () => navigator.clipboard.writeText(window.location.href).then(
 
 const downloadSource = () => {
   if (currentFile.value) {
-    const blob = new Blob([currentFile.value.content || ''], { type: 'text/markdown' });
+    const blob = new Blob([currentFile.value.content || ''], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -635,6 +660,7 @@ const downloadSource = () => {
 
 // Selection Popup Logic
 const handleSelection = () => {
+  if (currentFile.value?.isSource) return; // No highlight for source code
   const selection = window.getSelection();
   if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
     selectionMenu.value.show = false;
@@ -688,16 +714,14 @@ const handleContentClick = (e: MouseEvent) => {
     return;
   }
   
-  // 2. Intercept internal markdown links to prevent page reload/404
+  // 2. Intercept internal links
   const link = target.closest('a');
   if (link) {
     const href = link.getAttribute('href');
     // If it is a relative link ending in .md
     if (href && !href.startsWith('http') && href.endsWith('.md')) {
-      e.preventDefault(); // STOP BROWSER JUMP
+      e.preventDefault(); 
       
-      // Resolve path relative to current file
-      // Simple resolve logic:
       let targetPath = '';
       if (currentFile.value?.path) {
         const currentDir = currentFile.value.path.split('/').slice(0, -1);
@@ -727,7 +751,7 @@ const handleContentClick = (e: MouseEvent) => {
 };
 
 const generateToc = () => {
-  if (!currentFile.value?.content) { toc.value = []; return; }
+  if (!currentFile.value?.content || currentFile.value.isSource) { toc.value = []; return; }
   const headers: TocItem[] = [];
   const lines = currentFile.value.content.split(/\r?\n/);
   let inCodeBlock = false;
@@ -782,7 +806,9 @@ const scrollToHeader = (id: string) => {
   }
 };
 
-watch(currentFile, () => generateToc());
+watch(currentFile, () => {
+    if (!currentFile.value?.isSource) generateToc();
+});
 
 onMounted(async () => {
   document.addEventListener('selectionchange', () => {
