@@ -1,3 +1,4 @@
+
 # 02. 响应式系统：App.vue 源码解析 🌸
 
 > 为什么点击左侧菜单，右侧内容会自动变？为什么切换“暗黑模式”，整个网页颜色会自动变？
@@ -8,54 +9,57 @@
 打开 `src/App.vue`，找到 `<script setup>` 部分。你会看到这样的代码：
 
 ```typescript
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
-// 这里的变量不仅仅是变量，它们是"活"的
+// 1. ref: 适合基本类型 (数字, 字符串, 布尔值)
 const currentFile = ref(null);
 const isDark = ref(false);
-const viewMode = ref('latest');
+
+// 2. reactive: 适合对象 (Object)
+const userSettings = reactive({
+  fontSize: 'normal',
+  fontFamily: 'sans'
+});
 ```
 
-## 2. 什么是 `ref`？
+## 2. Ref vs Reactive
 
-在普通 JS 中：
-```js
-let count = 0;
-count = 1; // 变量变了，但网页界面不会自动刷新
-```
+在 Vue 3 中，我们主要用这两个工具来定义“活”的数据：
 
-在 Vue 中：
-```js
-const count = ref(0);
-count.value = 1; // Vue 监测到 value 变了，自动通知 HTML 重新渲染！
-```
+*   **ref()**: 也就是 Reference (引用)。它像一个盒子，把数据包在里面。
+    *   **JS 中使用**: 必须加 `.value`，例如 `isDark.value = true`。
+    *   **模板中使用**: 不需要加 `.value`，例如 `{{ isDark }}`，Vue 会自动解包。
+*   **reactive()**: 专门用于对象。
+    *   **JS 中使用**: 不需要 `.value`，像普通对象一样读写，例如 `userSettings.fontSize = 'large'`。
 
-**Ref** 全称 Reference (引用)。它是一个包装器，把普通数据变成了“响应式数据”。
+## 3. 实战分析：组件通信与状态更新
 
-## 3. 实战分析：切换暗黑模式
+在这个博客中，**设置弹窗** (`SettingsModal.vue`) 负责修改主题，但 `isDark` 状态实际上存在于 `App.vue` 中。这是如何工作的？
 
-在这个博客的左下角（设置里）有一个切换主题的按钮。它是怎么工作的？
-
-### 代码逻辑 (Script)
+### 父组件 (App.vue)
 ```typescript
 const isDark = ref(false);
-
-const toggleTheme = (val: boolean) => {
-  isDark.value = val; // 1. 修改响应式数据
-  // 2. 顺便操作 DOM class (Tailwind 需要)
-  if (val) document.documentElement.classList.add('dark');
-  else document.documentElement.classList.remove('dark');
-};
+const toggleTheme = (val) => { 
+  // 注意：在 <script> 中修改 ref 需要 .value
+  isDark.value = val; 
+}
 ```
 
-### 模板绑定 (Template)
+HTML 中：
 ```html
-<div :class="{ 'dark': isDark }">
-  <!-- 页面内容 -->
-</div>
+<SettingsModal 
+  :is-dark="isDark" 
+  @toggle-theme="toggleTheme" 
+/>
 ```
 
-当 `isDark.value` 变为 `true` 时，Vue 自动给 div 加上 `dark` 类名，页面瞬间变黑。
+### 子组件 (SettingsModal.vue)
+```typescript
+// 接收父组件的指令
+emit('toggle-theme', true);
+```
+
+当你在弹窗里点击“深色模式”时，子组件发射信号，父组件收到信号后修改 `isDark.value`，Vue 自动更新整个页面的 class。
 
 ## 4. 实战分析：打开文件
 
@@ -82,4 +86,5 @@ const openFile = (file) => {
 
 因为 `currentFile` 是响应式的，一旦它从 `null` 变成了某个文件对象，Vue 就会瞬间销毁“欢迎页”，创建“文章内容页”。
 
-**总结**：在 Vue 中，我们不需要手动去操作 DOM（比如 `document.getElementById('title').innerText = ...`）。我们只需要**修改数据**，Vue 负责更新视图。这就是 **数据驱动 (Data Driven)**。
+**新手提示**：
+初学者最容易犯的错误就是在 `<script>` 里忘记写 `.value`。如果你发现 console.log 打印出来是一个 RefImpl 对象，说明你忘记加 `.value` 了。

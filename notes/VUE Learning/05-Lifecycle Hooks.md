@@ -1,3 +1,4 @@
+
 # 05. Rhythm of Life: Lifecycle Hooks 🌸
 
 > How is `files.json` loaded when the page refreshes?
@@ -47,7 +48,22 @@ Why use `nextTick`?
 `nextTick` means: **Wait until Vue finishes updating the DOM, then execute my callback function.**
 This ensures that when generating the TOC, the article headers are already rendered on the page.
 
-## 3. watch: Secret Observation
+## 3. onUnmounted: Cleanup the Battlefield
+
+Although `App.vue` as the root component is rarely unmounted, we often use this hook in `Lab` components.
+
+For example, in `LabQuizGame.vue`, we start a timer (`setInterval`). If the user switches to another page before the game ends, we MUST destroy this timer, otherwise it will keep running in the background and consume memory.
+
+```typescript
+// LabQuizGame.vue Pseudo code
+onUnmounted(() => {
+  clearInterval(timerInterval); // Stop timer when component is destroyed
+});
+```
+
+**Principle**: If you create a timer or add a `window.addEventListener` in `onMounted`, you must clean them up in `onUnmounted`.
+
+## 4. watch: Secret Observation
 
 We also use `watch` to listen to user settings:
 
@@ -63,9 +79,9 @@ watch(() => userSettings.fontSize, (newValue) => {
 
 Congratulations! By analyzing the source code of this blog, you have mastered the core concepts of Vue 3:
 1. **SPA Structure** (index.html, main.ts, App.vue)
-2. **Reactive ref** (Data Driven View)
-3. **Components & Directives** (v-for, v-if, FileTree)
+2. **Reactivity** (ref/reactive)
+3. **Directives** (v-for, v-if vs v-show)
 4. **Component Communication** (Props, Emit)
-5. **Lifecycle** (onMounted, nextTick)
+5. **Lifecycle** (onMounted, onUnmounted, nextTick)
 
 Now, try modifying the files in `notes/` and start your own Vue journey! 🌸

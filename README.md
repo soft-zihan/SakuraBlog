@@ -13,10 +13,6 @@ A pure static personal blog system built with **Vue 3** + **Tailwind CSS**, desi
 ## ✨ Features
 
 - **Pure Static Architecture**: Fully client-side rendered (CSR), with metadata index pre-generated via GitHub Actions.
-- **Enhanced Images**:
-  - **Smart Pathing**: Supports `./` (same directory) and `../` (parent directory) image references.
-  - **Lightbox**: Built-in image viewer. Click any image to enlarge it in full-screen mode.
-  - **HTML Support**: Allows controlling image size using `<img src="..." width="100">`.
 - **Dynamic Fetching**: Markdown content is loaded on-demand (Lazy Load), ensuring extremely fast initial page load.
 - **Internationalization**: Built-in Chinese/English language switching (i18n).
 - **Theme Modes**: Supports both "Day Sakura" (light) and "Night Sakura" (dark) themes.

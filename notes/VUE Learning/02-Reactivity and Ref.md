@@ -1,3 +1,4 @@
+
 # 02. Reactivity System: App.vue Analysis 🌸
 
 > Why does the content change automatically when I click the left menu? Why does the whole webpage color change when I toggle "Dark Mode"?
@@ -8,54 +9,57 @@
 Open `src/App.vue` and find the `<script setup>` section. You will see code like this:
 
 ```typescript
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
-// These variables are not just variables, they are "alive"
+// 1. ref: Suitable for primitive types (number, string, boolean)
 const currentFile = ref(null);
 const isDark = ref(false);
-const viewMode = ref('latest');
+
+// 2. reactive: Suitable for Objects
+const userSettings = reactive({
+  fontSize: 'normal',
+  fontFamily: 'sans'
+});
 ```
 
-## 2. What is `ref`?
+## 2. Ref vs Reactive
 
-In plain JS:
-```js
-let count = 0;
-count = 1; // The variable changed, but the webpage interface won't update automatically
-```
+In Vue 3, we mainly use these two tools to define "alive" data:
 
-In Vue:
-```js
-const count = ref(0);
-count.value = 1; // Vue detects that .value changed and automatically notifies HTML to re-render!
-```
+*   **ref()**: Stands for Reference. It's like a box that wraps the data.
+    *   **In JS**: You MUST use `.value`, e.g., `isDark.value = true`.
+    *   **In Template**: You DO NOT need `.value`, e.g., `{{ isDark }}`, Vue unwraps it automatically.
+*   **reactive()**: Specifically for Objects.
+    *   **In JS**: No `.value` needed, read/write like a normal object, e.g., `userSettings.fontSize = 'large'`.
 
-**Ref** stands for Reference. It is a wrapper that turns normal data into "reactive data".
+## 3. Real-world Analysis: Component Communication
 
-## 3. Real-world Analysis: Toggling Dark Mode
+In this blog, the **Settings Modal** (`SettingsModal.vue`) is responsible for toggling the theme, but the `isDark` state actually lives in `App.vue`. How does this work?
 
-There is a theme toggle button in the bottom left corner (in settings) of this blog. How does it work?
-
-### Logic (Script)
+### Parent (App.vue)
 ```typescript
 const isDark = ref(false);
-
-const toggleTheme = (val: boolean) => {
-  isDark.value = val; // 1. Modify reactive data
-  // 2. Manipulate DOM class (Required for Tailwind)
-  if (val) document.documentElement.classList.add('dark');
-  else document.documentElement.classList.remove('dark');
-};
+const toggleTheme = (val) => { 
+  // NOTE: Modifying a ref in <script> requires .value
+  isDark.value = val; 
+}
 ```
 
-### Template Binding (Template)
+In HTML:
 ```html
-<div :class="{ 'dark': isDark }">
-  <!-- Page Content -->
-</div>
+<SettingsModal 
+  :is-dark="isDark" 
+  @toggle-theme="toggleTheme" 
+/>
 ```
 
-When `isDark.value` becomes `true`, Vue automatically adds the `dark` class to the div, turning the page dark instantly.
+### Child (SettingsModal.vue)
+```typescript
+// Send signal to parent
+emit('toggle-theme', true);
+```
+
+When you click "Dark Mode" in the modal, the child emits a signal. The parent receives it, updates `isDark.value`, and Vue automatically updates the class of the entire page.
 
 ## 4. Real-world Analysis: Opening a File
 
@@ -82,4 +86,5 @@ In the HTML template, we use the `v-if` directive:
 
 Because `currentFile` is reactive, once it changes from `null` to a file object, Vue instantly destroys the "Welcome Page" and creates the "Article Content Page".
 
-**Summary**: In Vue, we don't need to manually manipulate the DOM (like `document.getElementById('title').innerText = ...`). We only need to **modify data**, and Vue takes care of updating the view. This is **Data Driven**.
+**Pro Tip**:
+The most common mistake for beginners is forgetting `.value` inside `<script>`. If you see `console.log` printing a `RefImpl` object, it means you forgot to unwrap it with `.value`.

@@ -1,4 +1,5 @@
 
+
 export const I18N = {
   en: {
     loading: "Loading Sakura Notes...",
@@ -19,7 +20,11 @@ export const I18N = {
 
     // HTML/JS Tools
     lab_html_title: "HTML DOM & Box Model",
-    lab_html_info: "Type HTML to see the structure. Borders are added automatically to visualize the Box Model.",
+    lab_html_info: "Type HTML to see the structure. Toggle 'Debug Mode' to visualize element boundaries.",
+    lab_html_mode: "Mode",
+    lab_html_debug: "Structure (Debug)",
+    lab_html_preview: "Render (Preview)",
+    
     lab_js_title: "JS Event Propagation",
     lab_js_info: "Click the boxes to visualize Event Capturing and Bubbling phases.",
     lab_js_log: "Event Log",
@@ -30,6 +35,8 @@ export const I18N = {
     lab_reactivity_desc: "Data binding visualizer",
     lab_lifecycle: "Lifecycle",
     lab_lifecycle_desc: "Hook execution flow",
+    lab_lifecycle_component: "Virtual Component",
+    lab_lifecycle_state: "State",
     lab_directives: "Directives",
     lab_directives_desc: "v-if vs v-show visualizer",
     lab_quiz: "Vue Ninja Quiz",
@@ -125,7 +132,11 @@ export const I18N = {
 
     // HTML/JS Tools
     lab_html_title: "HTML 结构与盒模型",
-    lab_html_info: "输入 HTML 代码，右侧自动勾勒出 DOM 结构轮廓，助你理解盒模型嵌套关系。",
+    lab_html_info: "输入 HTML 代码，右侧实时渲染。切换“结构调试”模式可透视元素边界。",
+    lab_html_mode: "视图模式",
+    lab_html_debug: "结构调试 (Debug)",
+    lab_html_preview: "渲染预览 (Preview)",
+
     lab_js_title: "JS 事件传播机制",
     lab_js_info: "点击下方方块，可视化观察事件的“捕获”与“冒泡”全过程。",
     lab_js_log: "事件日志",
@@ -136,6 +147,8 @@ export const I18N = {
     lab_reactivity_desc: "数据绑定可视化",
     lab_lifecycle: "生命周期",
     lab_lifecycle_desc: "钩子执行流程",
+    lab_lifecycle_component: "虚拟组件",
+    lab_lifecycle_state: "状态",
     lab_directives: "指令实验室",
     lab_directives_desc: "v-if 与 v-show 的区别",
     lab_quiz: "Vue 忍者挑战",

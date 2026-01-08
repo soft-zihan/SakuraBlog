@@ -1,3 +1,4 @@
+
 # 03. 指令魔法：FileTree 组件解析 🌸
 
 > 我们的左侧文件树是可以无限层级嵌套的。这是如何做到的？
@@ -20,25 +21,27 @@
 这段代码的意思是：遍历 `nodes` 数组，为每个 `node` 生成一个 `<li>` 标签。
 `:key` 是非常重要的，它给每个节点一个唯一的身份证号。如果数据变了，Vue 可以凭借 key 精准地找到要修改的那个元素，而不是暴力重绘整个列表。
 
-## 2. v-if：条件渲染
+## 2. v-if vs v-show：条件渲染
 
-文件树里有两种东西：**文件夹** 和 **文件**。它们的显示样式完全不同。
+在文件树组件中，我们同时使用了这两个指令，它们的区别是面试必考题：
 
+### v-if (真正的条件渲染)
 ```html
-<template>
-  <!-- 情况1：如果是文件夹 -->
-  <div v-if="node.type === 'directory'">
-     <span>📁 {{ node.name }}</span>
-  </div>
-
-  <!-- 情况2：如果是文件 -->
-  <div v-else>
-     <span>📄 {{ node.name }}</span>
-  </div>
-</template>
+<div v-if="node.type === 'directory'">...</div>
+<div v-else>...</div>
 ```
+Vue 会根据 `node.type` 的值，**完全销毁或重建** DOM 元素。因为一个节点不可能既是文件夹又是文件，所以这里适合用 `v-if`。
 
-Vue 会根据 `node.type` 的值，决定渲染上面的 div 还是下面的 div。
+### v-show (CSS 切换)
+查看文件夹展开/收起的代码：
+```html
+<div v-show="isOpen(node.path)">
+  <!-- 子节点内容 -->
+</div>
+```
+这里使用的是 `v-show`。
+*   **原理**：Vue 并没有删除 DOM，它只是给元素加了一个 `display: none` 的 CSS 样式。
+*   **为什么？**：用户可能会频繁点击展开/收起。如果用 `v-if`，Vue 就得反复创建和销毁 DOM，性能开销大。用 `v-show` 只是切换 CSS，速度极快。
 
 ## 3. 递归组件：无限套娃
 

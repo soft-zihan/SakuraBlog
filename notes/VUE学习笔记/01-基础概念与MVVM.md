@@ -14,8 +14,13 @@ sakura-notes/
 ├── index.html        # 入口 HTML (万物之源)
 ├── src/
 │   ├── main.ts       # Vue 启动入口
-│   ├── App.vue       # 根组件 (整个页面的骨架)
-│   ├── components/   # 组件文件夹 (如左侧文件树、实验室工具)
+│   ├── App.vue       # 根布局容器 (Layout)
+│   ├── components/   # 组件文件夹
+│   │   ├── AppSidebar.vue      # 左侧侧边栏 (导航逻辑)
+│   │   ├── FileTree.vue        # 递归文件树组件
+│   │   ├── LabDashboard.vue    # 实验室仪表盘
+│   │   ├── PetalBackground.vue # 樱花背景动画
+│   │   └── ...                 # 其他工具组件
 │   └── constants.ts  # 常量数据 (如 Mock 数据、多语言文本)
 ├── public/           # 静态资源
 └── notes/            # 你的 Markdown 笔记存放处
@@ -53,10 +58,10 @@ createApp(App).mount('#app')
 
 ## 4. App.vue：页面骨架
 
-`App.vue` 是核心文件，它使用了 **SFC (Single File Component)** 格式：
+`App.vue` 是核心文件，在最新的架构中，它主要充当**布局容器**和**状态管理器**：
 
-1.  **Template (HTML)**: 定义了左侧侧边栏 (Sidebar) 和右侧内容区 (Main Content)。
-2.  **Script (JS/TS)**: 包含了所有的逻辑，比如“当前打开了哪个文件”、“是否是暗黑模式”。
-3.  **Style (CSS)**: 使用 Tailwind CSS 处理了大部分样式。
+1.  **Template (HTML)**: 它引用了 `<AppSidebar>` 来处理复杂的侧边栏逻辑，引用 `<PetalBackground>` 处理背景动画，主内容区则负责渲染 Markdown 内容。
+2.  **Script (JS/TS)**: 它持有全局状态（如当前打开的文件 `currentFile`、主题模式 `isDark`），并通过 **Props** 将数据传递给 `<AppSidebar>`。
+3.  **Style (CSS)**: 使用 Tailwind CSS 定义了全局的 Flex 布局。
 
-在下一章，我们将深入 `App.vue` 的 `<script setup>`，学习 Vue 3 的灵魂——**响应式系统 (Reactivity)**。
+这种将导航逻辑抽离到 `AppSidebar.vue` 的做法，让 `App.vue` 变得更加清爽，符合组件化开发的“关注点分离”原则。在下一章，我们将深入学习 Vue 3 的灵魂——**响应式系统 (Reactivity)**。

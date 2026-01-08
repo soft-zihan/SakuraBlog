@@ -1,3 +1,4 @@
+
 # 03. Directive Magic: FileTree Analysis 🌸
 
 > Our file tree on the left can be nested infinitely. How is this achieved?
@@ -20,25 +21,27 @@ The file tree is essentially an array, and we need to draw every item in that ar
 This code means: Iterate through the `nodes` array and generate an `<li>` tag for each `node`.
 `:key` is very important; it gives each node a unique ID. If the data changes, Vue can use the key to precisely find the element to modify instead of brutally re-rendering the entire list.
 
-## 2. v-if: Conditional Rendering
+## 2. v-if vs v-show: Conditional Rendering
 
-There are two things in the file tree: **Folders** and **Files**. Their display styles are completely different.
+In the FileTree component, we use both. The difference between them is a classic interview question:
 
+### v-if (Real Conditional Rendering)
 ```html
-<template>
-  <!-- Case 1: If it is a directory -->
-  <div v-if="node.type === 'directory'">
-     <span>📁 {{ node.name }}</span>
-  </div>
-
-  <!-- Case 2: If it is a file -->
-  <div v-else>
-     <span>📄 {{ node.name }}</span>
-  </div>
-</template>
+<div v-if="node.type === 'directory'">...</div>
+<div v-else>...</div>
 ```
+Vue will **completely destroy or recreate** the DOM element based on `node.type`. Since a node cannot be both a folder and a file, `v-if` is suitable here.
 
-Vue will decide whether to render the top div or the bottom div based on the value of `node.type`.
+### v-show (CSS Toggle)
+Look at the folder expand/collapse code:
+```html
+<div v-show="isOpen(node.path)">
+  <!-- Children content -->
+</div>
+```
+Here we use `v-show`.
+*   **Principle**: Vue does not remove the DOM; it just adds `display: none` CSS style to the element.
+*   **Why?** Users might frequently click expand/collapse. If we used `v-if`, Vue would have to repeatedly create and destroy the DOM, which is costly. `v-show` simply toggles CSS, which is extremely fast.
 
 ## 3. Recursive Components: Infinite Nesting
 

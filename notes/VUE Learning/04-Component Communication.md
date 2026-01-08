@@ -1,7 +1,7 @@
 # 04. Component Communication: Parent-Child Dialogue 🌸
 
-> `App.vue` is the parent, and `FileTree.vue` is the child.
-> The parent needs to give file data to the child to display, and the child needs to tell the parent when it is clicked.
+> In our architecture, `AppSidebar.vue` is the parent, and `FileTree.vue` is the child.
+> The sidebar gives file data to the tree to display. When the tree is clicked, it tells the sidebar, which then tells `App.vue`.
 
 ## 1. Props: Tasks from Parent to Child
 
@@ -15,10 +15,10 @@ const props = defineProps<{
 }>();
 ```
 
-When used in `App.vue`:
+When used in `AppSidebar.vue`:
 
 ```html
-<!-- App.vue -->
+<!-- AppSidebar.vue -->
 <FileTree 
   :nodes="filteredFileSystem" 
   :current-path="currentPath"
@@ -30,7 +30,7 @@ This is **Props**. Data flows from parent to child.
 
 ## 2. Emit: Report from Child to Parent
 
-When a user clicks a file in `FileTree`, `FileTree` itself cannot open the file (because it doesn't have the fetch logic; logic is in `App.vue`).
+When a user clicks a file in `FileTree`, the `FileTree` is just a presentation component; it doesn't know how to open a file.
 So, it must **send a notification**.
 
 ```typescript
@@ -44,20 +44,18 @@ const handleFileClick = (node) => {
 }
 ```
 
-Back in `App.vue`, the parent listens for this signal:
+Back in `AppSidebar.vue`, the parent listens for this signal and passes it up further (because the real logic to open files is in the grandparent `App.vue`):
 
 ```html
-<!-- App.vue -->
+<!-- AppSidebar.vue -->
 <FileTree 
-  @select-file="openFile"
+  @select-file="$emit('select-file', $event)"
 />
 ```
 
-When the `select-file` signal is received, the parent executes its own `openFile` function to actually load the article content.
-
 ## 3. Summary
 
-*   **Props Down**: Data flows down (Rendering the tree).
-*   **Events Up**: Events bubble up (Click notification).
+*   **Props Down**: Data flows down (App -> AppSidebar -> FileTree).
+*   **Events Up**: Events bubble up (FileTree -> AppSidebar -> App).
 
 This **One-Way Data Flow** ensures a Single Source of Truth for data, making code logic clear and maintainable.

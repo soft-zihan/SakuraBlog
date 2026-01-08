@@ -1,3 +1,4 @@
+
 # 05. 生命的律动：Lifecycle 钩子 🌸
 
 > 页面刷新时，Vue 是怎么把 `files.json` 加载出来的？
@@ -47,7 +48,22 @@ const openFile = async (file) => {
 `nextTick` 的意思是：**等 Vue 把 DOM 更新完之后，再执行我的回调函数。**
 这样我们就能确保在生成目录时，文章标题已经在页面上渲染好了。
 
-## 3. watch：暗中观察
+## 3. onUnmounted：清理战场
+
+虽然 `App.vue` 作为根组件很少被卸载，但我们在 `Lab`（实验室）组件中经常使用这个钩子。
+
+例如，在 `LabQuizGame.vue`（答题游戏）中，我们开启了一个定时器 (setInterval)。如果用户在游戏还没结束时就切换到了其他页面，我们必须销毁这个定时器，否则它会在后台一直跑，占用内存。
+
+```typescript
+// LabQuizGame.vue 伪代码
+onUnmounted(() => {
+  clearInterval(timerInterval); // 组件销毁时，停止计时
+});
+```
+
+**原则**：如果你在 `onMounted` 里创建了定时器或添加了 `window.addEventListener`，一定要在 `onUnmounted` 里清理掉它们。
+
+## 4. watch：暗中观察
 
 我们还用到了 `watch` 来监听用户的设置：
 
@@ -63,9 +79,9 @@ watch(() => userSettings.fontSize, (newValue) => {
 
 恭喜你！通过分析这个博客的源码，你已经掌握了 Vue 3 的核心概念：
 1. **SPA 结构** (index.html, main.ts, App.vue)
-2. **响应式 ref** (数据驱动视图)
-3. **组件与指令** (v-for, v-if, FileTree)
+2. **响应式 ref/reactive** (数据驱动视图)
+3. **指令魔法** (v-for, v-if vs v-show)
 4. **组件通信** (Props, Emit)
-5. **生命周期** (onMounted, nextTick)
+5. **生命周期** (onMounted, onUnmounted, nextTick)
 
-现在，试着修改一下 `VUE学习笔记` 里的文件，开始你自己的 Vue 之旅吧！🌸
+现在，试着修改一下 `notes/` 里的文件，开始你自己的 Vue 之旅吧！🌸

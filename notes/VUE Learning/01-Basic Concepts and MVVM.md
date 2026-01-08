@@ -14,8 +14,13 @@ sakura-notes/
 ├── index.html        # Entry HTML (The root of everything)
 ├── src/
 │   ├── main.ts       # Vue Startup Entry
-│   ├── App.vue       # Root Component (Skeleton of the page)
-│   ├── components/   # Component folder (e.g., Sidebar, Lab Tools)
+│   ├── App.vue       # Root Layout Container
+│   ├── components/   # Component folder
+│   │   ├── AppSidebar.vue      # Sidebar logic
+│   │   ├── FileTree.vue        # Recursive File Tree
+│   │   ├── LabDashboard.vue    # Lab Dashboard
+│   │   ├── PetalBackground.vue # Animation logic
+│   │   └── ...                 # Other tools
 │   └── constants.ts  # Constants (e.g., Mock Data, i18n text)
 ├── public/           # Static Assets
 └── notes/            # Where your Markdown notes live
@@ -53,10 +58,10 @@ This code means:
 
 ## 4. App.vue: Page Skeleton
 
-`App.vue` is the core file, utilizing the **SFC (Single File Component)** format:
+`App.vue` is the core file. In the latest architecture, it acts mainly as a **Layout Container** and **State Manager**:
 
-1.  **Template (HTML)**: Defines the Sidebar and Main Content area.
-2.  **Script (JS/TS)**: Contains all logic, such as "which file is currently open" or "is dark mode active".
-3.  **Style (CSS)**: Uses Tailwind CSS to handle most styles.
+1.  **Template (HTML)**: It includes `<AppSidebar>` to handle complex sidebar logic, `<PetalBackground>` for animations, while the main area renders Markdown content.
+2.  **Script (JS/TS)**: It holds global state (like `currentFile`, `isDark`) and passes data down to `<AppSidebar>` via **Props**.
+3.  **Style (CSS)**: Uses Tailwind CSS to handle global Flex layout.
 
-In the next chapter, we will dive into `<script setup>` of `App.vue` and learn the soul of Vue 3—**Reactivity**.
+Extracting navigation logic into `AppSidebar.vue` keeps `App.vue` clean and follows the "Separation of Concerns" principle. In the next chapter, we will dive into the soul of Vue 3—**Reactivity**.
