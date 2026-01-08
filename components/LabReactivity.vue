@@ -9,9 +9,9 @@
     </button>
 
     <h3 class="text-xl font-bold text-sakura-800 dark:text-sakura-300 mb-4 flex items-center gap-2">
-      🧪 Reactivity & Computed
+      {{ t.lab_reactivity_title }}
     </h3>
-    <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Type in the JS box to see how Data drives the View and how Computed properties update automatically.</p>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">{{ t.lab_reactivity_info }}</p>
 
     <div v-if="!showCode" class="flex flex-col gap-6">
       
@@ -101,6 +101,13 @@ const uppercaseName = computed(() => {
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { I18N } from '../constants';
+
+const props = defineProps<{
+  lang: 'en' | 'zh';
+}>();
+
+const t = computed(() => I18N[props.lang]);
 
 const name = ref('Vue');
 const isUpdating = ref(false);

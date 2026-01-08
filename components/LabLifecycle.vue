@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white/80 p-6 rounded-2xl border border-sakura-200 shadow-sm backdrop-blur-md mt-6">
     <h3 class="text-xl font-bold text-sakura-800 mb-4 flex items-center gap-2">
-      🎢 Lifecycle Coaster
+      {{ t.lab_lifecycle_title }}
     </h3>
     
     <div class="flex gap-2 mb-6 justify-center">
@@ -11,7 +11,7 @@
         class="px-4 py-2 rounded-lg text-sm font-bold transition-all"
         :class="status === 'unmounted' ? 'bg-sakura-500 text-white hover:bg-sakura-600 shadow-md' : 'bg-gray-100 text-gray-400'"
       >
-        1. Mount
+        1. {{ t.lab_lifecycle_btn_mount }}
       </button>
       <button 
         @click="updateComponent" 
@@ -19,7 +19,7 @@
         class="px-4 py-2 rounded-lg text-sm font-bold transition-all"
         :class="status === 'mounted' ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md' : 'bg-gray-100 text-gray-400'"
       >
-        2. Update
+        2. {{ t.lab_lifecycle_btn_update }}
       </button>
       <button 
         @click="unmountComponent" 
@@ -27,7 +27,7 @@
         class="px-4 py-2 rounded-lg text-sm font-bold transition-all"
         :class="status !== 'unmounted' ? 'bg-red-400 text-white hover:bg-red-500 shadow-md' : 'bg-gray-100 text-gray-400'"
       >
-        3. Unmount
+        3. {{ t.lab_lifecycle_btn_unmount }}
       </button>
     </div>
 
@@ -57,7 +57,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { I18N } from '../constants';
+
+const props = defineProps<{
+  lang: 'en' | 'zh';
+}>();
+
+const t = computed(() => I18N[props.lang]);
 
 const status = ref<'unmounted' | 'mounted' | 'updating'>('unmounted');
 const activeStep = ref('');

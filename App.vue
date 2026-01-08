@@ -80,62 +80,26 @@
           <span class="text-xs font-medium">{{ t.reading_notes }}</span>
         </div>
 
-        <!-- LAB MODE SIDEBAR -->
+        <!-- LAB MODE SIDEBAR (Refactored) -->
         <div v-else-if="viewMode === 'lab'" class="animate-fade-in pb-20">
            <div class="px-2 mb-4">
              <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_tools }}</h3>
              
-             <!-- Lab Tools Links -->
+             <!-- Unified Lab Dashboard Link -->
              <div 
-               @click="currentTool = 'quiz'; currentFile = null; currentFolder = null;"
-               class="p-3 rounded-xl border border-orange-100 dark:border-orange-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-2 flex items-center gap-3 bg-orange-50/50 dark:bg-gray-800/30"
-               :class="{'ring-2 ring-orange-300 dark:ring-orange-700 bg-white dark:bg-gray-800': currentTool === 'quiz'}"
+               @click="currentTool = 'dashboard'; currentFile = null; currentFolder = null;"
+               class="p-3 rounded-xl border border-indigo-100 dark:border-indigo-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-4 flex items-center gap-3 bg-indigo-50/50 dark:bg-gray-800/30"
+               :class="{'ring-2 ring-indigo-300 dark:ring-indigo-700 bg-white dark:bg-gray-800': currentTool === 'dashboard'}"
              >
-               <span class="text-xl">🥷</span>
+               <span class="text-xl">🎛️</span>
                <div class="flex-1">
-                 <div class="text-sm font-bold text-orange-900 dark:text-orange-300">{{ t.lab_quiz }}</div>
-                 <div class="text-[10px] text-orange-500 dark:text-orange-400">{{ t.lab_quiz_desc }}</div>
-               </div>
-             </div>
-
-             <div 
-               @click="currentTool = 'reactivity'; currentFile = null; currentFolder = null;"
-               class="p-3 rounded-xl border border-purple-100 dark:border-purple-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-2 flex items-center gap-3 bg-purple-50/50 dark:bg-gray-800/30"
-               :class="{'ring-2 ring-purple-300 dark:ring-purple-700 bg-white dark:bg-gray-800': currentTool === 'reactivity'}"
-             >
-               <span class="text-xl">🧪</span>
-               <div class="flex-1">
-                 <div class="text-sm font-bold text-purple-900 dark:text-purple-300">{{ t.lab_reactivity }}</div>
-                 <div class="text-[10px] text-purple-500 dark:text-purple-400">{{ t.lab_reactivity_desc }}</div>
-               </div>
-             </div>
-
-             <div 
-               @click="currentTool = 'directives'; currentFile = null; currentFolder = null;"
-               class="p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-2 flex items-center gap-3 bg-teal-50/50 dark:bg-gray-800/30"
-               :class="{'ring-2 ring-teal-300 dark:ring-teal-700 bg-white dark:bg-gray-800': currentTool === 'directives'}"
-             >
-               <span class="text-xl">👁️</span>
-               <div class="flex-1">
-                 <div class="text-sm font-bold text-teal-900 dark:text-teal-300">{{ t.lab_directives }}</div>
-                 <div class="text-[10px] text-teal-500 dark:text-teal-400">{{ t.lab_directives_desc }}</div>
-               </div>
-             </div>
-
-             <div 
-               @click="currentTool = 'lifecycle'; currentFile = null; currentFolder = null;"
-               class="p-3 rounded-xl border border-blue-100 dark:border-blue-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-4 flex items-center gap-3 bg-blue-50/50 dark:bg-gray-800/30"
-               :class="{'ring-2 ring-blue-300 dark:ring-blue-700 bg-white dark:bg-gray-800': currentTool === 'lifecycle'}"
-             >
-               <span class="text-xl">🎢</span>
-               <div class="flex-1">
-                 <div class="text-sm font-bold text-blue-900 dark:text-blue-300">{{ t.lab_lifecycle }}</div>
-                 <div class="text-[10px] text-blue-500 dark:text-blue-400">{{ t.lab_lifecycle_desc }}</div>
+                 <div class="text-sm font-bold text-indigo-900 dark:text-indigo-300">{{ t.lab_dashboard }}</div>
+                 <div class="text-[10px] text-indigo-500 dark:text-indigo-400">{{ t.lab_dashboard_desc }}</div>
                </div>
              </div>
 
              <!-- Course Section -->
-             <div>
+             <div class="mb-6">
                <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_course }}</h3>
                <div v-if="labFolder && labFolder.children">
                  <FileTree 
@@ -153,14 +117,20 @@
              </div>
              
              <!-- External Resources Section -->
-             <div class="mt-6">
+             <div>
                <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_resources }}</h3>
-               <div class="space-y-2">
-                 <a href="https://vuemastery.com" target="_blank" class="block p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-2">
-                    <span>🎮</span> Vue Mastery Games
+               <div class="space-y-3">
+                 <a href="https://vuemastery.com" target="_blank" class="block p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700 transition-colors group">
+                    <div class="flex items-center gap-2 mb-1">
+                       <span>🎮</span> <span class="text-xs font-bold text-gray-700 dark:text-gray-200">Vue Mastery</span>
+                    </div>
+                    <div class="text-[10px] text-gray-400 dark:text-gray-500 pl-6 group-hover:text-sakura-500 transition-colors">{{ t.res_vue_mastery_desc }}</div>
                  </a>
-                 <a href="https://scrimba.com" target="_blank" class="block p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-2">
-                    <span>📺</span> Scrimba
+                 <a href="https://scrimba.com" target="_blank" class="block p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700 transition-colors group">
+                    <div class="flex items-center gap-2 mb-1">
+                       <span>📺</span> <span class="text-xs font-bold text-gray-700 dark:text-gray-200">Scrimba</span>
+                    </div>
+                    <div class="text-[10px] text-gray-400 dark:text-gray-500 pl-6 group-hover:text-sakura-500 transition-colors">{{ t.res_scrimba_desc }}</div>
                  </a>
                </div>
              </div>
@@ -213,7 +183,7 @@
             <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             <span>Code</span>
          </a>
-         <span class="text-[10px] text-sakura-300 dark:text-gray-600 font-mono">v1.2</span>
+         <span class="text-[10px] text-sakura-300 dark:text-gray-600 font-mono">1.0</span>
       </div>
     </aside>
 
@@ -239,7 +209,7 @@
              <span class="text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded-md">{{ t.tab_lab }}</span>
              <span class="mx-2 text-sakura-300 dark:text-gray-600">›</span>
              <span class="text-gray-500 dark:text-gray-400">
-                {{ currentTool === 'reactivity' ? t.lab_reactivity : (currentTool === 'quiz' ? t.lab_quiz : (currentTool === 'directives' ? t.lab_directives : t.lab_lifecycle)) }}
+                {{ t.lab_dashboard }}
              </span>
           </template>
           <template v-else v-for="(item, index) in breadcrumbs" :key="item.path">
@@ -313,12 +283,9 @@
           class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full" 
         >
           
-          <!-- Lab Tool View -->
-          <div v-if="viewMode === 'lab' && currentTool" class="w-full max-w-5xl mx-auto animate-fade-in">
-             <LabReactivity v-if="currentTool === 'reactivity'" />
-             <LabLifecycle v-if="currentTool === 'lifecycle'" />
-             <LabDirectives v-if="currentTool === 'directives'" />
-             <LabQuizGame v-if="currentTool === 'quiz'" />
+          <!-- Lab Tool View (Unified Dashboard) -->
+          <div v-if="viewMode === 'lab' && currentTool === 'dashboard'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
+             <LabDashboard :lang="lang" />
           </div>
 
           <!-- Folder View -->
@@ -523,10 +490,7 @@ import { I18N } from './constants';
 import { NodeType } from './types';
 import type { FileNode, BreadcrumbItem, TocItem } from './types';
 import FileTree from './components/FileTree.vue';
-import LabReactivity from './components/LabReactivity.vue';
-import LabLifecycle from './components/LabLifecycle.vue';
-import LabDirectives from './components/LabDirectives.vue';
-import LabQuizGame from './components/LabQuizGame.vue';
+import LabDashboard from './components/LabDashboard.vue'; // Unified Dashboard
 
 // Petal Interface
 interface Petal {
@@ -568,7 +532,8 @@ const toc = ref<TocItem[]>([]);
 const activeHeaderId = ref<string>('');
 const loading = ref(true);
 const contentLoading = ref(false);
-const currentTool = ref<'reactivity' | 'lifecycle' | 'directives' | 'quiz' | null>(null);
+// Unified currentTool state: 'dashboard' is default for lab mode
+const currentTool = ref<'dashboard' | null>(null);
 const showParticles = ref(true);
 const petals = ref<Petal[]>([]);
 const toastMessage = ref('');
@@ -668,9 +633,31 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
   });
 });
 
+// Setup Marked Renderer to ensure IDs are added to Headers for TOC
+// This needs to be done once, but we can re-init inside computed if needed.
+// However, window.marked is global. We should set it up properly.
+const setupMarkedRenderer = () => {
+    // @ts-ignore
+    if (!window.marked) return;
+    // @ts-ignore
+    const renderer = new window.marked.Renderer();
+    renderer.heading = function(text: string, level: number) {
+       // Generate safe ID matching the logic in generateToc
+       const id = text.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-\u4e00-\u9fa5]+/g, '');
+       return `<h${level} id="${id}">${text}</h${level}>`;
+    };
+    // @ts-ignore
+    window.marked.use({ renderer });
+};
+
 const renderedContent = computed(() => {
   if (!currentFile.value?.content) return '';
   
+  // Ensure renderer is ready
+  setupMarkedRenderer();
+
   let rawContent = currentFile.value.content;
 
   // Image path rewriting logic
@@ -733,7 +720,10 @@ const openFile = async (file: FileNode) => {
   currentTool.value = null;
   isRawMode.value = false;
   updateUrl(file.path);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Important: Scroll the container, not window
+  const container = document.getElementById('scroll-container');
+  if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+  
   selectionMenu.value.show = false;
 
   if (!file.content) {
@@ -784,7 +774,7 @@ const toggleFolder = (path: string) => {
 const switchViewMode = (mode: 'latest' | 'files' | 'lab') => {
   viewMode.value = mode;
   if (mode === 'lab' && !currentFile.value) {
-    if (!currentTool.value) currentTool.value = 'quiz';
+    currentTool.value = 'dashboard';
   }
   selectionMenu.value.show = false;
 };
@@ -915,6 +905,7 @@ const generateToc = () => {
     const match = line.match(/^(#{1,3})\s+(.+)$/);
     if (match) {
       const text = match[2].trim();
+      // MUST MATCH the ID generation in setupMarkedRenderer
       const id = text.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w\-\u4e00-\u9fa5]+/g, ''); 
@@ -941,7 +932,8 @@ const updateActiveHeader = () => {
   for (const item of toc.value) {
     const el = document.getElementById(item.id);
     if (el) {
-       if (el.offsetTop - 150 <= scrollPosition) {
+       // Check offset relative to container's top
+       if (el.offsetTop - container.offsetTop - 150 <= scrollPosition) {
          active = item.id;
        }
     }
@@ -953,10 +945,9 @@ const scrollToHeader = (id: string) => {
   const el = document.getElementById(id);
   const container = document.getElementById('scroll-container');
   if (el && container) {
-     container.scrollTo({
-       top: el.offsetTop - 80,
-       behavior: 'smooth'
-     });
+     // Using scrollIntoView handles overflow containers correctly
+     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+     // Adjust for header height if needed (manual offset hard with scrollIntoView, but basic functionality works)
      activeHeaderId.value = id;
   }
 };

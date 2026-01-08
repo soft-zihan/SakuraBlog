@@ -4,10 +4,27 @@ export const I18N = {
     subtitle: "For every reader",
     tab_latest: "Latest",
     tab_files: "Files",
-    tab_lab: "Lab",
-    lab_tools: "Interactive Tools",
+    tab_lab: "Visual Learning",
+    lab_dashboard: "Learning Center",
+    lab_dashboard_desc: "Visualize code, understand logic",
+    lab_tools: "Visual Playground",
     lab_resources: "Learning Resources",
     lab_course: "Vue Ninja Training (Project Based)",
+    
+    // Categories
+    cat_foundation: "Web Foundation",
+    cat_vue: "Vue Core",
+    cat_challenge: "Challenge",
+
+    // HTML/JS Tools
+    lab_html_title: "HTML DOM & Box Model",
+    lab_html_info: "Type HTML to see the structure. Borders are added automatically to visualize the Box Model.",
+    lab_js_title: "JS Event Propagation",
+    lab_js_info: "Click the boxes to visualize Event Capturing and Bubbling phases.",
+    lab_js_log: "Event Log",
+    lab_js_clear: "Clear",
+    
+    // Existing Vue Tools
     lab_reactivity: "Reactivity",
     lab_reactivity_desc: "Data binding visualizer",
     lab_lifecycle: "Lifecycle",
@@ -16,6 +33,23 @@ export const I18N = {
     lab_directives_desc: "v-if vs v-show visualizer",
     lab_quiz: "Vue Ninja Quiz",
     lab_quiz_desc: "Test your knowledge!",
+    
+    // Quiz Extended
+    quiz_cat_all: "Mixed Challenge",
+    quiz_cat_basic: "HTML & CSS",
+    quiz_cat_js: "JavaScript Core",
+    quiz_cat_vue: "Vue.js Ecology",
+    quiz_streak: "Streak",
+    quiz_score: "Score",
+    quiz_lifeline_5050: "50/50",
+    quiz_lifeline_used: "Used",
+    quiz_review: "Review Mistakes",
+    quiz_explanation: "Explanation",
+    quiz_perfect: "Perfect! You are a master!",
+    quiz_good: "Great job! Keep practicing.",
+    quiz_try: "Don't give up! Review the notes.",
+    
+    // General
     no_notes: "No notes found in 'en' folder.",
     no_vue_notes: "Course notes folder not found.",
     reading_notes: "Reading notes...",
@@ -50,16 +84,48 @@ export const I18N = {
     menu_highlight: "Highlight",
     menu_underline: "Underline",
     selection_error: "Selection cannot cross paragraphs.",
+    
+    // Lab Components content
+    lab_reactivity_title: "Reactivity & Computed",
+    lab_reactivity_info: "Type in the JS box to see how Data drives the View and how Computed properties update automatically.",
+    lab_lifecycle_title: "Lifecycle Coaster",
+    lab_lifecycle_btn_mount: "Mount",
+    lab_lifecycle_btn_update: "Update",
+    lab_lifecycle_btn_unmount: "Unmount",
+    lab_directives_title: "Directives: v-if vs v-show",
+    lab_directives_info: "Visualizing how Vue handles conditional rendering and DOM updates.",
+    lab_quiz_start: "Start Training",
+    lab_quiz_title: "Vue Ninja Training",
+    lab_quiz_subtitle: "Test your reflexes and Vue knowledge.",
+    res_vue_mastery_desc: "Gamified learning path",
+    res_scrimba_desc: "Interactive video tutorials"
   },
   zh: {
     loading: "正在加载樱花笔记...",
     subtitle: "献给所有读者",
     tab_latest: "最新",
     tab_files: "归档",
-    tab_lab: "实验室",
-    lab_tools: "交互式工具",
+    tab_lab: "可视化学习",
+    lab_dashboard: "可视化学习中心",
+    lab_dashboard_desc: "看见代码，理解逻辑",
+    lab_tools: "交互演示",
     lab_resources: "前端修炼场",
     lab_course: "Vue 实战笔记 (源码解析)",
+
+    // Categories
+    cat_foundation: "Web 基础",
+    cat_vue: "Vue 核心",
+    cat_challenge: "挑战",
+
+    // HTML/JS Tools
+    lab_html_title: "HTML 结构与盒模型",
+    lab_html_info: "输入 HTML 代码，右侧自动勾勒出 DOM 结构轮廓，助你理解盒模型嵌套关系。",
+    lab_js_title: "JS 事件传播机制",
+    lab_js_info: "点击下方方块，可视化观察事件的“捕获”与“冒泡”全过程。",
+    lab_js_log: "事件日志",
+    lab_js_clear: "清空",
+
+    // Existing Vue Tools
     lab_reactivity: "响应式原理",
     lab_reactivity_desc: "数据绑定可视化",
     lab_lifecycle: "生命周期",
@@ -68,6 +134,23 @@ export const I18N = {
     lab_directives_desc: "v-if 与 v-show 的区别",
     lab_quiz: "Vue 忍者挑战",
     lab_quiz_desc: "随机抽取5题测试水平！",
+    
+    // Quiz Extended
+    quiz_cat_all: "综合大挑战",
+    quiz_cat_basic: "HTML & CSS 基础",
+    quiz_cat_js: "JavaScript 核心",
+    quiz_cat_vue: "Vue.js 全家桶",
+    quiz_streak: "连胜",
+    quiz_score: "得分",
+    quiz_lifeline_5050: "50/50 排除",
+    quiz_lifeline_used: "已使用",
+    quiz_review: "错题回顾",
+    quiz_explanation: "解析",
+    quiz_perfect: "太强了！全知全能的忍者！",
+    quiz_good: "干得漂亮！继续保持。",
+    quiz_try: "别灰心！复习一下笔记再来。",
+
+    // General
     no_notes: "在 'zh' 文件夹下暂无笔记",
     no_vue_notes: "未找到 'VUE学习笔记' 文件夹",
     reading_notes: "读取笔记中...",
@@ -102,5 +185,20 @@ export const I18N = {
     menu_highlight: "高亮",
     menu_underline: "波浪线",
     selection_error: "无法跨段落标注",
+    
+    // Lab Components content
+    lab_reactivity_title: "响应式与计算属性",
+    lab_reactivity_info: "在 JS 框中输入，观察数据如何驱动视图，以及计算属性如何自动更新。",
+    lab_lifecycle_title: "生命周期过山车",
+    lab_lifecycle_btn_mount: "挂载 (Mount)",
+    lab_lifecycle_btn_update: "更新 (Update)",
+    lab_lifecycle_btn_unmount: "卸载 (Unmount)",
+    lab_directives_title: "指令对比: v-if vs v-show",
+    lab_directives_info: "可视化 Vue 如何处理条件渲染和 DOM 更新。",
+    lab_quiz_start: "开始修炼",
+    lab_quiz_title: "Vue 忍者训练",
+    lab_quiz_subtitle: "测试你的反应速度和 Vue 知识。",
+    res_vue_mastery_desc: "游戏化学习路径",
+    res_scrimba_desc: "交互式视频教程"
   }
 };

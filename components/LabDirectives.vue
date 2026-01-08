@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-2xl border border-teal-100 dark:border-gray-700 shadow-sm backdrop-blur-md mt-6">
     <h3 class="text-xl font-bold text-teal-800 dark:text-teal-300 mb-4 flex items-center gap-2">
-      👁️ Directives: v-if vs v-show
+      {{ t.lab_directives_title }}
     </h3>
-    <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Visualizing how Vue handles conditional rendering and DOM updates.</p>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">{{ t.lab_directives_info }}</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       
@@ -77,7 +77,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { I18N } from '../constants';
 
+const props = defineProps<{
+  lang: 'en' | 'zh';
+}>();
+
+const t = computed(() => I18N[props.lang]);
 const isVisible = ref(true);
 </script>

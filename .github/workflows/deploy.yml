@@ -41,6 +41,7 @@ jobs:
         run: |
           mkdir -p dist/notes
           if [ -d "notes" ]; then cp -r notes/* dist/notes/ || true; fi
+          touch dist/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

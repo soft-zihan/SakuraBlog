@@ -1,10 +1,10 @@
-# 🌸 Sakura Notes (Static Vue Blog)
+# 🌸 Sakura Notes
 
-**v1.0**
+> **v1.0**
 
-这是一个基于 Vue 3 + Tailwind CSS 的纯静态个人博客系统，专为 GitHub Pages 部署设计。
+这是一个基于 **Vue 3** + **Tailwind CSS** 的纯静态个人博客系统，专为 **GitHub Pages** 部署设计。
 
-[Live Demo](https://soft-zihan.github.io/)
+[**在线演示 (Live Demo)**](https://soft-zihan.github.io/)
 
 ---
 
@@ -25,9 +25,9 @@
 
 ## 🛠 原理与架构
 
-1.  **Scanner**: Node.js 脚本扫描 `notes/` 目录生成索引。
-2.  **Deploy**: 所有的 Markdown 和 **图片资源** 都会被原样复制到 `dist/notes/` 目录。
-3.  **Runtime**: Vue 应用拦截 Markdown 中的图片路径，自动补全为服务器上的真实路径。
+1. **Scanner**: Node.js 脚本扫描 `notes/` 目录生成索引。
+2. **Deploy**: 所有的 Markdown 和 **图片资源** 都会被原样复制到 `dist/notes/` 目录。
+3. **Runtime**: Vue 应用拦截 Markdown 中的图片路径，自动补全为服务器上的真实路径。
 
 ---
 
@@ -36,9 +36,8 @@
 我们非常欢迎您的贡献！如果您想分享笔记或贡献代码：
 
 1. 克隆仓库。
-2. 直接推送到main分支。
-3. 或者你可以提交 **Pull Request (PR)** 到主分支。
-
+2. 直接推送到 `main` 分支。
+3. 或者您可以提交 **Pull Request (PR)** 到主分支。
 
 ---
 
@@ -46,6 +45,6 @@
 
 1. **Fork** 此仓库。
 2. 在项目根目录下 `notes` 文件夹中创建 `.md` 文件。
-3. Push 代码，在Github Pages中选择 GitHub Actions，每次 push 会自动构建并部署到 Pages。
+3. Push 代码，在 GitHub 仓库的 **Settings -> Pages** 中选择 **GitHub Actions** 作为构建源。每次 push 会自动构建并部署到 Pages。
 
 希望这个项目能成为你整理知识、分享生活的小小花园 🌸
