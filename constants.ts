@@ -42,12 +42,17 @@ export const I18N = {
     lab_html_status_style: "Calculating Styles...",
     lab_html_status_paint: "Painting Pixels...",
     
-    lab_js_title: "JS Event Propagation",
-    lab_js_info: "Click the boxes to visualize Event Capturing and Bubbling phases.",
+    // JS Lab (Updated)
+    lab_js_title: "JS Core Mechanics",
+    lab_js_tab_basics: "1. Basics (Types & Operators)",
+    lab_js_tab_events: "2. Event Propagation",
+    lab_js_type_check: "Type Checker (typeof)",
+    lab_js_equality: "Equality (== vs ===)",
+    lab_js_info: "Switch tabs to explore JS variables, types, and event bubbling.",
     lab_js_log: "Event Log",
     lab_js_clear: "Clear",
 
-    // DOM Lab (New)
+    // DOM Lab
     lab_dom_title: "DOM Manipulation Playground",
     lab_dom_desc: "Interact with page elements using standard DOM APIs.",
     lab_dom_target: "Target Element",
@@ -58,7 +63,7 @@ export const I18N = {
     lab_dom_btn_hide: "Hide Element",
     lab_dom_btn_show: "Show Element",
 
-    // Ajax Lab (New)
+    // Ajax Lab
     lab_ajax_title: "Async Interaction (Province/City)",
     lab_ajax_desc: "Simulating the Province-City-Area selection flow from the course.",
     lab_ajax_sync: "Promise Chain (.then)",
@@ -70,7 +75,7 @@ export const I18N = {
     lab_ajax_start: "Start Request",
     lab_ajax_reset: "Reset",
 
-    // Vue List Lab (Updated to Employee Management)
+    // Vue List Lab
     lab_vue_list_title: "Employee Management (v-for/v-if)",
     lab_vue_list_desc: "Rendering a list based on raw data with conditional formatting.",
     lab_vue_form_name: "Name",
@@ -78,6 +83,8 @@ export const I18N = {
     lab_vue_form_job: "Job",
     lab_vue_add: "Add Employee",
     lab_vue_empty: "No data available",
+    lab_vue_view_ui: "👁️ View UI",
+    lab_vue_view_code: "📝 View Source",
     lab_gender_1: "Male",
     lab_gender_2: "Female",
     lab_job_1: "Lecturer",
@@ -208,12 +215,17 @@ export const I18N = {
     lab_html_status_style: "计算 CSS 样式...",
     lab_html_status_paint: "绘制像素 (Paint)...",
 
-    lab_js_title: "JS 事件传播机制",
-    lab_js_info: "点击下方方块，可视化观察事件的“捕获”与“冒泡”全过程。",
+    // JS Lab (Updated)
+    lab_js_title: "JS 核心机制",
+    lab_js_tab_basics: "1. 基础语法 (类型与运算符)",
+    lab_js_tab_events: "2. 事件传播机制 (Bubbling)",
+    lab_js_type_check: "数据类型检测 (typeof)",
+    lab_js_equality: "运算符对比 (== vs ===)",
+    lab_js_info: "切换标签页以探索 JS 变量、类型判断以及事件冒泡机制。",
     lab_js_log: "事件日志",
     lab_js_clear: "清空",
 
-    // DOM Lab (New)
+    // DOM Lab
     lab_dom_title: "DOM 操作演练场",
     lab_dom_desc: "使用标准的 document API 操作页面元素。",
     lab_dom_target: "目标元素",
@@ -224,7 +236,7 @@ export const I18N = {
     lab_dom_btn_hide: "隐藏元素 (Display)",
     lab_dom_btn_show: "显示元素 (Display)",
 
-    // Ajax Lab (New)
+    // Ajax Lab
     lab_ajax_title: "异步交互 (省市区联动)",
     lab_ajax_desc: "模拟课程中的“省-市-区”三级联动请求流程。",
     lab_ajax_sync: "链式调用 (.then)",
@@ -244,6 +256,8 @@ export const I18N = {
     lab_vue_form_job: "职位",
     lab_vue_add: "入职 (添加)",
     lab_vue_empty: "暂无数据",
+    lab_vue_view_ui: "👁️ 查看界面",
+    lab_vue_view_code: "📝 查看源码",
     lab_gender_1: "男",
     lab_gender_2: "女",
     lab_job_1: "讲师",

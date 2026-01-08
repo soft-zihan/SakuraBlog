@@ -703,7 +703,7 @@ const applyFormat = (type: 'highlight' | 'underline') => {
     }
 };
 
-// Lightbox logic
+// Lightbox logic & Link Interception
 const handleContentClick = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   
@@ -718,12 +718,13 @@ const handleContentClick = (e: MouseEvent) => {
   const link = target.closest('a');
   if (link) {
     const href = link.getAttribute('href');
-    // If it is a relative link ending in .md
-    if (href && !href.startsWith('http') && href.endsWith('.md')) {
-      e.preventDefault(); 
+    // If it is a local link (starts with ./, ../ or no slash, and ends in .md)
+    if (href && !href.startsWith('http') && !href.startsWith('//') && href.endsWith('.md')) {
+      e.preventDefault(); // Stop Browser Jump
       
       let targetPath = '';
       if (currentFile.value?.path) {
+        // Resolve relative path
         const currentDir = currentFile.value.path.split('/').slice(0, -1);
         const parts = href.split('/');
         
@@ -732,17 +733,25 @@ const handleContentClick = (e: MouseEvent) => {
            if (part === '..') {
               if (currentDir.length > 0) currentDir.pop();
            } else {
-              currentDir.push(part);
+              currentDir.push(decodeURIComponent(part)); // Ensure decoding
            }
         }
         targetPath = currentDir.join('/');
       }
 
-      const node = findNodeByPath(fileSystem.value, targetPath);
+      // Try to find exact match
+      let node = findNodeByPath(fileSystem.value, targetPath);
+      
+      // Fallback: Try fuzzy search if exact match fails (sometimes encoding differs)
+      if (!node) {
+         const flat = filteredFlatFiles.value;
+         node = flat.find(f => f.path.endsWith(href)) || null;
+      }
+
       if (node && node.type === NodeType.FILE) {
         openFile(node);
       } else {
-        showToast('Linked note not found');
+        showToast(`Linked note not found: ${href}`);
       }
     }
   }

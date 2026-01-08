@@ -126,7 +126,7 @@
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
             <section>
             <h2 class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4 flex items-center gap-2">
-                <span class="text-2xl">⚡</span> {{ t.lab_js_title }}
+                <span class="text-2xl">⚡</span> {{ lang === 'zh' ? 'JS 核心机制' : 'JS Core Mechanics' }}
             </h2>
             <LabJs :lang="lang" />
             </section>

@@ -6,7 +6,7 @@
       @click="showCode = !showCode" 
       class="absolute top-6 right-6 text-xs font-bold text-teal-600 hover:text-teal-700 bg-teal-50 dark:bg-gray-900 px-3 py-1 rounded-full transition-colors border border-teal-100 dark:border-gray-600 z-10"
     >
-      {{ showCode ? '👁️ View UI' : '📝 View Source' }}
+      {{ showCode ? t.lab_vue_view_ui : t.lab_vue_view_code }}
     </button>
 
     <p class="text-xs text-gray-500 dark:text-gray-400 mb-6 pr-20">{{ t.lab_vue_list_desc }}</p>
@@ -19,8 +19,8 @@
         <pre class="p-4 text-xs font-mono text-gray-300 overflow-auto custom-scrollbar h-full leading-relaxed"><code class="language-html">&lt;!-- 1. 列表渲染 (v-for) --&gt;
 &lt;tr v-for="(item, index) in items" :key="item.id"&gt;
   &lt;!-- 索引展示 --&gt;
-  &lt;td&gt;{{ index + 1 }}&lt;/td&gt;
-  &lt;td&gt;{{ item.name }}&lt;/td&gt;
+  &lt;td&gt;{{"{{ index + 1 }}"}}&lt;/td&gt;
+  &lt;td&gt;{{"{{ item.name }}"}}&lt;/td&gt;
   
   &lt;!-- 2. 条件渲染 (v-if/v-else-if/v-else) --&gt;
   &lt;td&gt;
