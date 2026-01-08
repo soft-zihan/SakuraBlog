@@ -1,54 +1,49 @@
 # 🌸 Sakura Notes (Static Vue Blog)
-
+[中文文档 (Chinese)](https://github.com/soft-zihan/personal_blog/blob/main/README.md)
 **v1.0**
+A pure static personal blog system built with Vue 3 + Tailwind CSS, designed specifically for GitHub Pages deployment.
 
-[中文文档 (Chinese)](./README_zh.md)
-
-This is a pure static personal blog system based on Vue 3 + Tailwind CSS, designed for GitHub Pages deployment.
-It requires no complex backend server, adopting a **Metadata Indexing + Runtime Fetching** architecture for an extremely lightweight static blog experience.
-
-[Live Demo](https://github.com/soft-zihan)
+[Live Demo](https://soft-zihan.github.io/)
 
 ---
 
 ## ✨ Features
 
-- **Pure Static Architecture**: Fully Client-Side Rendering (CSR).
-- **Gamified Learning**: Includes a "Vue Ninja" quiz game.
-- **Dynamic Fetching**: Markdown content is Lazy Loaded.
-- **Root Content**: Notes are served directly from the `notes/` directory.
-- **Sakura/Snow Effects**: Toggleable particle system for aesthetics.
-- **i18n Support**: Built-in English/Chinese switching.
-- **Deep Interaction**:
-  - **Temporary Highlight**: Select text to highlight.
-  - **Smart Copy**: Copy selection as Markdown quote (`> text`) automatically.
+-   **Pure Static Architecture**: Fully client-side rendered (CSR), with metadata index pre-generated via GitHub Actions.
+-   **Enhanced Images**:
+    -   **Smart Pathing**: Supports `./` (same directory) and `../` (parent directory) image references.
+    -   **Lightbox**: Built-in image viewer. Click any image to enlarge it in full-screen mode.
+    -   **HTML Support**: Allows controlling image size using `<img src="..." width="100">`.
+-   **Dynamic Fetching**: Markdown content is loaded on-demand (Lazy Load), ensuring extremely fast initial page load.
+-   **Internationalization**: Built-in Chinese/English language switching (i18n).
+-   **Theme Modes**: Supports both "Day Sakura" (light) and "Night Sakura" (dark) themes.
+-   **Sakura Lab**: Built-in Vue interactive lab featuring visual teaching components (Reactivity, Lifecycle).
+-   **Backend-free Personalization**: Uses `localStorage` to save user preferences for font, font size, and theme.
 
 ---
 
-## 🛠 Architecture
+## 🛠 Principle & Architecture
 
-1.  **Scanner**: A Node.js script (`generate-tree.js`) scans the `notes/` directory.
-2.  **Indexer**: It generates `files.json` containing the flat path structure relative to `notes/`.
-3.  **Deployment**: The contents of your local `notes/` folder are deployed to `dist/notes/` on the server.
-4.  **Runtime**: The Vue app fetches `files.json`, then fetches individual notes from `notes/{path}`.
-
----
-
-## 🚀 How to Start
-
-1. **Content**: Place all your Markdown notes inside the `notes/` folder at the root of the project. You can create subfolders there (e.g., `notes/Vue/Basic.md`).
-2. **Deploy**: Push to GitHub. The Action will build the site and deploy.
+1.  **Scanner**: A Node.js script scans the `notes/` directory to generate the content index.
+2.  **Deploy**: All Markdown files and **image assets** are copied directly to the `dist/notes/` directory.
+3.  **Runtime**: The Vue application intercepts image paths in Markdown and automatically completes them with the real server paths.
 
 ---
 
-## 🤝 Contributing
+## 🚀 How to Contribute
 
-Contributions are welcome! If you have any improvements, new features, or bug fixes, please submit a **Pull Request**.
+We welcome your contributions! If you'd like to share notes or contribute code:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1.  Clone the repository.
+2.  Push your changes directly to the `main` branch.
+3.  Alternatively, you can submit a **Pull Request (PR)** to the main branch.
 
-Enjoy writing! 🌸
+---
+
+## 🚀 Self-Deployment
+
+1.  **Fork** this repository.
+2.  Create `.md` files inside the `notes` folder in the project root.
+3.  Push your code. Select GitHub Actions for the source in your repository's Pages settings. Each push will trigger an automatic build and deploy to Pages.
+
+Hope this project becomes your little garden for organizing knowledge and sharing life 🌸

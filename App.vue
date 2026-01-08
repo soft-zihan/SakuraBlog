@@ -1,4 +1,21 @@
 <template>
+  <!-- Dynamic Petals Container -->
+  <div v-if="showParticles" class="petals-container" id="petals">
+    <div 
+      v-for="(petal, index) in petals" 
+      :key="index" 
+      class="petal"
+      :style="{
+        left: petal.left + '%',
+        width: petal.size + 'px',
+        height: (petal.size * 1.3) + 'px',
+        animationDuration: (petal.duration * speedMultiplier) + 's',
+        animationDelay: petal.delay + 's',
+        opacity: petal.opacity
+      }"
+    ></div>
+  </div>
+
   <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500" :class="[userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', isDark ? 'dark' : '']">
     
     <!-- Left Sidebar: Navigation -->
@@ -9,15 +26,15 @@
         
         <!-- Language Switcher (Top Left of Sidebar) -->
         <div class="absolute top-4 left-4 z-20">
-           <button @click="toggleLang" class="text-xs font-bold px-2 py-1 rounded bg-sakura-50 dark:bg-gray-800 text-sakura-600 dark:text-sakura-400 hover:bg-sakura-100 transition-colors">
-             {{ lang === 'en' ? '中' : 'EN' }}
+           <button @click="toggleLang" class="text-xs font-bold px-2 py-1 rounded bg-sakura-50 dark:bg-gray-800 text-sakura-600 dark:text-sakura-400 hover:bg-sakura-100 transition-colors shadow-sm border border-sakura-100 dark:border-gray-700">
+             {{ lang === 'en' ? 'EN / 中' : '中 / EN' }}
            </button>
         </div>
 
         <div class="relative group cursor-pointer z-10" @click="resetToHome">
           <div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-sakura-300 to-sakura-100 dark:from-sakura-700 dark:to-sakura-900 shadow-xl mb-4 group-hover:scale-105 transition-transform duration-300">
             <img 
-              src="https://api.dicebear.com/7.x/notionists/svg?seed=Sakura&backgroundColor=ffd7e6" 
+              src="https://picx.zhimg.com/80/v2-1e3a27439c019dff7f9f7a679005c950_720w.webp?source=1def8aca" 
               class="w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800 bg-white dark:bg-gray-800"
               alt="Avatar"
             />
@@ -117,23 +134,37 @@
                </div>
              </div>
 
-             <!-- Course Section with Error Handling -->
-             <div v-if="labFolder && labFolder.children && labFolder.children.length > 0">
+             <!-- Course Section -->
+             <div>
                <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_course }}</h3>
-               <FileTree 
-                  :nodes="labFolder.children" 
-                  :expanded-paths="expandedFolders"
-                  :current-path="currentPath"
-                  @toggle-folder="toggleFolder"
-                  @select-file="openFile"
-                  @select-folder="openFolder"
-                />
+               <div v-if="labFolder && labFolder.children">
+                 <FileTree 
+                    :nodes="labFolder.children" 
+                    :expanded-paths="expandedFolders"
+                    :current-path="currentPath"
+                    @toggle-folder="toggleFolder"
+                    @select-file="openFile"
+                    @select-folder="openFolder"
+                  />
+               </div>
+               <div v-else class="text-[10px] text-gray-400 italic px-2">
+                 {{ t.no_vue_notes }}
+               </div>
              </div>
-              <!-- Fallback if folder missing, but don't show error, just show general files link -->
-              <div v-else class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-500 text-center">
-                 <p class="mb-2">Course notes not found.</p>
-                 <button @click="switchViewMode('files')" class="text-sakura-500 underline">Browse all files</button>
-              </div>
+             
+             <!-- External Resources Section -->
+             <div class="mt-6">
+               <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_resources }}</h3>
+               <div class="space-y-2">
+                 <a href="https://vuemastery.com" target="_blank" class="block p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-2">
+                    <span>🎮</span> Vue Mastery Games
+                 </a>
+                 <a href="https://scrimba.com" target="_blank" class="block p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-2">
+                    <span>📺</span> Scrimba
+                 </a>
+               </div>
+             </div>
+
            </div>
         </div>
 
@@ -156,8 +187,7 @@
                <span class="text-[10px] bg-sakura-50 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-300 px-2 py-0.5 rounded-md whitespace-nowrap font-medium">
                   {{ formatDate(file.lastModified) }}
                </span>
-               <!-- Path is often redundant in Latest view if it just repeats filename or is root, only show parent dir if meaningful -->
-               <div v-if="getCleanParentPath(file.path) !== 'Root'" class="text-[10px] text-gray-400 dark:text-gray-500 truncate flex items-center gap-1">
+               <div v-if="getCleanParentPath(file.path) !== lang" class="text-[10px] text-gray-400 dark:text-gray-500 truncate flex items-center gap-1">
                  <span class="opacity-50">/</span> {{ getCleanParentPath(file.path) }}
                </div>
              </div>
@@ -179,9 +209,9 @@
       
       <!-- Footer Info -->
       <div class="p-4 border-t border-sakura-100/50 dark:border-gray-700/50 flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
-         <a href="https://github.com/soft-zihan" target="_blank" class="text-xs text-sakura-400 hover:text-sakura-600 dark:text-gray-500 dark:hover:text-sakura-400 flex items-center gap-2 transition-colors group">
+         <a href="https://github.com/soft-zihan/soft-zihan.github.io" target="_blank" class="text-xs text-sakura-400 hover:text-sakura-600 dark:text-gray-500 dark:hover:text-sakura-400 flex items-center gap-2 transition-colors group">
             <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            <span>soft-zihan</span>
+            <span>Code</span>
          </a>
          <span class="text-[10px] text-sakura-300 dark:text-gray-600 font-mono">v1.2</span>
       </div>
@@ -201,6 +231,9 @@
         <div class="flex items-center text-sm overflow-x-auto no-scrollbar whitespace-nowrap mask-linear flex-1 mr-4 py-2">
           <span class="text-sakura-300 dark:text-sakura-500 mr-2 shrink-0 text-lg cursor-pointer hover:scale-110 transition-transform" @click="resetToHome">🏠</span>
           <span class="text-sakura-200 dark:text-gray-700 mx-1">/</span>
+          <!-- Language Root Indicator -->
+          <span class="font-bold text-sakura-500 dark:text-sakura-400 bg-sakura-50 dark:bg-sakura-900/20 px-2 py-0.5 rounded mr-2">{{ lang }}</span>
+          
           <template v-if="viewMode === 'lab' && currentTool">
              <span class="mx-2 text-sakura-300 dark:text-gray-600">›</span>
              <span class="text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded-md">{{ t.tab_lab }}</span>
@@ -230,6 +263,11 @@
 
           <!-- Action Buttons -->
           <template v-if="currentFile">
+             <!-- View Source Toggle -->
+             <button @click="isRawMode = !isRawMode" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold" :title="isRawMode ? t.view_render : t.view_source">
+                <span class="text-lg">{{ isRawMode ? '👁️' : '🖊️' }}</span>
+             </button>
+
             <button @click="copyLink" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold" :title="t.copy_link">
               <span class="text-lg">🔗</span>
             </button>
@@ -250,12 +288,29 @@
       <!-- Content Area -->
       <div class="flex-1 flex overflow-hidden z-10 relative">
         
+        <!-- Selection Menu (Floating) -->
+        <div 
+          v-show="selectionMenu.show" 
+          class="fixed z-50 flex bg-gray-900/90 text-white rounded-full shadow-xl backdrop-blur transform -translate-x-1/2 -translate-y-full mb-2 px-1 py-1"
+          :style="{ top: selectionMenu.y + 'px', left: selectionMenu.x + 'px' }"
+          @mousedown.prevent
+        >
+          <button @click="applyFormat('highlight')" class="px-3 py-1.5 hover:bg-white/20 rounded-full text-xs font-bold flex items-center gap-1">
+            <span class="w-3 h-3 bg-yellow-400 rounded-full inline-block"></span>
+            {{ t.menu_highlight }}
+          </button>
+          <div class="w-px bg-white/20 my-1"></div>
+          <button @click="applyFormat('underline')" class="px-3 py-1.5 hover:bg-white/20 rounded-full text-xs font-bold flex items-center gap-1">
+             <span class="underline decoration-wavy decoration-white">U</span>
+             {{ t.menu_underline }}
+          </button>
+        </div>
+
         <!-- Center Stage -->
         <div 
           v-if="currentFile || (viewMode === 'lab' && currentTool) || currentFolder" 
           id="scroll-container" 
           class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full" 
-          @mouseup="handleTextSelection"
         >
           
           <!-- Lab Tool View -->
@@ -311,12 +366,17 @@
                  <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 tracking-tight leading-tight">{{ currentFile.name.replace('.md', '') }}</h1>
              </div>
 
-            <!-- Markdown Content with Click Listener for Lightbox -->
+            <!-- Markdown Content or Raw Source -->
             <div 
+              v-if="!isRawMode"
+              id="markdown-viewer"
               v-html="renderedContent" 
-              class="markdown-body dark:text-gray-300"
+              class="markdown-body dark:text-gray-300 selection:bg-sakura-200 dark:selection:bg-sakura-900"
               @click="handleContentClick"
+              @mouseup="handleSelection"
             ></div>
+
+            <pre v-else class="whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto text-gray-700 dark:text-gray-300 select-text">{{ currentFile.content }}</pre>
             
             <div class="mt-12 pt-8 border-t border-sakura-100 dark:border-gray-700 flex justify-between text-xs text-sakura-300 dark:text-gray-500">
               <span class="italic">Sakura Notes</span>
@@ -339,7 +399,7 @@
         </div>
 
         <!-- Right Sidebar (TOC) -->
-        <aside v-if="currentFile && !currentTool" class="hidden xl:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md overflow-y-auto custom-scrollbar z-20">
+        <aside v-if="currentFile && !currentTool && !isRawMode" class="hidden xl:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md overflow-y-auto custom-scrollbar z-20">
           
           <!-- Table of Contents -->
           <div v-if="toc.length > 0">
@@ -381,18 +441,6 @@
           </div>
         </aside>
 
-        <!-- Selection Tooltip -->
-        <div 
-          v-if="selectionRect" 
-          class="fixed z-50 flex gap-1 p-1 bg-gray-800 dark:bg-white rounded-lg shadow-xl text-white dark:text-gray-900 transform -translate-x-1/2 -translate-y-full animate-fade-in"
-          :style="{ top: selectionRect.top + 'px', left: selectionRect.left + 'px' }"
-          @mousedown.stop
-        >
-          <button @click="highlightSelection" class="p-2 hover:bg-gray-700 dark:hover:bg-gray-200 rounded transition-colors" title="Highlight (Temporary)">🖊️</button>
-          <button @click="underlineSelection" class="p-2 hover:bg-gray-700 dark:hover:bg-gray-200 rounded transition-colors" title="Underline"><u>U</u></button>
-          <button @click="copyQuoteToClipboard" class="p-2 hover:bg-gray-700 dark:hover:bg-gray-200 rounded transition-colors" title="Copy as Markdown">📋</button>
-        </div>
-
       </div>
     </main>
     
@@ -431,6 +479,19 @@
            </div>
         </div>
 
+        <!-- Sakura Speed (New) -->
+        <div class="mb-6">
+           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.sakura_speed }}</label>
+           <div class="flex flex-col gap-2">
+             <button @click="userSettings.petalSpeed = 'slow'" class="flex-1 py-3 border rounded-xl text-sm transition-colors flex items-center justify-center gap-2" :class="userSettings.petalSpeed === 'slow' ? 'border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400' : 'border-gray-200 dark:border-gray-700 text-gray-500'">
+               <span>🌸</span> {{ t.speed_5cm }}
+             </button>
+             <button @click="userSettings.petalSpeed = 'fast'" class="flex-1 py-3 border rounded-xl text-sm transition-colors flex items-center justify-center gap-2" :class="userSettings.petalSpeed === 'fast' ? 'border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400' : 'border-gray-200 dark:border-gray-700 text-gray-500'">
+               <span>💨</span> {{ t.speed_10cm }}
+             </button>
+           </div>
+        </div>
+
         <!-- Font Family -->
         <div class="mb-6">
            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.font_style }}</label>
@@ -458,7 +519,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, reactive, nextTick } from 'vue';
-import { MOCK_FILE_SYSTEM, I18N } from './constants';
+import { I18N } from './constants';
 import { NodeType } from './types';
 import type { FileNode, BreadcrumbItem, TocItem } from './types';
 import FileTree from './components/FileTree.vue';
@@ -467,10 +528,26 @@ import LabLifecycle from './components/LabLifecycle.vue';
 import LabDirectives from './components/LabDirectives.vue';
 import LabQuizGame from './components/LabQuizGame.vue';
 
-// i18n
-const lang = ref<'en' | 'zh'>('zh');
+// Petal Interface
+interface Petal {
+  left: number;
+  size: number;
+  duration: number;
+  delay: number;
+  opacity: number;
+}
+
+// i18n with Persistence
+const savedLang = localStorage.getItem('sakura_lang');
+const lang = ref<'en' | 'zh'>((savedLang === 'en' || savedLang === 'zh') ? savedLang : 'zh');
 const t = computed(() => I18N[lang.value]);
-const toggleLang = () => lang.value = lang.value === 'en' ? 'zh' : 'en';
+
+const toggleLang = () => {
+  lang.value = lang.value === 'en' ? 'zh' : 'en';
+  localStorage.setItem('sakura_lang', lang.value);
+  // Reset content when switching lang to avoid confusion
+  resetToHome();
+};
 
 // Theme
 const isDark = ref(localStorage.getItem('sakura_theme') === 'dark');
@@ -493,20 +570,23 @@ const loading = ref(true);
 const contentLoading = ref(false);
 const currentTool = ref<'reactivity' | 'lifecycle' | 'directives' | 'quiz' | null>(null);
 const showParticles = ref(true);
+const petals = ref<Petal[]>([]);
 const toastMessage = ref('');
 const lightboxImage = ref<string | null>(null);
+const isRawMode = ref(false);
+
+const selectionMenu = ref({ show: false, x: 0, y: 0 });
 
 const showSettings = ref(false);
 const userSettings = reactive({
   fontSize: localStorage.getItem('sakura_fontsize') || 'normal',
-  fontFamily: localStorage.getItem('sakura_fontfamily') || 'sans'
+  fontFamily: localStorage.getItem('sakura_fontfamily') || 'sans',
+  petalSpeed: localStorage.getItem('sakura_petalspeed') || 'slow' // 'slow' | 'fast'
 });
-
-const selectionRect = ref<{top: number, left: number} | null>(null);
-const shareQuote = ref('');
 
 watch(() => userSettings.fontSize, (v) => localStorage.setItem('sakura_fontsize', v));
 watch(() => userSettings.fontFamily, (v) => localStorage.setItem('sakura_fontfamily', v));
+watch(() => userSettings.petalSpeed, (v) => localStorage.setItem('sakura_petalspeed', v));
 
 // Computed
 const fontSizeClass = computed(() => {
@@ -517,9 +597,22 @@ const fontSizeClass = computed(() => {
   }
 });
 
+const speedMultiplier = computed(() => {
+  return userSettings.petalSpeed === 'fast' ? 0.5 : 1; 
+});
+
 const currentPath = computed(() => currentFile.value?.path || currentFolder.value?.path || '');
 
-const filteredFileSystem = computed(() => fileSystem.value);
+// Root Directory Logic based on Language
+const currentLangRoot = computed(() => {
+   const root = fileSystem.value.find(node => node.name === lang.value);
+   return root ? root.children : [];
+});
+
+const filteredFileSystem = computed(() => {
+  // Only show files under current language root
+  return currentLangRoot.value || [];
+});
 
 const filteredFlatFiles = computed(() => {
   const flatten = (nodes: FileNode[]): FileNode[] => {
@@ -530,11 +623,29 @@ const filteredFlatFiles = computed(() => {
     }
     return files;
   };
-  return flatten(fileSystem.value).sort((a, b) => new Date(b.lastModified || 0).getTime() - new Date(a.lastModified || 0).getTime());
+  // We only flatten the filtered system (current language), not the whole raw fileSystem
+  return flatten(filteredFileSystem.value).sort((a, b) => new Date(b.lastModified || 0).getTime() - new Date(a.lastModified || 0).getTime());
 });
 
 const labFolder = computed(() => {
-  return fileSystem.value.find(node => node.name === 'VUE学习笔记');
+  // New Logic: Find "VUE学习笔记" (zh) or "VUE Learning" (en) anywhere in the tree
+  const targetName = lang.value === 'zh' ? 'VUE学习笔记' : 'VUE Learning';
+  
+  const findFolderByName = (nodes: FileNode[]): FileNode | null => {
+      for (const node of nodes) {
+          if (node.type === NodeType.DIRECTORY && node.name.toLowerCase() === targetName.toLowerCase()) {
+              return node;
+          }
+          if (node.children) {
+              const found = findFolderByName(node.children);
+              if (found) return found;
+          }
+      }
+      return null;
+  }
+  
+  // Search from root file system, not just under currentLangRoot
+  return findFolderByName(fileSystem.value);
 });
 
 const sortedFolderChildren = computed(() => {
@@ -565,20 +676,12 @@ const renderedContent = computed(() => {
   // Image path rewriting logic
   if (currentFile.value.path) {
     const parentDir = currentFile.value.path.substring(0, currentFile.value.path.lastIndexOf('/'));
-    
-    // We prepend 'notes/' because raw content urls need to point to server path
     const serverPrefix = 'notes/'; 
 
-    // 1. Handle Markdown Images: ![alt](./path) or ![alt](../path) or ![alt](path)
-    // Supports ../ for assets folder
     rawContent = rawContent.replace(/!\[(.*?)\]\((?!http)(.*?)\)/g, (match, alt, relPath) => {
-      // Remove leading ./ if present
       let cleanPath = relPath.startsWith('./') ? relPath.slice(2) : relPath;
-      
       let newPath = '';
       if (cleanPath.startsWith('../')) {
-         // Handle parent dir traversal: notes/Folder/Sub/../assets/img.png -> notes/Folder/assets/img.png
-         // Browser resolves double dots in fetch URL automatically, we just need to prepend server prefix
          newPath = `${serverPrefix}${parentDir}/${cleanPath}`;
       } else {
          newPath = `${serverPrefix}${parentDir}/${cleanPath}`;
@@ -586,11 +689,8 @@ const renderedContent = computed(() => {
       return `![${alt}](${newPath})`;
     });
 
-    // 2. Handle HTML Img Tags: <img src="./path"> or <img src="path">
-    // Useful for sizing: <img src="img.png" width="50%">
     rawContent = rawContent.replace(/src="(\.\/)?([^"]+\.(png|jpg|jpeg|gif|webp|svg))"/g, (match, prefix, filename) => {
         if (filename.startsWith('http')) return match;
-        // Same logic: prepend path
         const newPath = `${serverPrefix}${parentDir}/${filename}`;
         return `src="${newPath}"`;
     });
@@ -607,7 +707,10 @@ const activeIndicatorTop = computed(() => {
 });
 
 const getCleanParentPath = (path: string) => {
-  const parent = path.split('/').slice(0, -1).join('/');
+  const parts = path.split('/');
+  // If path is zh/foo/bar.md, parent is zh/foo.
+  // We want to show relative to lang root.
+  const parent = parts.slice(0, -1).join('/');
   return parent || 'Root';
 };
 
@@ -628,19 +731,18 @@ const openFile = async (file: FileNode) => {
   currentFile.value = file;
   currentFolder.value = null;
   currentTool.value = null;
+  isRawMode.value = false;
   updateUrl(file.path);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  selectionMenu.value.show = false;
 
   if (!file.content) {
     contentLoading.value = true;
     try {
-      // Fetch from "notes/" prefix because we copied `notes/*` into `dist/notes/`
-      // But the file.path in JSON is relative to `notes/`
       const fetchPath = `notes/${file.path}`;
       const res = await fetch(fetchPath);
       if (res.ok) {
         file.content = await res.text();
-        // Since content loaded late, we must trigger TOC generation manually
         nextTick(() => generateToc());
       } else {
         file.content = "# Error\nCould not load file. " + res.statusText;
@@ -649,7 +751,6 @@ const openFile = async (file: FileNode) => {
       file.content = "# Error\nFailed to fetch content.";
     } finally {
       contentLoading.value = false;
-      // Force reactivity update
       currentFile.value = { ...file }; 
     }
   } else {
@@ -663,6 +764,7 @@ const openFolder = (folder: FileNode) => {
   currentTool.value = null;
   updateUrl(folder.path);
   if (viewMode.value === 'latest') viewMode.value = 'files';
+  selectionMenu.value.show = false;
 };
 
 const navigateToBreadcrumb = (path: string) => {
@@ -684,6 +786,7 @@ const switchViewMode = (mode: 'latest' | 'files' | 'lab') => {
   if (mode === 'lab' && !currentFile.value) {
     if (!currentTool.value) currentTool.value = 'quiz';
   }
+  selectionMenu.value.show = false;
 };
 
 const updateUrl = (path: string | null) => {
@@ -696,6 +799,7 @@ const resetToHome = () => {
   currentFile.value = null;
   currentFolder.value = null;
   viewMode.value = 'latest';
+  selectionMenu.value.show = false;
   updateUrl(null);
 };
 
@@ -718,53 +822,75 @@ const downloadSource = () => {
   }
 };
 
-// Particle Toggle
+// Selection Popup Logic
+const handleSelection = () => {
+  const selection = window.getSelection();
+  if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+    selectionMenu.value.show = false;
+    return;
+  }
+  
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+  
+  // Basic check to ensure we are inside the viewer
+  const viewer = document.getElementById('markdown-viewer');
+  if (!viewer || !viewer.contains(range.commonAncestorContainer)) {
+      selectionMenu.value.show = false;
+      return;
+  }
+
+  selectionMenu.value = {
+    show: true,
+    x: rect.left + rect.width / 2,
+    y: rect.top - 10
+  };
+};
+
+const applyFormat = (type: 'highlight' | 'underline') => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    
+    const range = selection.getRangeAt(0);
+    
+    // Safety check: surroundContents throws if range crosses node boundaries (e.g. partial paragraph selection)
+    try {
+        const span = document.createElement('span');
+        if (type === 'highlight') {
+            span.className = 'bg-yellow-200 dark:bg-yellow-800/60 rounded px-0.5 transition-colors shadow-sm';
+        } else if (type === 'underline') {
+            span.className = 'underline decoration-wavy decoration-sakura-500 underline-offset-4';
+        }
+        
+        range.surroundContents(span);
+        
+        // Clear UI
+        selection.removeAllRanges();
+        selectionMenu.value.show = false;
+    } catch (e) {
+        showToast(t.value.selection_error);
+    }
+};
+
+// Particle / Petal Logic
+const generatePetals = () => {
+  const newPetals: Petal[] = [];
+  // Create 16 random petals
+  for (let i = 0; i < 16; i++) {
+    newPetals.push({
+      left: Math.random() * 100, // 0-100%
+      size: Math.random() * 10 + 10, // 10-20px
+      duration: Math.random() * 5 + 10, // 10-15s base speed
+      delay: Math.random() * 10,
+      opacity: Math.random() * 0.5 + 0.3
+    });
+  }
+  petals.value = newPetals;
+};
+
 const toggleParticles = () => {
   showParticles.value = !showParticles.value;
-  const el = document.getElementById('petals');
-  if (el) el.style.display = showParticles.value ? 'block' : 'none';
 }
-
-// Selection Handling
-const handleTextSelection = () => {
-  const selection = window.getSelection();
-  if (selection && selection.toString().trim().length > 0) {
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    selectionRect.value = { top: rect.top - 10, left: rect.left + rect.width / 2 };
-    shareQuote.value = selection.toString();
-  } else {
-    selectionRect.value = null;
-  }
-};
-
-const highlightSelection = () => {
-  // execCommand is deprecated but widely supported for simple contenteditable-like actions
-  document.designMode = "on";
-  document.execCommand("BackColor", false, "rgba(255, 228, 100, 0.5)");
-  document.designMode = "off";
-  selectionRect.value = null;
-  window.getSelection()?.removeAllRanges();
-};
-
-const underlineSelection = () => {
-  document.designMode = "on";
-  document.execCommand("Underline", false, "");
-  document.designMode = "off";
-  selectionRect.value = null;
-  window.getSelection()?.removeAllRanges();
-};
-
-const copyQuoteToClipboard = () => {
-  // Enhanced formatting for Markdown Copy
-  const selection = shareQuote.value.trim();
-  const text = `> ${selection}\n\nVia [Sakura Notes](${window.location.href})`;
-  navigator.clipboard.writeText(text).then(() => {
-     showToast(t.value.quote_copied);
-     selectionRect.value = null;
-     window.getSelection()?.removeAllRanges();
-  });
-};
 
 // Lightbox logic
 const handleContentClick = (e: MouseEvent) => {
@@ -772,12 +898,13 @@ const handleContentClick = (e: MouseEvent) => {
   if (target.tagName === 'IMG') {
     lightboxImage.value = (target as HTMLImageElement).src;
   }
+  // Also dismiss menu on click
+  selectionMenu.value.show = false;
 };
 
 const generateToc = () => {
   if (!currentFile.value?.content) { toc.value = []; return; }
   const headers: TocItem[] = [];
-  // Fix: Handle CRLF and LF mixed line endings for better compatibility
   const lines = currentFile.value.content.split(/\r?\n/);
   let inCodeBlock = false;
   
@@ -785,11 +912,9 @@ const generateToc = () => {
     if (line.trim().startsWith('```')) inCodeBlock = !inCodeBlock;
     if (inCodeBlock) return;
     
-    // Improved Regex to be more robust
     const match = line.match(/^(#{1,3})\s+(.+)$/);
     if (match) {
       const text = match[2].trim();
-      // Generate safer ID
       const id = text.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w\-\u4e00-\u9fa5]+/g, ''); 
@@ -798,7 +923,6 @@ const generateToc = () => {
   });
   toc.value = headers;
   
-  // Re-attach scroll listener after DOM update
   nextTick(() => {
      const el = document.getElementById('scroll-container');
      if (el) {
@@ -814,11 +938,9 @@ const updateActiveHeader = () => {
   const scrollPosition = container.scrollTop;
   
   let active = '';
-  // Simple scroll spying
   for (const item of toc.value) {
     const el = document.getElementById(item.id);
     if (el) {
-       // 150px offset looks good for sticky headers
        if (el.offsetTop - 150 <= scrollPosition) {
          active = item.id;
        }
@@ -831,9 +953,8 @@ const scrollToHeader = (id: string) => {
   const el = document.getElementById(id);
   const container = document.getElementById('scroll-container');
   if (el && container) {
-     // Scroll container to element
      container.scrollTo({
-       top: el.offsetTop - 80, // Offset for navbar
+       top: el.offsetTop - 80,
        behavior: 'smooth'
      });
      activeHeaderId.value = id;
@@ -842,7 +963,18 @@ const scrollToHeader = (id: string) => {
 
 watch(currentFile, () => generateToc());
 
+// Listen for selection changes globally to hide menu if clicking elsewhere
 onMounted(async () => {
+  document.addEventListener('selectionchange', () => {
+      // Defer to allow mouseup to handle show logic, this is mainly for clearing
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) {
+          selectionMenu.value.show = false;
+      }
+  });
+
+  generatePetals(); // Initialize petals
+
   if (isDark.value) document.documentElement.classList.add('dark');
   
   try {
@@ -854,16 +986,15 @@ onMounted(async () => {
       if (targetPath) {
         const node = findNodeByPath(fileSystem.value, targetPath);
         if (node) {
-          // If accessing a lab note directly, try to set viewMode to lab
-          if (targetPath.includes('VUE学习笔记')) viewMode.value = 'lab';
+          if (targetPath.includes('VUE学习笔记') || targetPath.includes('VUE Learning')) viewMode.value = 'lab';
           else viewMode.value = 'files';
-          
           node.type === NodeType.FILE ? openFile(node) : openFolder(node);
         }
       }
     }
   } catch (e) {
-    fileSystem.value = MOCK_FILE_SYSTEM;
+    console.error("Failed to load file system", e);
+    fileSystem.value = [];
   } finally {
     loading.value = false;
   }
