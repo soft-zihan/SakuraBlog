@@ -2,7 +2,7 @@
 
 **v1.0**
 
-[中文文档 (Chinese)](./README_zh.md)
+[中文文档 (Chinese)](./blob/main/README_zh.md)
 
 This is a pure static personal blog system based on Vue 3 + Tailwind CSS, designed for GitHub Pages deployment.
 It requires no complex backend server, adopting a **Metadata Indexing + Runtime Fetching** architecture for an extremely lightweight static blog experience.
