@@ -92,6 +92,19 @@
                  <div class="text-[10px] text-purple-500 dark:text-purple-400">{{ t.lab_reactivity_desc }}</div>
                </div>
              </div>
+
+             <div 
+               @click="currentTool = 'directives'; currentFile = null; currentFolder = null;"
+               class="p-3 rounded-xl border border-teal-100 dark:border-teal-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-2 flex items-center gap-3 bg-teal-50/50 dark:bg-gray-800/30"
+               :class="{'ring-2 ring-teal-300 dark:ring-teal-700 bg-white dark:bg-gray-800': currentTool === 'directives'}"
+             >
+               <span class="text-xl">👁️</span>
+               <div class="flex-1">
+                 <div class="text-sm font-bold text-teal-900 dark:text-teal-300">{{ t.lab_directives }}</div>
+                 <div class="text-[10px] text-teal-500 dark:text-teal-400">{{ t.lab_directives_desc }}</div>
+               </div>
+             </div>
+
              <div 
                @click="currentTool = 'lifecycle'; currentFile = null; currentFolder = null;"
                class="p-3 rounded-xl border border-blue-100 dark:border-blue-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-4 flex items-center gap-3 bg-blue-50/50 dark:bg-gray-800/30"
@@ -104,17 +117,23 @@
                </div>
              </div>
 
-             <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_course }}</h3>
-             <FileTree 
-                v-if="labFolder && labFolder.children"
-                :nodes="labFolder.children" 
-                :expanded-paths="expandedFolders"
-                :current-path="currentPath"
-                @toggle-folder="toggleFolder"
-                @select-file="openFile"
-                @select-folder="openFolder"
-              />
-              <div v-else class="text-xs text-gray-400 italic px-2">{{ t.no_vue_notes }}</div>
+             <!-- Course Section with Error Handling -->
+             <div v-if="labFolder && labFolder.children && labFolder.children.length > 0">
+               <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_course }}</h3>
+               <FileTree 
+                  :nodes="labFolder.children" 
+                  :expanded-paths="expandedFolders"
+                  :current-path="currentPath"
+                  @toggle-folder="toggleFolder"
+                  @select-file="openFile"
+                  @select-folder="openFolder"
+                />
+             </div>
+              <!-- Fallback if folder missing, but don't show error, just show general files link -->
+              <div v-else class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-500 text-center">
+                 <p class="mb-2">Course notes not found.</p>
+                 <button @click="switchViewMode('files')" class="text-sakura-500 underline">Browse all files</button>
+              </div>
            </div>
         </div>
 
@@ -161,10 +180,10 @@
       <!-- Footer Info -->
       <div class="p-4 border-t border-sakura-100/50 dark:border-gray-700/50 flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
          <a href="https://github.com/soft-zihan" target="_blank" class="text-xs text-sakura-400 hover:text-sakura-600 dark:text-gray-500 dark:hover:text-sakura-400 flex items-center gap-2 transition-colors group">
-            <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             <span>soft-zihan</span>
          </a>
-         <span class="text-[10px] text-sakura-300 dark:text-gray-600 font-mono">v1.1</span>
+         <span class="text-[10px] text-sakura-300 dark:text-gray-600 font-mono">v1.2</span>
       </div>
     </aside>
 
@@ -187,7 +206,7 @@
              <span class="text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded-md">{{ t.tab_lab }}</span>
              <span class="mx-2 text-sakura-300 dark:text-gray-600">›</span>
              <span class="text-gray-500 dark:text-gray-400">
-                {{ currentTool === 'reactivity' ? t.lab_reactivity : (currentTool === 'quiz' ? t.lab_quiz : t.lab_lifecycle) }}
+                {{ currentTool === 'reactivity' ? t.lab_reactivity : (currentTool === 'quiz' ? t.lab_quiz : (currentTool === 'directives' ? t.lab_directives : t.lab_lifecycle)) }}
              </span>
           </template>
           <template v-else v-for="(item, index) in breadcrumbs" :key="item.path">
@@ -204,11 +223,8 @@
 
         <div class="flex gap-2 shrink-0 items-center">
           <!-- Particles Toggle -->
-           <button @click="toggleParticles" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center justify-center relative" :title="showParticles ? 'Hide petals' : 'Show petals'">
-             <span :class="{'opacity-100': showParticles, 'opacity-40 grayscale': !showParticles}">🌸</span>
-             <div v-if="!showParticles" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-               <div class="w-full h-0.5 bg-red-400 rotate-45"></div>
-             </div>
+           <button @click="toggleParticles" class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center relative group" :title="showParticles ? 'Hide petals' : 'Show petals'">
+             <span class="text-lg transition-all duration-300" :class="{'opacity-100 filter-none': showParticles, 'opacity-40 grayscale': !showParticles}">🌸</span>
            </button>
            <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
@@ -246,12 +262,13 @@
           <div v-if="viewMode === 'lab' && currentTool" class="w-full max-w-5xl mx-auto animate-fade-in">
              <LabReactivity v-if="currentTool === 'reactivity'" />
              <LabLifecycle v-if="currentTool === 'lifecycle'" />
+             <LabDirectives v-if="currentTool === 'directives'" />
              <LabQuizGame v-if="currentTool === 'quiz'" />
           </div>
 
           <!-- Folder View -->
           <div v-else-if="currentFolder" class="w-full max-w-6xl mx-auto">
-             <div class="flex items-center gap-4 mb-8 p-8 bg-white/60 dark:bg-gray-800/60 rounded-[2rem] border border-white dark:border-gray-700 shadow-sm backdrop-blur-md">
+             <div class="flex items-center gap-4 mb-8 p-8 bg-white/95 dark:bg-gray-800/95 rounded-[2rem] border border-white dark:border-gray-700 shadow-xl backdrop-blur-md">
                <span class="text-5xl bg-sakura-100 dark:bg-sakura-900/50 p-4 rounded-2xl shadow-inner text-sakura-500">📁</span>
                <div>
                  <h2 class="text-3xl font-bold text-sakura-900 dark:text-sakura-100">{{ currentFolder.name }}</h2>
@@ -263,7 +280,7 @@
                   v-for="child in sortedFolderChildren" 
                   :key="child.path"
                   @click="child.type === 'directory' ? openFolder(child) : openFile(child)"
-                  class="folder-card bg-white/60 dark:bg-gray-800/60 p-6 rounded-2xl shadow-sm border border-white/70 dark:border-gray-700 hover:shadow-xl hover:shadow-sakura-100/30 dark:hover:shadow-black/40 hover:bg-white dark:hover:bg-gray-800 hover:border-sakura-200 dark:hover:border-sakura-800 cursor-pointer transition-all duration-300 flex flex-col h-48 backdrop-blur-sm group relative overflow-hidden"
+                  class="folder-card bg-white/90 dark:bg-gray-800/90 p-6 rounded-2xl shadow-md border border-white/70 dark:border-gray-700 hover:shadow-xl hover:shadow-sakura-100/30 dark:hover:shadow-black/40 hover:bg-white dark:hover:bg-gray-800 hover:border-sakura-200 dark:hover:border-sakura-800 cursor-pointer transition-all duration-300 flex flex-col h-48 backdrop-blur-sm group relative overflow-hidden"
                >
                  <div class="absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br from-sakura-50 to-transparent dark:from-sakura-900/30 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
                  <div class="flex items-start justify-between mb-4 relative z-10">
@@ -282,7 +299,7 @@
 
           <!-- Note Content View -->
           <div v-else-if="currentFile" 
-             class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/70 dark:bg-gray-800/70 p-8 md:p-12 rounded-[2rem] shadow-sm border border-white/60 dark:border-gray-700 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-2xl transition-all duration-300 relative"
+             class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/95 dark:bg-gray-900/95 p-8 md:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-sakura-200/50 dark:border-gray-700 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-2xl transition-all duration-300 relative"
              :class="fontSizeClass"
           >
              <div v-if="contentLoading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
@@ -447,6 +464,7 @@ import type { FileNode, BreadcrumbItem, TocItem } from './types';
 import FileTree from './components/FileTree.vue';
 import LabReactivity from './components/LabReactivity.vue';
 import LabLifecycle from './components/LabLifecycle.vue';
+import LabDirectives from './components/LabDirectives.vue';
 import LabQuizGame from './components/LabQuizGame.vue';
 
 // i18n
@@ -473,7 +491,7 @@ const toc = ref<TocItem[]>([]);
 const activeHeaderId = ref<string>('');
 const loading = ref(true);
 const contentLoading = ref(false);
-const currentTool = ref<'reactivity' | 'lifecycle' | 'quiz' | null>(null);
+const currentTool = ref<'reactivity' | 'lifecycle' | 'directives' | 'quiz' | null>(null);
 const showParticles = ref(true);
 const toastMessage = ref('');
 const lightboxImage = ref<string | null>(null);
@@ -738,9 +756,11 @@ const underlineSelection = () => {
 };
 
 const copyQuoteToClipboard = () => {
-  const text = `> ${shareQuote.value}\n\nVia Sakura Notes`;
+  // Enhanced formatting for Markdown Copy
+  const selection = shareQuote.value.trim();
+  const text = `> ${selection}\n\nVia [Sakura Notes](${window.location.href})`;
   navigator.clipboard.writeText(text).then(() => {
-     showToast(t.value.toast_copied);
+     showToast(t.value.quote_copied);
      selectionRect.value = null;
      window.getSelection()?.removeAllRanges();
   });
@@ -757,7 +777,8 @@ const handleContentClick = (e: MouseEvent) => {
 const generateToc = () => {
   if (!currentFile.value?.content) { toc.value = []; return; }
   const headers: TocItem[] = [];
-  const lines = currentFile.value.content.split('\n');
+  // Fix: Handle CRLF and LF mixed line endings for better compatibility
+  const lines = currentFile.value.content.split(/\r?\n/);
   let inCodeBlock = false;
   
   lines.forEach(line => {
@@ -833,7 +854,10 @@ onMounted(async () => {
       if (targetPath) {
         const node = findNodeByPath(fileSystem.value, targetPath);
         if (node) {
+          // If accessing a lab note directly, try to set viewMode to lab
           if (targetPath.includes('VUE学习笔记')) viewMode.value = 'lab';
+          else viewMode.value = 'files';
+          
           node.type === NodeType.FILE ? openFile(node) : openFolder(node);
         }
       }

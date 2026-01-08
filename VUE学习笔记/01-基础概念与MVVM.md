@@ -1,64 +1,91 @@
-# 基础概念：Vue 与 MVVM
+# 01. 基础概念：Vue 与 MVVM 🌸
 
-Vue.js 是一套用于构建用户界面的 **渐进式 JavaScript 框架**。它的核心目标是通过尽可能简单的 API 实现响应的数据绑定和组合的视图组件。
+> Vue (读音 /vjuː/，类似于 **view**) 是一套用于构建用户界面的**渐进式框架**。
 
-## 1. 为什么需要框架？
+## 1. 为什么选择 Vue?
 
-在原生 JavaScript 开发中，我们经常面临以下问题，而 Vue 致力于解决这些痛点：
+在传统的前端开发（Vanilla JS / jQuery）中，我们经常面临以下痛点：
 
-### 1.1 繁琐的 DOM 操作
-在原生 JS (Vanilla JS) 中，修改页面内容需要频繁调用 `document.getElementById` 或 `querySelector`，然后手动设置 `innerHTML`。
+### 1.1 痛点：DOM 操作繁琐
+要修改页面上的一个文字，你需要：
+1. `document.querySelector` 找到元素。
+2. 修改 `innerText` 或 `innerHTML`。
+3. 如果数据变了，要手动再次修改。
+
 ```javascript
-// 原生 JS 写法
-const box = document.querySelector('.box');
-box.innerText = 'Hello';
-box.style.color = 'red';
+// ❌ 传统写法：命令式编程
+const div = document.querySelector('#app');
+div.innerText = 'Hello World';
+div.style.color = 'red';
 ```
-当页面交互变复杂时，代码中会充斥着大量的 DOM 操作，难以维护且容易出错（例如操作了不存在的 DOM）。
 
-### 1.2 状态同步困难
-如果一个数据（比如购物车数量）在页面的 Header、Sidebar 和 Main 区域都要显示，原生 JS 需要你手动去更新这三个地方。一旦漏掉一个，页面显示就会不一致。
-
-### 1.3 代码组织混乱
-原生开发中，HTML、CSS 和 JS 往往是分离的，或者逻辑混杂在一起。Vue 提出了 **组件化 (Component)** 的概念，把一个功能块（如导航栏）封装成一个独立的 `.vue` 文件，包含它自己的结构、样式和逻辑。
-
-## 2. Vue 的解决方案
-
-Vue 通过 **声明式渲染** 和 **MVVM 模式** 解决了上述问题。
+### 1.2 解决方案：声明式渲染
+Vue 允许你采用**声明式**的方式描述你的 UI。你只需要告诉 Vue "我想要显示什么"，而不需要告诉它 "怎么一步步去改 DOM"。
 
 ```html
-<!-- Vue 写法 -->
+<!-- ✅ Vue 写法：声明式编程 -->
 <template>
-  <div class="box" :style="{ color: textColor }">{{ message }}</div>
+  <div :style="{ color: textColor }">{{ message }}</div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-const message = ref('Hello');
+const message = ref('Hello World');
 const textColor = ref('red');
 </script>
 ```
 
-你只需要改变 `message.value`，界面会自动更新。你不需要关心 DOM 是怎么被修改的。
+当 `message.value` 改变时，Vue 会自动帮你更新 DOM。
 
-## 3. MVVM 架构模式
+## 2. 什么是 MVVM?
 
-Vue 的设计遵循 **MVVM (Model-View-ViewModel)** 模式。
+Vue 的设计受到了 **MVVM (Model-View-ViewModel)** 架构模式的启发。
 
-*   **Model (模型)**:
-    JavaScript 中的数据状态（如 `ref`, `reactive` 定义的对象）。它是真理的来源。
+### Model (模型)
+**数据层**。在 Vue 3 中，这通常指你在 `<script setup>` 中定义的响应式数据（`ref`, `reactive`）。
+*它是真理的唯一来源*。
 
-*   **View (视图)**:
-    用户看到的界面（DOM）。
+### View (视图)
+**视图层**。即用户看到的 DOM 界面。
 
-*   **ViewModel (视图模型)**:
-    Vue 实例本身。它是连接 Model 和 View 的桥梁。
-    *   它监听 Model 的变化，自动更新 View（数据绑定）。
-    *   它监听 View 的交互（如点击），自动更新 Model（事件监听）。
+### ViewModel (视图模型)
+**Vue 实例本身**。它是连接 Model 和 View 的桥梁。
+1. **Data Bindings (数据绑定)**: 当 Model 变化，ViewModel 自动更新 View。
+2. **DOM Listeners (事件监听)**: 当 View 触发事件（如点击），ViewModel 自动修改 Model。
 
-## 总结
+```mermaid
+graph LR
+A[View (DOM)] -- Events --> B(ViewModel (Vue))
+B -- Data Bindings --> A
+B <--> C[Model (JS Data)]
+```
 
-Vue 的核心优势在于：
-1.  **解放双手**：不再手动操作 DOM。
-2.  **数据驱动**：关注数据本身，而不是界面的渲染过程。
-3.  **组件化**：构建可复用、易维护的大型应用。
+## 3. 渐进式框架
+
+Vue 被称为"渐进式"框架，意味着你可以：
+- **作为库使用**：只在一个简单的 HTML 页面引入 Vue CDN，控制一个小小的挂件。
+- **作为框架使用**：使用 Vue CLI / Vite 构建大型单页应用 (SPA)。
+
+## 4. 单文件组件 (SFC)
+
+Vue 项目通常使用 `.vue` 文件，它将逻辑、结构和样式封装在一起：
+
+```vue
+<script setup>
+  // 逻辑 (JavaScript)
+  import { ref } from 'vue'
+  const count = ref(0)
+</script>
+
+<template>
+  <!-- 结构 (HTML) -->
+  <button @click="count++">Count is: {{ count }}</button>
+</template>
+
+<style scoped>
+  /* 样式 (CSS) */
+  button { font-weight: bold; }
+</style>
+```
+
+这种模式让代码维护变得非常简单，实现了**关注点分离**。

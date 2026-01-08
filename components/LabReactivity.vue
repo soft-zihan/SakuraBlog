@@ -1,11 +1,19 @@
 <template>
-  <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-2xl border border-sakura-200 dark:border-gray-700 shadow-sm backdrop-blur-md transition-colors">
+  <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-2xl border border-sakura-200 dark:border-gray-700 shadow-sm backdrop-blur-md transition-colors relative">
+    <!-- View Source Toggle -->
+    <button 
+      @click="showCode = !showCode" 
+      class="absolute top-4 right-4 text-xs font-bold text-sakura-500 hover:text-sakura-600 bg-sakura-50 dark:bg-gray-900 px-3 py-1 rounded-full transition-colors"
+    >
+      {{ showCode ? 'Hide Code' : 'View Code' }}
+    </button>
+
     <h3 class="text-xl font-bold text-sakura-800 dark:text-sakura-300 mb-4 flex items-center gap-2">
       🧪 Reactivity & Computed
     </h3>
     <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Type in the JS box to see how Data drives the View and how Computed properties update automatically.</p>
 
-    <div class="flex flex-col gap-6">
+    <div v-if="!showCode" class="flex flex-col gap-6">
       
       <!-- Top Row: Data Binding -->
       <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
@@ -59,7 +67,34 @@
             </div>
          </div>
       </div>
+    </div>
 
+    <!-- Code View -->
+    <div v-else class="animate-fade-in">
+      <div class="bg-[#1e1e1e] p-4 rounded-xl overflow-x-auto text-xs font-mono text-gray-300 leading-relaxed shadow-inner">
+<pre>&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- View updates automatically --&gt;
+    &lt;h1&gt;Hello, {{ name }}!&lt;/h1&gt;
+    &lt;p&gt;Uppercase: {{ uppercaseName }}&lt;/p&gt;
+    
+    &lt;!-- v-model binds input to data --&gt;
+    &lt;input v-model="name" /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { ref, computed } from 'vue';
+
+// 1. Reactive State
+const name = ref('Vue');
+
+// 2. Computed Property (Updates when 'name' changes)
+const uppercaseName = computed(() => {
+  return name.value.toUpperCase();
+});
+&lt;/script&gt;</pre>
+      </div>
     </div>
   </div>
 </template>
@@ -69,6 +104,7 @@ import { ref, computed, watch } from 'vue';
 
 const name = ref('Vue');
 const isUpdating = ref(false);
+const showCode = ref(false);
 
 const uppercaseName = computed(() => name.value.toUpperCase());
 

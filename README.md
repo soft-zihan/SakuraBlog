@@ -1,6 +1,6 @@
 # 🌸 Sakura Notes (Static Vue Blog)
 
-**v1.1**
+**v1.0**
 
 [中文文档 (Chinese)](./README_zh.md)
 
@@ -21,7 +21,7 @@ It requires no complex backend server, adopting a **Metadata Indexing + Runtime 
 - **i18n Support**: Built-in English/Chinese switching.
 - **Deep Interaction**:
   - **Temporary Highlight**: Select text to highlight.
-  - **Smart Copy**: Copy selection as Markdown quote (`> text`).
+  - **Smart Copy**: Copy selection as Markdown quote (`> text`) automatically.
 
 ---
 
@@ -39,4 +39,16 @@ It requires no complex backend server, adopting a **Metadata Indexing + Runtime 
 1. **Content**: Place all your Markdown notes inside the `notes/` folder at the root of the project. You can create subfolders there (e.g., `notes/Vue/Basic.md`).
 2. **Deploy**: Push to GitHub. The Action will build the site and deploy.
 
-**Contributing**: PRs are welcome! If you have cool Vue tricks or new game ideas for the Lab, feel free to submit. 🌸
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! If you have any improvements, new features, or bug fixes, please submit a **Pull Request**.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+Enjoy writing! 🌸
