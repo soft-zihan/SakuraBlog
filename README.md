@@ -1,9 +1,8 @@
 # 🌸 Sakura Notes
 
-<kbd>
-  <img title="中文 (Simplified)" alt="中文 (Simplified)" src="https://cdn.jsdelivr.net/gh/hampusborgos/country-flags@main/svg/cn.svg" width="22">
-  <span>中文 (Simplified)</span>
-</kbd>
+<div align="center">
+  [简体中文](README_zh.md)
+</div>
 
 > **v1.0**
 

@@ -1,4 +1,3 @@
-
 # 03. 指令全家桶 (Directives) 🌸
 
 > **学习目标**: 掌握 Vue 常用指令 `v-for`, `v-bind`, `v-model`, `v-on`, `v-if/show` 的用法。
@@ -69,14 +68,14 @@ Vue 的模板语法中最强大的部分就是指令 (带有 `v-` 前缀的特�
 ## 5. v-if vs v-show: 条件渲染
 
 *   **v-if**: **真正的销毁/重建**。条件为假时，DOM 元素根本不存在。
-    *   *实战*: `LabVueList.vue` 中，根据性别数据 (`1:男, 2:女`) 显示不同颜色的标签：
+    *   *实战*: [[LabVueList.vue]](/LabVueList.vue) 中，根据性别数据 (`1:男, 2:女`) 显示不同颜色的标签：
         ```html
         <span v-if="item.gender === 1">男</span>
         <span v-else-if="item.gender === 2">女</span>
         <span v-else>其他</span>
         ```
 *   **v-show**: **切换 CSS** `display: none`。元素始终在 DOM 中，只是看不见。
-    *   *实战*: `LabVueList.vue` 中，根据职位数据 (`1:讲师`) 显示文本：
+    *   *实战*: [[LabVueList.vue]](/LabVueList.vue) 中，根据职位数据 (`1:讲师`) 显示文本：
         ```html
         <span v-show="item.job === 1">讲师</span>
         ```

@@ -1,4 +1,3 @@
-
 # 03. The Directive Family 🌸
 
 > **Goal**: Master common directives: `v-for`, `v-bind`, `v-model`, `v-on`, `v-if/show`.
@@ -67,13 +66,13 @@ Replaces `addEventListener`.
 ## 5. v-if vs v-show
 
 *   **v-if**: **Real Destroy/Create**.
-    *   *Example*: `LabVueList.vue` - Showing "Male" (1) vs "Female" (2) tags.
+    *   *Example*: [[LabVueList.vue]](file:///LabVueList.vue) - Showing "Male" (1) vs "Female" (2) tags.
         ```html
         <span v-if="item.gender === 1">Male</span>
         <span v-else-if="item.gender === 2">Female</span>
         ```
 *   **v-show**: **CSS Toggle** (`display: none`).
-    *   *Example*: `LabVueList.vue` - Showing Job Title.
+    *   *Example*: [[LabVueList.vue]](file:///LabVueList.vue) - Showing Job Title.
         ```html
         <span v-show="item.job === 1">Lecturer</span>
         ```

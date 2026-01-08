@@ -1,4 +1,3 @@
-
 # 01. Web Standards & Vue Architecture 🌸
 
 > **Goal**: Understand the Web Standards Triad, Vue as a Progressive Framework, and SPA bootstrapping.
@@ -10,7 +9,7 @@ Modern web development relies on three pillars. Here is how they apply to **Saku
 
 1.  **HTML (Structure)**: 
     *   *Theory*: The skeleton. Defines WHAT is on the page.
-    *   *Project*: Check root `index.html`. It's nearly empty (`<div id="app"></div>`). Why? Because Vue is a **SPA (Single Page Application)**. It takes over this div and injects content dynamically via JS.
+    *   *Project*: Check root [index.html](/index.html). It's nearly empty (`<div id="app"></div>`). Why? Because Vue is a **SPA (Single Page Application)**. It takes over this div and injects content dynamically via JS.
 2.  **CSS (Presentation)**: 
     *   *Theory*: The skin. Defines HOW it looks.
     *   *Project*: We use **Tailwind CSS** (e.g., `bg-sakura-50`) and component `<style>` tags to define the pink aesthetics and animations.
@@ -40,7 +39,7 @@ const fileSystem = ref([]);
 
 ## 3. Bootstrapping
 
-Starts at `index.tsx`:
+Starts at [index.tsx](/index.tsx):
 
 ```typescript
 import { createApp } from 'vue'
@@ -54,7 +53,7 @@ app.mount('#app');
 
 ## 4. Single File Component (SFC)
 
-`components/AppSidebar.vue` demonstrates the standard `.vue` format:
+[[components/AppSidebar.vue]](file:///components/AppSidebar.vue) demonstrates the standard `.vue` format:
 
 *   **`<template>`**: HTML Structure.
 *   **`<script setup>`**: JS Logic.
