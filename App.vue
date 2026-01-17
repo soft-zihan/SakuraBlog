@@ -1,12 +1,35 @@
 
 <template>
   <!-- Dynamic Petals Container -->
-  <PetalBackground v-if="showParticles" :speed="userSettings.petalSpeed" :isDark="isDark" />
+  <PetalBackground v-if="appStore.showParticles" :speed="appStore.userSettings.petalSpeed" :isDark="appStore.isDark" />
 
-  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500" :class="[userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', isDark ? 'dark' : '']">
+  <!-- Global Audio Player -->
+  <GlobalAudio />
+
+  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
     
+    <!-- Mobile Menu Button -->
+    <button 
+      @click="sidebarOpen = !sidebarOpen"
+      class="md:hidden fixed top-4 left-4 z-50 p-2 bg-white/80 dark:bg-gray-800/80 rounded-xl shadow-lg backdrop-blur"
+    >
+      <svg class="w-6 h-6 text-sakura-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path v-if="!sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div 
+      v-if="sidebarOpen" 
+      @click="sidebarOpen = false"
+      class="md:hidden fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
+    />
+
     <!-- Left Sidebar: Navigation -->
     <AppSidebar 
+      :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0']"
+      class="fixed md:relative z-40 transition-transform duration-300 ease-out"
       :lang="lang"
       :t="t"
       v-model:viewMode="viewMode"
@@ -26,12 +49,13 @@
       @toggle-folder="toggleFolder"
       @select-file="openFile"
       @select-folder="openFolder"
+      @open-search="showSearch = true"
     />
 
     <!-- Main Content Wrapper -->
     <main class="flex-1 flex flex-col h-full overflow-hidden relative isolate">
       <!-- Wallpaper Layer (behind decorations, excluding sidebar) -->
-      <WallpaperLayer :is-dark="isDark" :light-url="wallpaperLightUrl" :dark-url="wallpaperDarkUrl" />
+      <WallpaperLayer :is-dark="appStore.isDark" :light-url="wallpaperLightUrl" :dark-url="wallpaperDarkUrl" :mode="appStore.userSettings.bannerMode" />
 
       <!-- Decorative Background Elements -->
       <div class="absolute inset-0 z-[-1] overflow-hidden pointer-events-none">
@@ -48,13 +72,16 @@
         :view-mode="viewMode"
         :current-tool="currentTool"
         :current-file="currentFile"
-        v-model:showParticles="showParticles"
+        v-model:showParticles="appStore.showParticles"
         v-model:isRawMode="isRawMode"
         @reset="resetToHome"
         @navigate="navigateToBreadcrumb"
         @copy-link="copyLink"
         @download="downloadSource"
         @open-settings="showSettings = true"
+        @open-search="showSearch = true"
+        @open-music="showMusicPlayer = true"
+        @open-write="showWriteEditor = true"
       />
 
       <!-- Content Area -->
@@ -120,10 +147,34 @@
                </div>
              </div>
 
-             <!-- Header -->
-             <div class="mb-8 border-b border-gray-100 dark:border-gray-700 pb-6 flex justify-between items-end">
-                 <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 tracking-tight leading-tight">{{ currentFile.name.replace('.md', '') }}</h1>
-                 <span v-if="currentFile.isSource" class="bg-gray-100 dark:bg-gray-700 text-gray-500 px-3 py-1 rounded text-xs font-mono">Read Only</span>
+             <!-- Header with Like/Favorite buttons -->
+             <div class="mb-8 border-b border-gray-100 dark:border-gray-700 pb-6">
+                 <div class="flex justify-between items-start">
+                   <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 tracking-tight leading-tight flex-1">{{ currentFile.name.replace('.md', '') }}</h1>
+                   <span v-if="currentFile.isSource" class="bg-gray-100 dark:bg-gray-700 text-gray-500 px-3 py-1 rounded text-xs font-mono">Read Only</span>
+                 </div>
+                 <!-- Article Actions -->
+                 <div class="flex items-center gap-4 mt-4" v-if="!currentFile.isSource">
+                   <button 
+                     @click="handleLike"
+                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all"
+                     :class="articleStore.isLiked(currentFile.path) ? 'bg-sakura-100 dark:bg-sakura-900/30 text-sakura-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-sakura-50'"
+                   >
+                     <span>{{ articleStore.isLiked(currentFile.path) ? '❤️' : '🤍' }}</span>
+                     <span>{{ articleStore.getLikes(currentFile.path) }}</span>
+                   </button>
+                   <button 
+                     @click="articleStore.toggleFavorite(currentFile.path)"
+                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all"
+                     :class="articleStore.isFavorited(currentFile.path) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-amber-50'"
+                   >
+                     <span>{{ articleStore.isFavorited(currentFile.path) ? '⭐' : '☆' }}</span>
+                     <span>{{ t.favorite }}</span>
+                   </button>
+                   <span class="text-xs text-gray-400 ml-auto">
+                     📝 {{ currentFile.content?.length || 0 }} {{ t.words }}
+                   </span>
+                 </div>
              </div>
 
             <!-- Markdown Content -->
@@ -145,6 +196,14 @@
               <span class="italic">Sakura Notes</span>
               <span>{{ t.updated }}: {{ formatDate(currentFile.lastModified) }}</span>
             </div>
+
+            <!-- Comments Section -->
+            <GiscusComments 
+              v-if="!currentFile.isSource"
+              :path="currentFile.path"
+              :lang="lang"
+              :is-dark="appStore.isDark"
+            />
           </div>
         </div>
 
@@ -246,9 +305,9 @@
     </div>
 
     <!-- Toast Notification -->
-    <div v-if="toastMessage" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[100] animate-fade-in">
+    <div v-if="appStore.toastMessage" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[100] animate-fade-in">
        <div class="bg-gray-800/90 dark:bg-white/90 text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl backdrop-blur font-medium text-sm flex items-center gap-2">
-         <span>✅</span> {{ toastMessage }}
+         <span>✅</span> {{ appStore.toastMessage }}
        </div>
     </div>
 
@@ -257,16 +316,40 @@
       v-if="showSettings" 
       @close="showSettings = false"
       :t="t"
-      :is-dark="isDark"
-      :settings="userSettings"
+      :is-dark="appStore.isDark"
+      :settings="appStore.userSettings"
       @toggle-theme="toggleTheme"
+    />
+
+    <!-- Search Modal -->
+    <SearchModal
+      v-if="showSearch"
+      @close="showSearch = false"
+      :t="t"
+      :files="filteredFlatFiles"
+      @select="handleSearchSelect"
+    />
+
+    <!-- Music Player Modal -->
+    <MusicPlayer
+      v-if="showMusicPlayer"
+      @close="showMusicPlayer = false"
+      :t="t"
+    />
+
+    <!-- Write Editor Modal -->
+    <WriteEditor
+      v-if="showWriteEditor"
+      @close="showWriteEditor = false"
+      :t="t"
+      :lang="lang"
     />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, reactive, nextTick } from 'vue';
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { I18N } from './constants';
 import { NodeType } from './types';
 import type { FileNode, BreadcrumbItem, TocItem } from './types';
@@ -279,18 +362,33 @@ import WallpaperLayer from './components/WallpaperLayer.vue';
 import AppSidebar from './components/AppSidebar.vue';
 import AppHeader from './components/AppHeader.vue';
 import FolderView from './components/FolderView.vue';
+import GlobalAudio from './components/GlobalAudio.vue';
+import MusicPlayer from './components/MusicPlayer.vue';
+import SearchModal from './components/SearchModal.vue';
+import WriteEditor from './components/WriteEditor.vue';
+import GiscusComments from './components/GiscusComments.vue';
 import { marked } from 'marked';
 
-// i18n with Persistence
-const savedLang = localStorage.getItem('sakura_lang');
-const lang = ref<'en' | 'zh'>((savedLang === 'en' || savedLang === 'zh') ? savedLang : 'zh');
+// Pinia Stores
+import { useAppStore } from './stores/appStore';
+import { useArticleStore } from './stores/articleStore';
+import { useMusicStore } from './stores/musicStore';
+
+const appStore = useAppStore();
+const articleStore = useArticleStore();
+const musicStore = useMusicStore();
+
+// i18n with Persistence (from store)
+const lang = computed({
+  get: () => appStore.lang,
+  set: (val) => appStore.setLang(val)
+});
 const t = computed(() => I18N[lang.value]);
 
 const toggleLang = async () => {
   const oldLang = lang.value;
   const newLang = oldLang === 'en' ? 'zh' : 'en';
-  lang.value = newLang;
-  localStorage.setItem('sakura_lang', newLang);
+  appStore.setLang(newLang);
   
   // Preserve current state during language switch
   // 1. If in lab mode, stay in lab mode (LabDashboard is language-aware)
@@ -333,11 +431,9 @@ const toggleLang = async () => {
   // No action needed, UI will update automatically
 };
 
-// Theme
-const isDark = ref(localStorage.getItem('sakura_theme') === 'dark');
+// Theme (using store)
 const toggleTheme = (val: boolean) => {
-  isDark.value = val;
-  localStorage.setItem('sakura_theme', val ? 'dark' : 'light');
+  appStore.setDark(val);
   if (val) document.documentElement.classList.add('dark');
   else document.documentElement.classList.remove('dark');
 };
@@ -353,10 +449,15 @@ const activeHeaderId = ref<string>('');
 const loading = ref(true);
 const contentLoading = ref(false);
 const currentTool = ref<'dashboard' | 'event-handling' | 'slot' | null>(null);
-const showParticles = ref(true);
-const toastMessage = ref('');
 const lightboxImage = ref<string | null>(null);
 const isRawMode = ref(false);
+
+// Modal States
+const showSettings = ref(false);
+const showSearch = ref(false);
+const showMusicPlayer = ref(false);
+const showWriteEditor = ref(false);
+const sidebarOpen = ref(false);
 
 // Source Code Modal State
 const showCodeModal = ref(false);
@@ -365,24 +466,27 @@ const codeModalTitle = ref('');
 
 const selectionMenu = ref({ show: false, x: 0, y: 0 });
 
-const showSettings = ref(false);
-const userSettings = reactive({
-  fontSize: localStorage.getItem('sakura_fontsize') || 'normal',
-  fontFamily: localStorage.getItem('sakura_fontfamily') || 'sans',
-  petalSpeed: localStorage.getItem('sakura_petalspeed') || 'slow' // 'slow' | 'fast'
-});
-
 // Wallpaper URLs (user to place files in project; hardcoded paths)
 const wallpaperLightUrl = '/image/wallpaper-light.jpg';
 const wallpaperDarkUrl = '/image/wallpaper-dark.jpg';
 
-watch(() => userSettings.fontSize, (v) => localStorage.setItem('sakura_fontsize', v));
-watch(() => userSettings.fontFamily, (v) => localStorage.setItem('sakura_fontfamily', v));
-watch(() => userSettings.petalSpeed, (v) => localStorage.setItem('sakura_petalspeed', v));
+// Keyboard Shortcuts (Cmd+K for search)
+const handleKeydown = (e: KeyboardEvent) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    showSearch.value = true;
+  }
+  if (e.key === 'Escape') {
+    showSearch.value = false;
+    showMusicPlayer.value = false;
+    showWriteEditor.value = false;
+    sidebarOpen.value = false;
+  }
+};
 
 // Computed
 const fontSizeClass = computed(() => {
-  switch(userSettings.fontSize) {
+  switch(appStore.userSettings.fontSize) {
     case 'small': return 'text-sm lg:text-base leading-relaxed';
     case 'large': return 'text-xl lg:text-2xl leading-loose';
     default: return 'text-base lg:text-lg leading-loose';
@@ -682,8 +786,7 @@ const resetToHome = () => {
 };
 
 const showToast = (msg: string) => {
-  toastMessage.value = msg;
-  setTimeout(() => toastMessage.value = '', 2000);
+  appStore.showToast(msg);
 }
 
 const copyLink = () => navigator.clipboard.writeText(window.location.href).then(() => showToast(t.value.link_copied));
@@ -702,6 +805,20 @@ const downloadSource = () => {
 
 const copyCodeContent = () => {
     navigator.clipboard.writeText(codeModalContent.value).then(() => showToast(t.value.toast_copied));
+};
+
+// Handle search selection
+const handleSearchSelect = (file: FileNode) => {
+  showSearch.value = false;
+  sidebarOpen.value = false;
+  openFile(file);
+};
+
+// Handle like action
+const handleLike = () => {
+  if (currentFile.value) {
+    articleStore.toggleLike(currentFile.value.path);
+  }
 };
 
 // Selection Popup Logic
@@ -890,6 +1007,9 @@ watch(currentFile, async () => {
 });
 
 onMounted(async () => {
+  // Keyboard shortcuts
+  document.addEventListener('keydown', handleKeydown);
+
   document.addEventListener('selectionchange', () => {
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed) {
@@ -897,10 +1017,13 @@ onMounted(async () => {
       }
   });
 
-  if (isDark.value) document.documentElement.classList.add('dark');
+  if (appStore.isDark) document.documentElement.classList.add('dark');
   
   // Setup marked renderer
   setupMarkedRenderer();
+
+  // Initialize music store (load playlist)
+  musicStore.loadPlaylist();
   
   try {
     // Explicitly using ./files.json to ensure relative fetch
@@ -934,5 +1057,9 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
 });
 </script>

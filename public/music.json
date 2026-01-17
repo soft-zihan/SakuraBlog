@@ -1,0 +1,12 @@
+{
+  "tracks": [
+    {
+      "id": "1",
+      "title": "示例音乐",
+      "artist": "未知艺术家",
+      "cover": "/image/music-default.jpg",
+      "url": "/music/sample.mp3",
+      "lrc": ""
+    }
+  ]
+}

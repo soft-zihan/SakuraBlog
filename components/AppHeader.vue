@@ -26,7 +26,39 @@
       </template>
     </div>
 
-    <div class="flex gap-2 shrink-0 items-center">
+    <div class="flex gap-1 md:gap-2 shrink-0 items-center">
+      <!-- Search Button (Cmd+K) -->
+      <button 
+        @click="$emit('open-search')" 
+        class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 hover:text-sakura-600 transition-all text-sm"
+        title="Search (⌘K)"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span class="hidden md:inline">{{ t.search_placeholder }}</span>
+        <kbd class="hidden md:inline px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded text-xs font-mono">⌘K</kbd>
+      </button>
+
+      <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1 hidden md:block"></div>
+
+      <!-- Music Button -->
+      <button 
+        @click="$emit('open-music')" 
+        class="p-2 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 rounded-lg transition-colors relative group"
+        :title="t.music_player"
+      >
+        <span class="text-lg">🎵</span>
+        <span v-if="musicStore.isPlaying" class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+      </button>
+
+      <!-- Write Button -->
+      <button 
+        @click="$emit('open-write')" 
+        class="p-2 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 rounded-lg transition-colors"
+        :title="t.write_title"
+      >
+        <span class="text-lg">✏️</span>
+      </button>
+
       <!-- Particles Toggle -->
        <button @click="$emit('update:showParticles', !showParticles)" class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center relative group" :title="showParticles ? 'Hide petals' : 'Show petals'">
          <span class="text-lg transition-all duration-300" :class="{'opacity-100 filter-none': showParticles, 'opacity-40 grayscale': !showParticles}">🌸</span>
@@ -43,7 +75,7 @@
         <button @click="$emit('copy-link')" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold" :title="t.copy_link">
           <span class="text-lg">🔗</span>
         </button>
-        <button @click="$emit('download')" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold" :title="t.download">
+        <button @click="$emit('download')" class="hidden md:flex p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors items-center gap-2 text-xs font-bold" :title="t.download">
           <span>DL</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         </button>
@@ -60,6 +92,9 @@
 
 <script setup lang="ts">
 import type { BreadcrumbItem, FileNode } from '../types';
+import { useMusicStore } from '../stores/musicStore';
+
+const musicStore = useMusicStore();
 
 defineProps<{
   lang: string;
@@ -79,6 +114,9 @@ defineEmits([
   'update:isRawMode',
   'copy-link',
   'download',
-  'open-settings'
+  'open-settings',
+  'open-search',
+  'open-music',
+  'open-write'
 ]);
 </script>

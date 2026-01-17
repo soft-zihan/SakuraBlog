@@ -213,7 +213,8 @@ const emit = defineEmits([
   'select-tool',
   'toggle-folder',
   'select-file',
-  'select-folder'
+  'select-folder',
+  'open-search'
 ]);
 
 // Avatar Logic: Prefer external, fallback to local

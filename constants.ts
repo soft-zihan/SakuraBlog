@@ -1,5 +1,19 @@
 
 
+// Giscus Configuration (get values from https://giscus.app)
+export const GISCUS_CONFIG = {
+  repo: 'soft-zihan/soft-zihan.github.io',
+  repoId: '', // Fill from giscus.app
+  category: 'Announcements',
+  categoryId: '' // Fill from giscus.app
+}
+
+// Umami Configuration (optional)
+export const UMAMI_CONFIG = {
+  websiteId: '', // Fill from Umami dashboard
+  scriptUrl: 'https://cloud.umami.is/script.js'
+}
+
 export const I18N = {
   en: {
     loading: "Loading Sakura Notes...",
@@ -12,6 +26,28 @@ export const I18N = {
     lab_tools: "Visual Playground",
     lab_resources: "Learning Resources",
     lab_course: "Vue Ninja Training (Project Based)",
+    
+    // New v1.1 strings
+    search_title: "Search Notes",
+    search_no_results: "No results found",
+    search_try_different: "Try different keywords",
+    music_player: "Music Player",
+    music_playlist: "Playlist",
+    music_request: "Request a song",
+    music_no_tracks: "No tracks",
+    write_title: "Writing Studio",
+    write_publish: "Publish to GitHub",
+    write_draft: "Save Draft",
+    write_token_config: "Configure GitHub Token",
+    comments_title: "Comments",
+    banner_settings: "Banner Settings",
+    banner_normal: "Normal",
+    banner_fullscreen: "Fullscreen",
+    banner_background: "Background",
+    banner_hide: "Hide",
+    like: "Like",
+    favorite: "Favorite",
+    share: "Share",
     
     // Categories
     cat_foundation: "Web Foundation",
@@ -224,6 +260,28 @@ export const I18N = {
     lab_tools: "交互演示",
     lab_resources: "前端修炼场",
     lab_course: "Vue 实战笔记 (源码解析)",
+
+    // New v1.1 strings
+    search_title: "搜索笔记",
+    search_no_results: "未找到相关结果",
+    search_try_different: "试试其他关键词",
+    music_player: "音乐播放器",
+    music_playlist: "播放列表",
+    music_request: "点歌",
+    music_no_tracks: "暂无歌曲",
+    write_title: "写作工作台",
+    write_publish: "发布到 GitHub",
+    write_draft: "保存草稿",
+    write_token_config: "配置 GitHub Token",
+    comments_title: "评论区",
+    banner_settings: "横幅设置",
+    banner_normal: "正常",
+    banner_fullscreen: "全屏",
+    banner_background: "背景",
+    banner_hide: "隐藏",
+    like: "点赞",
+    favorite: "收藏",
+    share: "分享",
 
     // Categories
     cat_foundation: "Web 基础 (JS/DOM)",

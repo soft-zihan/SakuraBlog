@@ -20,13 +20,27 @@ export interface Petal {
   isLanded: boolean;
   dragOffsetX: number;
   dragOffsetY: number;
+  
+  // Vortex state
+  isInVortex: boolean;
+  vortexAngle: number;
 }
+
+// Vortex (long press) state
+export const vortexState = ref({
+  active: false,
+  x: 0,
+  y: 0,
+  strength: 0,
+  maxStrength: 150,
+  radius: 200
+});
 
 let nextId = 0;
 
 // Pile grid for bottom stacking
 const pileBaselineY = ref<number>(typeof window !== 'undefined' ? window.innerHeight : 1080);
-const colWidth = ref<number>(36); // approximate petal width + margin
+const colWidth = ref<number>(36);
 let pileHeights: number[] = [];
 
 const ensureGrid = () => {
@@ -35,7 +49,6 @@ const ensureGrid = () => {
   if (pileHeights.length !== cols) {
     const old = pileHeights.slice();
     pileHeights = new Array(cols).fill(0);
-    // carry over approximate heights
     for (let i = 0; i < Math.min(old.length, cols); i++) pileHeights[i] = old[i];
   }
 };
@@ -66,8 +79,67 @@ export const createPetal = (yStart = -50): Petal => {
     isDragging: false,
     isLanded: false,
     dragOffsetX: 0,
-    dragOffsetY: 0
+    dragOffsetY: 0,
+    
+    isInVortex: false,
+    vortexAngle: Math.random() * Math.PI * 2
   };
+};
+
+// Long press detection helpers
+let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+let longPressStartX = 0;
+let longPressStartY = 0;
+
+export const startLongPress = (x: number, y: number) => {
+  longPressStartX = x;
+  longPressStartY = y;
+  
+  longPressTimer = setTimeout(() => {
+    // Activate vortex
+    vortexState.value = {
+      active: true,
+      x,
+      y,
+      strength: 0,
+      maxStrength: 150,
+      radius: 200
+    };
+  }, 300); // 300ms for long press
+};
+
+export const updateLongPress = (x: number, y: number) => {
+  // If moved too far, cancel long press
+  const dx = x - longPressStartX;
+  const dy = y - longPressStartY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  
+  if (distance > 10 && longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+  
+  // Update vortex position if active
+  if (vortexState.value.active) {
+    vortexState.value.x = x;
+    vortexState.value.y = y;
+    // Gradually increase strength
+    vortexState.value.strength = Math.min(
+      vortexState.value.strength + 2,
+      vortexState.value.maxStrength
+    );
+  }
+};
+
+export const endLongPress = () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+  
+  // Deactivate vortex
+  vortexState.value.active = false;
+  vortexState.value.strength = 0;
 };
 
 export function updatePetals(petals: Petal[], opts: { speedMultiplier: number; isDark: boolean; }) {
@@ -86,7 +158,52 @@ export function updatePetals(petals: Petal[], opts: { speedMultiplier: number; i
   for (const p of petals) {
     if (p.isDragging) continue;
 
-    if (p.isLanded) continue; // landed positions managed by grid
+    if (p.isLanded && !vortexState.value.active) continue;
+
+    // Vortex physics
+    if (vortexState.value.active) {
+      const dx = vortexState.value.x - p.x;
+      const dy = vortexState.value.y - p.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < vortexState.value.radius) {
+        p.isInVortex = true;
+        
+        // Wake up landed petals
+        if (p.isLanded) {
+          p.isLanded = false;
+          p.opacity = 1;
+        }
+        
+        // Calculate vortex force
+        const strength = vortexState.value.strength * (1 - distance / vortexState.value.radius);
+        
+        // Spiral motion: tangential + radial force
+        const angle = Math.atan2(dy, dx);
+        p.vortexAngle += 0.05 * opts.speedMultiplier;
+        
+        // Tangential velocity (spiral)
+        const tangentX = Math.cos(angle + Math.PI / 2) * strength * 0.02;
+        const tangentY = Math.sin(angle + Math.PI / 2) * strength * 0.02;
+        
+        // Radial velocity (pull towards center)
+        const radialX = dx / distance * strength * 0.01;
+        const radialY = dy / distance * strength * 0.01;
+        
+        p.x += tangentX + radialX;
+        p.y += tangentY + radialY;
+        p.rotation += strength * 0.1;
+        
+        continue;
+      } else {
+        p.isInVortex = false;
+      }
+    } else if (p.isInVortex) {
+      // Release from vortex - resume normal physics
+      p.isInVortex = false;
+    }
+
+    if (p.isLanded) continue;
 
     p.timeOffset++;
     const sway = Math.sin(p.timeOffset * p.swayFreq) * p.swayAmp;
@@ -102,10 +219,10 @@ export function updatePetals(petals: Petal[], opts: { speedMultiplier: number; i
     if (p.y > h - p.size) {
       const idx = Math.max(0, Math.min(pileHeights.length - 1, Math.floor(p.x / colWidth.value)));
       const landingY = pileBaselineY.value - pileHeights[idx] - p.size;
-      p.y = Math.max(p.y, landingY); // Prevent floating: only set once, then lock
+      p.y = Math.max(p.y, landingY);
       p.isLanded = true;
       p.rotation = Math.random() * 360;
-      pileHeights[idx] += p.size * 0.85; // accumulate
+      pileHeights[idx] += p.size * 0.85;
       smoothColumnHeight(idx);
     }
   }
