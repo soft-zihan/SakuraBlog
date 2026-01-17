@@ -92,20 +92,25 @@ let longPressStartX = 0;
 let longPressStartY = 0;
 
 export const startLongPress = (x: number, y: number) => {
+  // Clear any existing timer
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+  }
+  
   longPressStartX = x;
   longPressStartY = y;
   
+  // Longer threshold + softer start
   longPressTimer = setTimeout(() => {
-    // Activate vortex
     vortexState.value = {
       active: true,
       x,
       y,
-      strength: 0,
-      maxStrength: 150,
-      radius: 200
+      strength: 20, // Soft start - petals slowly accelerate
+      maxStrength: 120, // Reduced max for more subtle effect
+      radius: 180 // Slightly smaller radius for tighter spiral
     };
-  }, 300); // 300ms for long press
+  }, 600); // 600ms for intentional activation
 };
 
 export const updateLongPress = (x: number, y: number) => {
@@ -114,18 +119,22 @@ export const updateLongPress = (x: number, y: number) => {
   const dy = y - longPressStartY;
   const distance = Math.sqrt(dx * dx + dy * dy);
   
-  if (distance > 10 && longPressTimer) {
+  // More tolerant movement threshold
+  if (distance > 20 && longPressTimer) {
     clearTimeout(longPressTimer);
     longPressTimer = null;
+    if (vortexState.value.active) {
+      vortexState.value.active = false;
+    }
   }
   
   // Update vortex position if active
-  if (vortexState.value.active) {
+  if (vortexState.value.active && distance <= 60) {
     vortexState.value.x = x;
     vortexState.value.y = y;
-    // Gradually increase strength
+    // Smooth, slower strength increase for natural feel
     vortexState.value.strength = Math.min(
-      vortexState.value.strength + 2,
+      vortexState.value.strength + 1,
       vortexState.value.maxStrength
     );
   }
@@ -160,13 +169,13 @@ export function updatePetals(petals: Petal[], opts: { speedMultiplier: number; i
 
     if (p.isLanded && !vortexState.value.active) continue;
 
-    // Vortex physics
+    // Vortex physics - natural spiral motion
     if (vortexState.value.active) {
       const dx = vortexState.value.x - p.x;
       const dy = vortexState.value.y - p.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       
-      if (distance < vortexState.value.radius) {
+      if (distance < vortexState.value.radius && distance > 5) {
         p.isInVortex = true;
         
         // Wake up landed petals
@@ -175,24 +184,29 @@ export function updatePetals(petals: Petal[], opts: { speedMultiplier: number; i
           p.opacity = 1;
         }
         
-        // Calculate vortex force
-        const strength = vortexState.value.strength * (1 - distance / vortexState.value.radius);
+        // Calculate vortex force - smooth falloff
+        const influence = 1 - (distance / vortexState.value.radius) * 0.8;
+        const strength = vortexState.value.strength * influence;
         
-        // Spiral motion: tangential + radial force
+        // Natural spiral motion
         const angle = Math.atan2(dy, dx);
-        p.vortexAngle += 0.05 * opts.speedMultiplier;
         
-        // Tangential velocity (spiral)
-        const tangentX = Math.cos(angle + Math.PI / 2) * strength * 0.02;
-        const tangentY = Math.sin(angle + Math.PI / 2) * strength * 0.02;
+        // Spiral velocity: tangential (circular) + radial (inward)
+        // Tangential velocity creates the rotation
+        const tangentX = Math.cos(angle + Math.PI / 2) * strength * 0.015;
+        const tangentY = Math.sin(angle + Math.PI / 2) * strength * 0.015;
         
-        // Radial velocity (pull towards center)
-        const radialX = dx / distance * strength * 0.01;
-        const radialY = dy / distance * strength * 0.01;
+        // Radial velocity: smooth pull towards center
+        const radialStrength = Math.max(0.5, strength * 0.008);
+        const radialX = (dx / distance) * radialStrength;
+        const radialY = (dy / distance) * radialStrength;
         
+        // Apply movement
         p.x += tangentX + radialX;
         p.y += tangentY + radialY;
-        p.rotation += strength * 0.1;
+        
+        // Smooth rotation following spiral
+        p.rotation += strength * 0.08;
         
         continue;
       } else {

@@ -1,56 +1,29 @@
 <template>
+  <!-- Container: only captures vortex events, never blocks page interaction -->
   <div 
     class="fixed inset-0 pointer-events-none z-50 overflow-hidden"
-    @pointerdown="handleLongPressStart"
-    @pointermove="handleLongPressMove"
-    @pointerup="handleLongPressEnd"
-    @pointercancel="handleLongPressEnd"
-    style="pointer-events: auto;"
   >
-    <!-- Vortex Visual Effect -->
+    <!-- Vortex interaction layer: only visible when active -->
     <div 
       v-if="vortexState.active"
-      class="absolute pointer-events-none transition-all duration-100"
+      class="absolute pointer-events-auto"
       :style="{
-        left: vortexState.x + 'px',
-        top: vortexState.y + 'px',
+        left: vortexState.x - vortexState.radius + 'px',
+        top: vortexState.y - vortexState.radius + 'px',
         width: vortexState.radius * 2 + 'px',
         height: vortexState.radius * 2 + 'px',
-        transform: 'translate(-50%, -50%)',
-        background: isDark 
-          ? `radial-gradient(circle, rgba(244,63,114,${vortexState.strength / 300}) 0%, transparent 70%)`
-          : `radial-gradient(circle, rgba(244,63,114,${vortexState.strength / 400}) 0%, transparent 70%)`,
-        borderRadius: '50%'
+        zIndex: 8
       }"
-    >
-      <!-- Spiral lines -->
-      <svg 
-        class="absolute inset-0 w-full h-full animate-spin-slow opacity-30"
-        viewBox="0 0 100 100"
-      >
-        <path 
-          d="M50,50 Q60,40 70,50 T90,50" 
-          fill="none" 
-          :stroke="isDark ? '#f43f72' : '#f43f72'" 
-          stroke-width="0.5"
-          opacity="0.5"
-        />
-        <path 
-          d="M50,50 Q40,60 30,50 T10,50" 
-          fill="none" 
-          :stroke="isDark ? '#f43f72' : '#f43f72'" 
-          stroke-width="0.5"
-          opacity="0.5"
-        />
-      </svg>
-    </div>
+      @pointermove="handleLongPressMove"
+      @pointerup="handleLongPressEnd"
+      @pointercancel="handleLongPressEnd"
+    />
     
-    <!-- Petals -->
+    <!-- Petals - always clickable -->
     <div 
       v-for="p in petals" 
       :key="p.id" 
-      class="absolute select-none cursor-grab active:cursor-grabbing will-change-transform"
-      :class="{ 'pointer-events-auto': !vortexState.active }"
+      class="absolute select-none cursor-grab active:cursor-grabbing will-change-transform pointer-events-auto"
       :style="{
         transform: `translate(${p.x}px, ${p.y}px) rotate(${p.rotation}deg) scale(${p.scale})`,
         opacity: p.opacity,
@@ -58,14 +31,20 @@
         height: (p.size * 1.3) + 'px',
         background: isDark ? 'linear-gradient(120deg, #be1245 0%, #f43f72 100%)' : 'linear-gradient(120deg, #ffd7e6 0%, #ffc4d6 100%)',
         borderRadius: '150% 0 150% 0',
-        boxShadow: p.isInVortex 
-          ? (isDark ? '0 0 10px rgba(244, 63, 114, 0.6)' : '0 0 10px rgba(244, 63, 114, 0.4)')
-          : (isDark ? '0 0 5px rgba(244, 63, 114, 0.3)' : '1px 1px 2px rgba(0,0,0,0.05)'),
-        transition: p.isDragging ? 'none' : 'opacity 0.5s, box-shadow 0.3s',
-        touchAction: 'none'
+        boxShadow: isDark ? '0 0 2px rgba(244, 63, 114, 0.2)' : '1px 1px 2px rgba(0,0,0,0.05)',
+        transition: p.isDragging ? 'none' : 'opacity 0.3s',
+        touchAction: 'none',
+        zIndex: p.isDragging ? 20 : 5
       }"
-      @pointerdown.stop="onPointerDown(p, $event)"
-    ></div>
+      @pointerdown="onPointerDown(p, $event)"
+    />
+
+    <!-- Empty area to trigger vortex: pointer-events only when needed -->
+    <div 
+      v-if="!vortexState.active"
+      class="absolute inset-0 pointer-events-auto"
+      @pointerdown="handleLongPressStart"
+    />
   </div>
 </template>
 
@@ -88,6 +67,9 @@ let animationFrameId: number;
 const draggedPetalId = ref<number | null>(null);
 
 const onPointerDown = (p: Petal, e: PointerEvent) => {
+  // Prevent parent listener from firing
+  e.stopPropagation();
+  
   draggedPetalId.value = p.id;
   p.isDragging = true;
   p.isLanded = false;
@@ -119,8 +101,8 @@ const onPointerUp = () => {
 
 // Long press for vortex effect
 const handleLongPressStart = (e: PointerEvent) => {
-  // Only trigger on empty space (not on petals)
-  if ((e.target as HTMLElement).classList.contains('absolute')) return;
+  // Only trigger on the empty background, not on petals
+  if ((e.target as HTMLElement).classList.contains('pointer-events-auto')) return;
   startLongPress(e.clientX, e.clientY);
 };
 
