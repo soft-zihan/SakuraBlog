@@ -140,25 +140,15 @@
           <div v-if="filteredFlatFiles.length === 0" class="text-center text-gray-400 py-10 text-sm italic">
           {{ t.no_notes }}
         </div>
-        <div 
+        <ArticleCard
           v-for="file in filteredFlatFiles" 
           :key="file.path"
+          :file="file"
+          :isActive="currentFile?.path === file.path"
+          :showPath="true"
+          :lang="lang"
           @click="$emit('select-file', file)"
-          class="group p-4 bg-white/40 dark:bg-gray-800/40 border border-white/60 dark:border-gray-700 rounded-2xl hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:shadow-sakura-100/20 dark:hover:shadow-black/20 cursor-pointer transition-all duration-300 animate-fade-in relative overflow-hidden backdrop-blur-sm"
-          :class="{'ring-2 ring-sakura-300 dark:ring-sakura-600 bg-white dark:bg-gray-800 shadow-md': currentFile?.path === file.path}"
-        >
-          <div class="flex justify-between items-center relative z-10 mb-2">
-            <span class="font-bold text-gray-700 dark:text-gray-200 group-hover:text-sakura-600 dark:group-hover:text-sakura-400 truncate pr-2 flex-1 text-sm">{{ file.name.replace('.md', '') }}</span>
-          </div>
-            <div class="flex items-center gap-2 relative z-10">
-              <span class="text-[10px] bg-sakura-50 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-300 px-2 py-0.5 rounded-md whitespace-nowrap font-medium">
-                {{ formatDate(file.lastModified) }}
-              </span>
-              <div v-if="getCleanParentPath(file.path) !== lang" class="text-[10px] text-gray-400 dark:text-gray-500 truncate flex items-center gap-1">
-                <span class="opacity-50">/</span> {{ getCleanParentPath(file.path) }}
-              </div>
-            </div>
-        </div>
+        />
       </div>
 
       <!-- Tree View -->
@@ -188,6 +178,7 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref } from 'vue';
 import FileTree from './FileTree.vue';
+import ArticleCard from './ArticleCard.vue';
 import type { FileNode } from '../types';
 
 defineProps<{

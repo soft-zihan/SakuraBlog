@@ -323,10 +323,12 @@
 
     <!-- Search Modal -->
     <SearchModal
-      v-if="showSearch"
+      :showSearchModal="showSearch"
       @close="showSearch = false"
       :t="t"
-      :files="filteredFlatFiles"
+      :lang="lang"
+      :searchFn="search"
+      :highlightFn="highlightMatches"
       @select="handleSearchSelect"
     />
 
@@ -367,16 +369,19 @@ import MusicPlayer from './components/MusicPlayer.vue';
 import SearchModal from './components/SearchModal.vue';
 import WriteEditor from './components/WriteEditor.vue';
 import GiscusComments from './components/GiscusComments.vue';
+import ArticleCard from './components/ArticleCard.vue';
 import { marked } from 'marked';
 
 // Pinia Stores
 import { useAppStore } from './stores/appStore';
 import { useArticleStore } from './stores/articleStore';
 import { useMusicStore } from './stores/musicStore';
+import { useSearch } from './composables/useSearch';
 
 const appStore = useAppStore();
 const articleStore = useArticleStore();
 const musicStore = useMusicStore();
+const { initSearchIndex, search, highlightMatches, showSearchModal: searchModalOpen } = useSearch();
 
 // i18n with Persistence (from store)
 const lang = computed({
@@ -454,7 +459,7 @@ const isRawMode = ref(false);
 
 // Modal States
 const showSettings = ref(false);
-const showSearch = ref(false);
+const showSearch = searchModalOpen;
 const showMusicPlayer = ref(false);
 const showWriteEditor = ref(false);
 const sidebarOpen = ref(false);
@@ -1056,6 +1061,10 @@ onMounted(async () => {
     fileSystem.value = [];
   } finally {
     loading.value = false;
+    // Initialize search index after file system is loaded
+    if (fileSystem.value.length > 0) {
+      await initSearchIndex(fileSystem.value);
+    }
   }
 });
 
