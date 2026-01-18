@@ -35,6 +35,23 @@
           </div>
       </div>
 
+      <!-- Wallpaper Switch -->
+      <div class="mb-6">
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.wallpaper || 'Wallpaper' }}</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button 
+              v-for="wp in themeWallpapers" 
+              :key="wp.filename" 
+              @click="setWallpaper(wp.filename)"
+              class="relative border rounded-xl overflow-hidden group"
+              :class="currentWallpaperFilename === wp.filename ? 'border-sakura-500' : 'border-gray-200 dark:border-gray-700'"
+            >
+              <img :src="wp.path" class="w-full h-16 object-cover" />
+              <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+          </div>
+      </div>
+
       <!-- Sakura Speed -->
       <div class="mb-6">
           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.sakura_speed }}</label>
@@ -72,6 +89,9 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useWallpapers } from '../composables/useWallpapers'
+
 const props = defineProps<{
   t: any;
   isDark: boolean;
@@ -91,4 +111,12 @@ const emit = defineEmits<{
 const toggleTheme = (val: boolean) => {
   emit('toggle-theme', val);
 };
+
+// Wallpaper options for current theme
+const { currentThemeWallpapers, setWallpaper } = useWallpapers()
+const themeWallpapers = computed(() => currentThemeWallpapers.value)
+// Current selection filename is stored in app store; derive via composable
+import { useAppStore } from '../stores/appStore'
+const appStore = useAppStore()
+const currentWallpaperFilename = computed(() => appStore.currentWallpaperFilename)
 </script>

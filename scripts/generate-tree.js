@@ -7,6 +7,7 @@ const publicDir = path.join(rootDir, 'public');
 const rawDir = path.join(publicDir, 'raw'); // New directory for raw code files
 const outputFile = path.join(publicDir, 'files.json'); 
 const notesDir = path.join(rootDir, 'notes');
+const publicNotesDir = path.join(publicDir, 'notes');
 
 console.log("🌸 Sakura Notes: Generating File Tree...");
 
@@ -14,6 +15,9 @@ console.log("🌸 Sakura Notes: Generating File Tree...");
 if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
 if (fs.existsSync(rawDir)) fs.rmSync(rawDir, { recursive: true, force: true });
 fs.mkdirSync(rawDir, { recursive: true });
+// Ensure public/notes exists and is cleanly recreated for static serving
+if (fs.existsSync(publicNotesDir)) fs.rmSync(publicNotesDir, { recursive: true, force: true });
+fs.mkdirSync(publicNotesDir, { recursive: true });
 
 // Helper to recursively scan directory
 function scanDirectory(basePath, relativePath, isSourceCode = false) {
@@ -94,6 +98,27 @@ function scanDirectory(basePath, relativePath, isSourceCode = false) {
 
 // 1. Scan Notes
 const notesTree = scanDirectory(notesDir, '', false);
+
+// 1.1 Copy notes (.md) into public/notes preserving structure for static fetch
+function copyNotesToPublic(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return;
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name.startsWith('.') || entry.name === 'node_modules' || entry.name === 'dist' || entry.name === 'public' || entry.name === 'assets') continue;
+    const srcPath = path.join(srcDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      fs.mkdirSync(destPath, { recursive: true });
+      copyNotesToPublic(srcPath, destPath);
+    } else {
+      if (entry.name.endsWith('.md')) {
+        fs.copyFileSync(srcPath, destPath);
+      }
+    }
+  }
+}
+
+copyNotesToPublic(notesDir, publicNotesDir);
 
 // 2. Scan Source Code (Specific Folders/Files)
 const sourceTree = [];

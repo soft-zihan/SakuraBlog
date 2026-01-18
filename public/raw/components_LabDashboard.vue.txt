@@ -142,6 +142,33 @@
              <LabDom :lang="lang" />
             </section>
         </div>
+
+        <!-- Learning Path (Roadmap) -->
+        <section class="max-w-4xl mx-auto">
+          <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-8 border border-sakura-100 dark:border-gray-700 shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+              <span class="text-2xl">🗺️</span>
+              {{ lang === 'zh' ? '前端学习路径' : 'Frontend Learning Path' }}
+            </h2>
+            <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+              <li>1) HTML / CSS / JS → {{ lang === 'zh' ? '打好基础，并能做简单交互' : 'build essentials and simple interactivity' }}</li>
+              <li>2) TypeScript + DOM / Web API → {{ lang === 'zh' ? '提升类型与浏览器API应用能力' : 'strengthen types and browser APIs' }}</li>
+              <li>3) 模块化（ESM/CJS） → {{ lang === 'zh' ? '理解模块加载与组织' : 'understand module loading and organization' }}</li>
+              <li>4) npm 包管理 → {{ lang === 'zh' ? '学会依赖管理与脚本' : 'learn dependency management and scripts' }}</li>
+              <li>5) CSS 框架（TailwindCSS） → {{ lang === 'zh' ? '快速搭建现代样式' : 'rapidly style modern UIs' }}</li>
+              <li>6) UI 框架（Vue） → {{ lang === 'zh' ? '组件化、响应式与生态' : 'components, reactivity, ecosystem' }}</li>
+            </ul>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <a href="zh/VUE学习笔记/01-基础概念与MVVM.md" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">📝 HTML/CSS/JS</a>
+              <a href="https://www.typescriptlang.org/docs/" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🧩 TypeScript</a>
+              <a href="https://developer.mozilla.org/docs/Web/API" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🧪 Web API</a>
+              <a href="https://nodejs.org/docs/latest/api/modules.html" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">📦 ESM/CJS</a>
+              <a href="https://docs.npmjs.com/" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🔧 npm</a>
+              <a href="https://tailwindcss.com/docs" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🎨 TailwindCSS</a>
+              <a href="https://vuejs.org/guide/introduction.html" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🟩 Vue</a>
+            </div>
+          </div>
+        </section>
       </div>
 
       <!-- Tab 2: Vue Core -->

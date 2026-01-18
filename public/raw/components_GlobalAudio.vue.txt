@@ -10,10 +10,13 @@
   ></audio>
   
   <!-- Mini FAB Button - Only spinning circle, NO card display -->
-  <div v-if="musicStore.currentTrack && !isMusicPage" class="fixed bottom-8 right-8 z-50 pointer-events-auto group/audio">
+  <div v-if="musicStore.currentTrack && !isMusicPage" class="fixed bottom-8 right-8 z-50 pointer-events-auto" @mouseenter="showControlsDelayed(true)" @mouseleave="showControlsDelayed(false)">
     
-    <!-- Hover Media Controls -->
-    <div class="absolute bottom-full right-0 mb-3 opacity-0 group-hover/audio:opacity-100 transition-all duration-300 pointer-events-none group-hover/audio:pointer-events-auto transform translate-y-2 group-hover/audio:translate-y-0">
+    <!-- Hover Media Controls (delayed hide) -->
+    <div class="absolute bottom-full right-0 mb-3 transition-all duration-300"
+         :class="showControls ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'"
+         @mouseenter="cancelHide()"
+         @mouseleave="showControlsDelayed(false)">
       <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 min-w-[280px]">
         <!-- Track Info -->
         <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
@@ -151,7 +154,8 @@
       </div>
       
       <!-- Hover tooltip (simple one) - Hidden when controls are shown -->
-      <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover/audio:opacity-0 transition-opacity duration-200 pointer-events-none">
+      <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 transition-opacity duration-200 pointer-events-none"
+           :class="showControls ? 'opacity-0' : 'opacity-100'">
         {{ musicStore.isPlaying ? 'Pause' : 'Play' }}
       </div>
     </button>
@@ -164,6 +168,8 @@ import { useMusicStore } from '../stores/musicStore'
 
 const musicStore = useMusicStore()
 const audioEl = ref<HTMLAudioElement | null>(null)
+const showControls = ref(false)
+let hideTimer: ReturnType<typeof setTimeout> | null = null
 
 // Check if on music page
 const isMusicPage = computed(() => {
@@ -190,6 +196,30 @@ const togglePlay = () => {
   } else {
     musicStore.play()
   }
+}
+
+// Delayed show/hide to ease hover movement
+const showControlsDelayed = (show: boolean) => {
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  if (show) {
+    showControls.value = true
+  } else {
+    hideTimer = setTimeout(() => {
+      showControls.value = false
+      hideTimer = null
+    }, 500)
+  }
+}
+
+const cancelHide = () => {
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  showControls.value = true
 }
 
 // Sync audio element with store state

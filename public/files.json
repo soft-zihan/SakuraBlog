@@ -618,7 +618,7 @@
         "path": "components/GlobalAudio.vue",
         "fetchPath": "raw/components_GlobalAudio.vue.txt",
         "type": "file",
-        "lastModified": "2026-01-18T10:22:27.876Z",
+        "lastModified": "2026-01-18T10:52:05.633Z",
         "isSource": true
       },
       {
@@ -650,7 +650,7 @@
         "path": "components/LabDashboard.vue",
         "fetchPath": "raw/components_LabDashboard.vue.txt",
         "type": "file",
-        "lastModified": "2026-01-12T00:43:08.495Z",
+        "lastModified": "2026-01-18T10:52:05.635Z",
         "isSource": true
       },
       {
@@ -778,7 +778,7 @@
         "path": "components/SettingsModal.vue",
         "fetchPath": "raw/components_SettingsModal.vue.txt",
         "type": "file",
-        "lastModified": "2026-01-17T14:18:24.265Z",
+        "lastModified": "2026-01-18T10:52:05.635Z",
         "isSource": true
       },
       {
@@ -817,7 +817,7 @@
         "path": "App.vue",
         "fetchPath": "raw/App.vue.txt",
         "type": "file",
-        "lastModified": "2026-01-18T10:27:19.599Z",
+        "lastModified": "2026-01-18T10:27:23.243Z",
         "isSource": true
       },
       {
