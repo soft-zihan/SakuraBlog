@@ -203,6 +203,31 @@
                    <span class="text-xs text-gray-400 flex items-center gap-1">
                      🕐 {{ t.updated }}: {{ formatDate(currentFile.lastModified) }}
                    </span>
+                   <span v-if="currentTags.length" class="text-xs text-gray-400 flex items-center gap-1">
+                     🏷️
+                     <span class="flex flex-wrap gap-1.5">
+                       <span
+                         v-for="tag in currentTags"
+                         :key="tag"
+                         class="text-[10px] px-2 py-0.5 rounded-full bg-sakura-100 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-300"
+                       >
+                         {{ tag }}
+                       </span>
+                     </span>
+                   </span>
+                   <span v-if="currentAuthorName || currentAuthorUrl" class="text-xs text-gray-400 flex items-center gap-1">
+                     👤
+                     <a
+                       v-if="currentAuthorUrl"
+                       :href="currentAuthorUrl"
+                       target="_blank"
+                       rel="noopener"
+                       class="text-sakura-600 dark:text-sakura-300 hover:underline"
+                     >
+                       {{ currentAuthorName || currentAuthorUrl }}
+                     </a>
+                     <span v-else>{{ currentAuthorName }}</span>
+                   </span>
                  </div>
              </div>
 
@@ -288,29 +313,6 @@
                <div class="flex justify-between"><span>{{ t.words }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentWordCount }}</span></div>
                <div class="flex justify-between"><span>{{ t.lines }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentLineCount }}</span></div>
                <div class="flex justify-between"><span>{{ t.format }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentFile.isSource ? 'Code' : 'Markdown' }}</span></div>
-               <div v-if="currentTags.length > 0" class="pt-1">
-                 <div class="mb-1 text-[10px] text-gray-400">{{ lang === 'zh' ? '标签' : 'Tags' }}</div>
-                 <div class="flex flex-wrap gap-1.5">
-                   <span
-                     v-for="tag in currentTags"
-                     :key="tag"
-                     class="text-[10px] px-2 py-0.5 rounded-full bg-sakura-100 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-300"
-                   >
-                     {{ tag }}
-                   </span>
-                 </div>
-               </div>
-               <div v-if="currentAuthorUrl" class="pt-1">
-                 <div class="mb-1 text-[10px] text-gray-400">{{ lang === 'zh' ? '发布者' : 'Publisher' }}</div>
-                 <a
-                   :href="currentAuthorUrl"
-                   target="_blank"
-                   rel="noopener"
-                   class="text-[11px] text-sakura-600 dark:text-sakura-300 hover:underline break-all"
-                 >
-                   {{ currentAuthorName || currentAuthorUrl }}
-                 </a>
-               </div>
              </div>
           </div>
         </aside>
@@ -698,6 +700,10 @@ const extractMetaFromContent = (content: string): { tags: string[]; author: stri
   return meta;
 };
 
+const stripMetaComment = (content: string): string => {
+  return content.replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+};
+
 // 从文章内容中提取 tags
 const extractTagsFromContent = (content: string): string[] => {
   const meta = extractMetaFromContent(content);
@@ -794,7 +800,7 @@ const updateRenderedContent = async () => {
     // If it's source or raw mode, we don't render md
     if (currentFile.value.isSource || isRawMode.value) return;
 
-    let rawContent = currentFile.value.content;
+    let rawContent = stripMetaComment(currentFile.value.content);
 
     // Image Path Resolution
     if (currentFile.value.path) {

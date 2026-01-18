@@ -48,13 +48,38 @@
           </div>
           
           <!-- Title Input -->
-          <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 space-y-2">
             <input 
               v-model="title"
               type="text"
               :placeholder="lang === 'zh' ? '输入文章标题...' : 'Enter article title...'"
               class="w-full text-xl font-bold bg-transparent border-0 outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400"
             />
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs text-gray-400">🏷️</span>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="tag in publishTags"
+                  :key="tag"
+                  class="text-xs px-2 py-0.5 rounded-full bg-sakura-100 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-300 flex items-center gap-1"
+                >
+                  {{ tag }}
+                  <button
+                    class="text-[10px] text-sakura-400 hover:text-sakura-600"
+                    @click="removeTag(tag)"
+                  >✕</button>
+                </span>
+              </div>
+              <input
+                v-model="tagInput"
+                type="text"
+                :placeholder="lang === 'zh' ? '添加标签，回车确认' : 'Add tag, press Enter'"
+                class="flex-1 min-w-[160px] text-sm bg-transparent border-0 outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400"
+                @keydown.enter.prevent="addTagFromInput"
+                @blur="addTagFromInput"
+              />
+              <span class="text-[10px] text-gray-400">{{ publishTags.length }}/5</span>
+            </div>
           </div>
           
           <!-- Editor Body -->
@@ -225,6 +250,8 @@ const content = ref('')
 const targetFolder = ref('notes/zh')
 const pathSuffix = ref('')
 const images = ref<Array<{ id: string; file: File; preview: string }>>([])
+const publishTags = ref<string[]>([])
+const tagInput = ref('')
 const markdownFileInput = ref<HTMLInputElement | null>(null)
 const markdownFolderInput = ref<HTMLInputElement | null>(null)
 
@@ -440,16 +467,40 @@ const applyMetaComment = (text: string, tags: string[], author: string, authorUr
   return metaBlock + stripped
 }
 
-const buildTagsForPublish = (text: string, folder: string, extraSubPath = '') => {
-  const root = getRootFolder()
+const buildTagsForPublish = (text: string) => {
   const existing = parseMetaComment(text).tags
-  const folderRel = folder.replace(root, '').replace(/^\/+/, '')
-  const folderParts = folderRel ? folderRel.split('/').filter(Boolean) : []
-  const extraParts = extraSubPath ? extraSubPath.split('/').filter(Boolean) : []
-  const authorName = localStorage.getItem('author_name') || ''
-  const merged = [...existing, ...folderParts, ...extraParts]
-  if (authorName) merged.push(authorName)
-  return Array.from(new Set(merged))
+  const selected = publishTags.value
+  const merged = [...selected, ...existing.filter(t => !selected.includes(t))]
+  return merged.slice(0, 5)
+}
+
+const normalizeTags = (raw: string) => {
+  return raw
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean)
+}
+
+const addTagFromInput = () => {
+  if (!tagInput.value.trim()) return
+  const newTags = normalizeTags(tagInput.value)
+  const merged = [...publishTags.value]
+  for (const t of newTags) {
+    if (merged.includes(t)) continue
+    if (merged.length >= 5) {
+      alert(props.lang === 'zh' ? '标签最多 5 个' : 'Up to 5 tags')
+      break
+    }
+    merged.push(t)
+  }
+  publishTags.value = merged
+  tagInput.value = ''
+  localStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(publishTags.value))
+}
+
+const removeTag = (tag: string) => {
+  publishTags.value = publishTags.value.filter((t: string) => t !== tag)
+  localStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(publishTags.value))
 }
 
 const saveDraft = () => {
@@ -522,7 +573,7 @@ const publish = async () => {
     }
   
     // 使用注释写入 meta 信息，避免出现在正文
-    const publishTags = buildTagsForPublish(processedContent, targetFolder.value)
+    const publishTags = buildTagsForPublish(processedContent)
     let finalContent = applyMetaComment(processedContent, publishTags, authorName, authorUrl)
     
     // 生成文件名
@@ -627,7 +678,7 @@ const uploadMarkdownFiles = async (files: File[], mode: 'file' | 'folder' = 'fil
       const authorName = localStorage.getItem('author_name') || ''
       const authorUrl = localStorage.getItem('author_url') || ''
       const relFolder = normalizedRel.split('/').slice(0, -1).join('/')
-      const publishTags = buildTagsForPublish(contentText, cleanFolder, relFolder)
+      const publishTags = buildTagsForPublish(contentText)
       const finalContent = applyMetaComment(contentText, publishTags, authorName, authorUrl)
 
       const path = `${cleanFolder}/${normalizedRel}`
@@ -661,6 +712,14 @@ onMounted(() => {
   loadDraft()
   repoOwner.value = localStorage.getItem('github_repo_owner') || 'soft-zihan'
   repoName.value = localStorage.getItem('github_repo_name') || 'soft-zihan.github.io'
+
+  const savedTags = localStorage.getItem(`publish_tags_${props.lang}`)
+  if (savedTags) {
+    try {
+      const tags = JSON.parse(savedTags)
+      publishTags.value = Array.isArray(tags) ? tags.slice(0, 5) : []
+    } catch {}
+  }
   
   // 加载自定义文件夹
   (['zh', 'en'] as Array<'zh' | 'en'>).forEach((langKey: 'zh' | 'en') => {
@@ -686,6 +745,16 @@ watch(() => props.lang, () => {
     targetFolder.value = rootFolder
   }
   pathSuffix.value = targetFolder.value.replace(rootFolder, '').replace(/^\/+/, '')
+
+  const savedTags = localStorage.getItem(`publish_tags_${props.lang}`)
+  if (savedTags) {
+    try {
+      const tags = JSON.parse(savedTags)
+      publishTags.value = Array.isArray(tags) ? tags.slice(0, 5) : []
+    } catch {}
+  } else {
+    publishTags.value = []
+  }
 })
 
 watch(pathSuffix, () => syncTargetFolder())
