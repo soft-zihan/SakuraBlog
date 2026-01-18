@@ -233,7 +233,7 @@
                   {{ lang === 'zh' ? '导入预览' : 'Import Preview' }}
                 </h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ lang === 'zh' ? '请选择将要上传的文件，并补充标签/作者信息' : 'Select files to upload and fill tags/author info' }}
+                  {{ lang === 'zh' ? '本地链接的图片在预览时看不到，但是上传时会一并上传。' : 'Select files to upload and fill tags/author info' }}
                 </p>
               </div>
               <button

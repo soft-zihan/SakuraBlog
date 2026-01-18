@@ -37,10 +37,10 @@ export function useWallpapers() {
       }
     } catch (e) {
       console.warn('Failed to load wallpapers.json:', e)
-      // 回退到默认壁纸
+      // 回退到默认壁纸（使用相对路径，避免手机端显示问题）
       wallpapersData.value = {
-        light: [{ filename: 'wallpaper-light.jpg', path: '/image/light/wallpaper-light.jpg', name: 'Default Light' }],
-        dark: [{ filename: 'pexels-minan1398-813269.jpg', path: '/image/dark/pexels-minan1398-813269.jpg', name: 'Default Dark' }]
+        light: [{ filename: 'wallpaper-light.jpg', path: './image/light/wallpaper-light.jpg', name: 'Default Light' }],
+        dark: [{ filename: 'pexels-minan1398-813269.jpg', path: './image/dark/pexels-minan1398-813269.jpg', name: 'Default Dark' }]
       }
     } finally {
       isLoading.value = false
@@ -62,8 +62,13 @@ export function useWallpapers() {
     
     // 如果未设置或找不到，回退到第一张
     const found = wallpapers.find((w: WallpaperItem) => w.filename === filename)
-    if (found) return found.path
-    return wallpapers[0]?.path || ''
+    let path = found ? found.path : (wallpapers[0]?.path || '')
+    
+    // 确保路径是相对路径（手机端兼容）
+    if (path.startsWith('/')) {
+      path = '.' + path
+    }
+    return path
   })
   
   // 设置壁纸

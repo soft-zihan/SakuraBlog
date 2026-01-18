@@ -253,9 +253,79 @@
               @contextmenu="handleSelectionContextMenu"
             ></div>
 
-            <!-- Source Code / Raw Mode -->
+            <!-- Source Code / Raw Mode (Editable) -->
             <div v-else class="relative group">
-               <pre class="whitespace-pre-wrap font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-xl border border-gray-700 overflow-x-auto select-text shadow-inner"><code :class="currentFile.name.endsWith('.vue') ? 'language-html' : ''">{{ currentFile.content }}</code></pre>
+               <!-- Edit Mode Toolbar -->
+               <div class="flex items-center justify-between mb-3 bg-[#252526] px-4 py-2 rounded-t-xl border border-gray-700 border-b-0">
+                 <div class="flex items-center gap-2">
+                   <span class="text-xs text-gray-400 font-mono">{{ isRawMode ? 'Markdown' : 'Source' }}</span>
+                   <span v-if="isEditingRaw" class="text-xs text-yellow-400 px-2 py-0.5 bg-yellow-900/30 rounded">{{ lang === 'zh' ? '编辑中' : 'Editing' }}</span>
+                 </div>
+                 <div class="flex items-center gap-2">
+                   <button
+                     v-if="!isEditingRaw && !currentFile.isSource"
+                     @click="startEditingRaw"
+                     class="text-xs px-3 py-1.5 bg-sakura-500 hover:bg-sakura-600 text-white rounded transition-colors"
+                   >
+                     {{ lang === 'zh' ? '编辑' : 'Edit' }}
+                   </button>
+                   <template v-if="isEditingRaw">
+                     <button
+                       @click="cancelEditingRaw"
+                       class="text-xs px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-white rounded transition-colors"
+                       :disabled="isSavingRaw"
+                     >
+                       {{ lang === 'zh' ? '取消' : 'Cancel' }}
+                     </button>
+                     <button
+                       @click="saveRawContent"
+                       class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded transition-colors flex items-center gap-1"
+                       :disabled="isSavingRaw"
+                     >
+                       <svg v-if="isSavingRaw" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                       </svg>
+                       {{ isSavingRaw ? (lang === 'zh' ? '保存中...' : 'Saving...') : (lang === 'zh' ? '保存并发布' : 'Save & Publish') }}
+                     </button>
+                   </template>
+                 </div>
+               </div>
+               <!-- Editable Textarea -->
+               <textarea
+                 v-if="isEditingRaw"
+                 v-model="editedRawContent"
+                 class="w-full h-[60vh] font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-b-xl border border-gray-700 resize-none outline-none focus:ring-2 focus:ring-sakura-500/50"
+                 spellcheck="false"
+               ></textarea>
+               <!-- Read-only Code View -->
+               <pre v-else class="whitespace-pre-wrap font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-b-xl border border-gray-700 overflow-x-auto select-text shadow-inner"><code :class="currentFile.name.endsWith('.vue') ? 'language-html' : ''">{{ currentFile.content }}</code></pre>
+            </div>
+
+            <!-- Contributors Section -->
+            <div v-if="currentContributors.length > 0" class="mt-8 pt-6 border-t border-sakura-100 dark:border-gray-700">
+              <h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+                <span>👥</span> {{ lang === 'zh' ? '贡献者' : 'Contributors' }}
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                <template v-for="contributor in currentContributors" :key="contributor.name">
+                  <a
+                    v-if="contributor.url"
+                    :href="contributor.url"
+                    target="_blank"
+                    rel="noopener"
+                    class="text-sm px-3 py-1 rounded-full bg-sakura-50 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-300 hover:bg-sakura-100 dark:hover:bg-sakura-900/50 transition-colors"
+                  >
+                    {{ contributor.name }}
+                  </a>
+                  <span
+                    v-else
+                    class="text-sm px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                  >
+                    {{ contributor.name }}
+                  </span>
+                </template>
+              </div>
             </div>
             
             <div class="mt-12 pt-8 border-t border-sakura-100 dark:border-gray-700 flex justify-center text-xs text-sakura-300 dark:text-gray-500">
@@ -341,11 +411,11 @@
        <div class="absolute bottom-10 text-white/50 text-sm bg-black/50 px-4 py-2 rounded-full">Click anywhere to close</div>
     </div>
 
-    <!-- Source Code Modal (New) -->
+    <!-- Source Code Modal (Enhanced with Syntax Highlighting) -->
     <div 
       v-if="showCodeModal" 
       class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center animate-fade-in p-4 md:p-10"
-      @click.self="showCodeModal = false"
+      @click.self="closeCodeModal"
     >
        <div class="bg-[#1e1e1e] w-full max-w-5xl h-[85vh] rounded-2xl shadow-2xl border border-gray-700 flex flex-col overflow-hidden relative transform transition-all duration-300 scale-100">
           <!-- Modal Header -->
@@ -354,17 +424,17 @@
                 <span class="text-2xl">📝</span>
                 <div>
                    <h3 class="text-sm font-bold text-gray-200 font-mono">{{ codeModalTitle }}</h3>
-                   <span class="text-[10px] text-gray-500">Read Only Preview</span>
+                   <span class="text-[10px] text-gray-500">{{ codeModalPath || 'Read Only Preview' }}</span>
                 </div>
              </div>
              <div class="flex gap-2">
                <button @click="copyCodeContent" class="text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded transition-colors border border-gray-600">Copy</button>
-               <button @click="showCodeModal = false" class="text-gray-400 hover:text-white transition-colors bg-gray-700/50 hover:bg-red-500/50 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
+               <button @click="closeCodeModal" class="text-gray-400 hover:text-white transition-colors bg-gray-700/50 hover:bg-red-500/50 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
              </div>
           </div>
-          <!-- Modal Content -->
+          <!-- Modal Content with Syntax Highlighting -->
           <div class="flex-1 overflow-auto custom-scrollbar p-0 bg-[#1e1e1e]">
-             <pre class="p-6 text-sm font-mono text-blue-100 leading-relaxed whitespace-pre-wrap"><code>{{ codeModalContent }}</code></pre>
+             <pre class="p-6 text-sm font-mono leading-relaxed whitespace-pre-wrap hljs"><code v-html="highlightedCodeContent"></code></pre>
           </div>
        </div>
     </div>
@@ -434,6 +504,7 @@ import GiscusComments from './components/GiscusComments.vue';
 import ArticleCard from './components/ArticleCard.vue';
 import { marked } from 'marked';
 import hljs from 'highlight.js/lib/common';
+import { useGitHubPublish } from './composables/useGitHubPublish';
 
 // Pinia Stores
 import { useAppStore } from './stores/appStore';
@@ -445,6 +516,7 @@ const appStore = useAppStore();
 const articleStore = useArticleStore();
 const musicStore = useMusicStore();
 const { initSearchIndex, search, highlightMatches, showSearchModal: searchModalOpen, rebuildSearchIndex, isLoadingContent, setFetchFunction, updateLanguage } = useSearch();
+const { getToken, uploadFile } = useGitHubPublish();
 
 // i18n with Persistence (from store)
 const lang = computed({
@@ -545,6 +617,12 @@ const isMobile = ref(false);
 const showCodeModal = ref(false);
 const codeModalContent = ref('');
 const codeModalTitle = ref('');
+const codeModalPath = ref(''); // 存储当前代码文件路径
+
+// Raw Mode Editing State
+const isEditingRaw = ref(false);
+const editedRawContent = ref('');
+const isSavingRaw = ref(false);
 
 const selectionMenu = ref({ show: false, x: 0, y: 0, locked: false });
 const lastSelectionRange = ref<Range | null>(null);
@@ -716,6 +794,153 @@ const stripMetaComment = (content: string): string => {
   return content.replace(/^\s*<!--[\s\S]*?-->\s*/, '');
 };
 
+// 从文章内容中提取贡献者列表
+interface Contributor {
+  name: string;
+  url?: string;
+}
+
+const extractContributorsFromContent = (content: string): Contributor[] => {
+  const contributors: Contributor[] = [];
+  if (!content) return contributors;
+
+  const commentMatch = content.match(/^\s*<!--([\s\S]*?)-->/);
+  if (commentMatch) {
+    const block = commentMatch[1];
+    // 匹配 contributors: name1, name2 或 contributors: [{name, url}, ...]
+    const contributorsMatch = block.match(/contributors?\s*:\s*([^\n]+)/i);
+    if (contributorsMatch) {
+      const raw = contributorsMatch[1].trim();
+      // 尝试解析 JSON 格式
+      if (raw.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(raw);
+          return parsed.map((c: any) => ({
+            name: c.name || c,
+            url: c.url || ''
+          }));
+        } catch {}
+      }
+      // 简单逗号分隔格式
+      return raw.split(',').map(n => ({ name: n.trim() })).filter(c => c.name);
+    }
+  }
+  return contributors;
+};
+
+// 当前文章的贡献者
+const currentContributors = computed(() => {
+  if (!currentFile.value?.content) return [];
+  return extractContributorsFromContent(currentFile.value.content);
+});
+
+// 构建包含贡献者的 meta 注释
+const buildMetaCommentWithContributors = (
+  content: string, 
+  newContributor: { name: string; url: string }
+): string => {
+  const existingMeta = extractMetaFromContent(content);
+  const existingContributors = extractContributorsFromContent(content);
+  
+  // 添加新贡献者（去重）
+  const contributorExists = existingContributors.some(c => 
+    c.name === newContributor.name || 
+    (c.url && c.url === newContributor.url)
+  );
+  
+  if (!contributorExists && newContributor.name) {
+    existingContributors.push(newContributor);
+  }
+  
+  // 移除旧的 meta 注释
+  const stripped = stripMetaComment(content);
+  
+  // 构建新的 meta 注释
+  const lines: string[] = [];
+  if (existingMeta.tags.length) lines.push(`tags: ${existingMeta.tags.join(', ')}`);
+  if (existingMeta.author) lines.push(`author: ${existingMeta.author}`);
+  if (existingMeta.authorUrl) lines.push(`authorUrl: ${existingMeta.authorUrl}`);
+  if (existingContributors.length) {
+    const contributorsJson = JSON.stringify(existingContributors.map(c => 
+      c.url ? { name: c.name, url: c.url } : { name: c.name }
+    ));
+    lines.push(`contributors: ${contributorsJson}`);
+  }
+  
+  if (!lines.length) return stripped;
+  return `<!--\n${lines.join('\n')}\n-->\n\n${stripped}`;
+};
+
+// 源码模式编辑功能
+const startEditingRaw = () => {
+  if (currentFile.value?.content) {
+    editedRawContent.value = currentFile.value.content;
+    isEditingRaw.value = true;
+  }
+};
+
+const cancelEditingRaw = () => {
+  isEditingRaw.value = false;
+  editedRawContent.value = '';
+};
+
+const saveRawContent = async () => {
+  const token = getToken();
+  if (!token) {
+    alert(lang.value === 'zh' ? '请先在设置中配置 GitHub Token' : 'Please configure GitHub Token in Settings');
+    showSettings.value = true;
+    return;
+  }
+  
+  if (!currentFile.value) return;
+  
+  isSavingRaw.value = true;
+  
+  try {
+    // 获取当前用户信息（用于贡献者名单）
+    const contributorName = localStorage.getItem('author_name') || '';
+    const contributorUrl = localStorage.getItem('author_url') || '';
+    
+    // 添加贡献者信息到内容
+    let finalContent = editedRawContent.value;
+    if (contributorName) {
+      finalContent = buildMetaCommentWithContributors(finalContent, { name: contributorName, url: contributorUrl });
+    }
+    
+    // 构建文件路径
+    const filePath = `notes/${currentFile.value.path}`;
+    const repoOwner = localStorage.getItem('github_repo_owner') || 'soft-zihan';
+    const repoName = localStorage.getItem('github_repo_name') || 'soft-zihan.github.io';
+    
+    const result = await uploadFile(
+      { owner: repoOwner, repo: repoName, branch: 'main', token },
+      filePath,
+      finalContent,
+      `Update article: ${currentFile.value.name}`
+    );
+    
+    if (result.success) {
+      // 更新本地内容
+      currentFile.value.content = finalContent;
+      isEditingRaw.value = false;
+      editedRawContent.value = '';
+      
+      // 如果是渲染模式，重新渲染
+      if (!isRawMode.value) {
+        await updateRenderedContent();
+      }
+      
+      showToast(lang.value === 'zh' ? '保存成功！' : 'Saved successfully!');
+    } else {
+      alert(`${lang.value === 'zh' ? '保存失败' : 'Save failed'}: ${result.message}`);
+    }
+  } catch (e: any) {
+    alert(`${lang.value === 'zh' ? '保存出错' : 'Save error'}: ${e.message || e}`);
+  } finally {
+    isSavingRaw.value = false;
+  }
+};
+
 // 从文章内容中提取 tags
 const extractTagsFromContent = (content: string): string[] => {
   const meta = extractMetaFromContent(content);
@@ -824,29 +1049,43 @@ const updateRenderedContent = async () => {
         const parentDirParts = currentFile.value.path.split('/');
         parentDirParts.pop(); // remove filename
         const parentDir = parentDirParts.join('/'); 
+        // 使用绝对路径前缀确保移动端兼容性
         const baseUrl = (import.meta as any).env?.BASE_URL || '/';
-        const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+        // 对于 GitHub Pages，使用完整的绝对路径
+        const isRelativeBase = baseUrl === './' || baseUrl === '.';
+        const normalizedBase = isRelativeBase ? './' : (baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`);
         const serverPrefix = `${normalizedBase}notes/`; 
         
         const resolvePath = (relPath: string) => {
-          const cleaned = relPath.replace(/^\.+\//, '');
-          if (cleaned.startsWith('http') || cleaned.startsWith('data:')) return relPath;
-            if (cleaned.startsWith('/notes/')) return `${normalizedBase}notes/${cleaned.replace(/^\/notes\//, '')}`;
-            if (cleaned.startsWith('notes/')) return `${normalizedBase}${cleaned}`;
-            if (cleaned.startsWith('/')) return `${normalizedBase}${cleaned.replace(/^\/+/, '')}`;
-            
+          // 保留原始路径用于特殊协议
+          const trimmed = relPath.trim();
+          if (trimmed.startsWith('http') || trimmed.startsWith('//') || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) return relPath;
+          
+          // 处理 GitHub raw URL (已经是完整URL的情况)
+          if (trimmed.includes('githubusercontent.com') || trimmed.includes('github.com')) return relPath;
+          
+          // 移除开头的 ./ 但保留 ../
+          let cleaned = trimmed.replace(/^\.\//g, '');
+          
+          // 处理绝对路径 /notes/...
+          if (cleaned.startsWith('/notes/')) return `${normalizedBase}notes/${cleaned.replace(/^\/notes\//, '')}`;
+          if (cleaned.startsWith('notes/')) return `${normalizedBase}${cleaned}`;
+          // 处理其他绝对路径 /image/... 等
+          if (cleaned.startsWith('/')) return `${normalizedBase}${cleaned.replace(/^\/+/, '')}`;
+          
+          // 处理相对路径 (包括 ../ 开头的)
           const parts = cleaned.split('/');
-            const parentParts = parentDir.split('/').filter(p => p); 
-            
-            for (const part of parts) {
-                if (part === '.') continue;
-                if (part === '..') {
-                    if (parentParts.length > 0) parentParts.pop();
-                } else {
-                    parentParts.push(part);
-                }
-            }
-            return `${serverPrefix}${parentParts.join('/')}`;
+          const parentParts = parentDir.split('/').filter(p => p); 
+          
+          for (const part of parts) {
+              if (part === '.') continue;
+              if (part === '..') {
+                  if (parentParts.length > 0) parentParts.pop();
+              } else {
+                  parentParts.push(part);
+              }
+          }
+          return `${serverPrefix}${parentParts.join('/')}`;
         };
 
           const splitImageToken = (raw: string) => {
@@ -1055,6 +1294,103 @@ const copyCodeContent = () => {
     navigator.clipboard.writeText(codeModalContent.value).then(() => showToast(t.value.toast_copied));
 };
 
+// 根据文件扩展名获取语言
+const getLanguageFromFileName = (fileName: string): string => {
+  const ext = fileName.split('.').pop()?.toLowerCase() || '';
+  const langMap: Record<string, string> = {
+    'vue': 'html',
+    'ts': 'typescript',
+    'tsx': 'typescript',
+    'js': 'javascript',
+    'jsx': 'javascript',
+    'json': 'json',
+    'html': 'html',
+    'css': 'css',
+    'scss': 'scss',
+    'md': 'markdown',
+    'py': 'python',
+    'sh': 'bash',
+    'yml': 'yaml',
+    'yaml': 'yaml'
+  };
+  return langMap[ext] || 'plaintext';
+};
+
+// 代码弹窗语法高亮
+const highlightedCodeContent = computed(() => {
+  if (!codeModalContent.value || codeModalContent.value === 'Loading...') {
+    return codeModalContent.value;
+  }
+  const lang = getLanguageFromFileName(codeModalTitle.value);
+  try {
+    if (hljs.getLanguage(lang)) {
+      return hljs.highlight(codeModalContent.value, { language: lang }).value;
+    }
+    return hljs.highlightAuto(codeModalContent.value).value;
+  } catch {
+    return codeModalContent.value;
+  }
+});
+
+// 保存打开弹窗前的 URL 用于恢复
+const previousUrl = ref<string | null>(null);
+
+// 打开代码弹窗并更新 URL
+const openCodeModal = async (title: string, content: string, path: string) => {
+  // 保存当前 URL
+  previousUrl.value = window.location.href;
+  
+  codeModalTitle.value = title;
+  codeModalContent.value = content;
+  codeModalPath.value = path;
+  showCodeModal.value = true;
+  
+  // 更新 URL（类似文章的路由方式）
+  const url = new URL(window.location.href);
+  url.searchParams.set('source', path);
+  window.history.pushState({ source: path }, '', url.toString());
+};
+
+// 关闭代码弹窗并恢复 URL
+const closeCodeModal = () => {
+  showCodeModal.value = false;
+  codeModalContent.value = '';
+  codeModalTitle.value = '';
+  codeModalPath.value = '';
+  
+  // 恢复 URL
+  const url = new URL(window.location.href);
+  url.searchParams.delete('source');
+  window.history.pushState({}, '', url.toString());
+};
+
+// 获取项目根目录下的源代码文件（如 App.vue, vite.config.ts 等）
+const fetchSourceCodeFile = async (filePath: string): Promise<string> => {
+  // 移除开头的斜杠
+  const cleanPath = filePath.replace(/^\/+/, '');
+  
+  // 将路径转换为 raw 目录下的文件名格式（/ 替换为 _，加 .txt 后缀）
+  const rawFileName = cleanPath.replace(/\//g, '_') + '.txt';
+  
+  try {
+    // 从 raw 目录获取（构建时生成的源代码文件）
+    const res = await fetch(`./raw/${rawFileName}`);
+    if (res.ok) {
+      return await res.text();
+    }
+    
+    // 回退：尝试直接获取（开发环境）
+    const fallbackRes = await fetch(`./${cleanPath}`);
+    if (fallbackRes.ok) {
+      return await fallbackRes.text();
+    }
+    
+    return `// Error: Could not load file\n// Path: ${filePath}\n// Tried: ./raw/${rawFileName}`;
+  } catch (e: any) {
+    return `// Error: ${e.message}\n// Path: ${filePath}`;
+  }
+};
+
 // Handle search selection
 const handleSearchSelect = (result: any) => {
   showSearch.value = false;
@@ -1260,6 +1596,7 @@ const handleContentClick = async (e: MouseEvent) => {
   const link = target.closest('a');
   if (link) {
     const href = link.getAttribute('href');
+    
     const isSupportedInternal = (raw?: string | null) => {
       if (!raw) return false;
       if (raw.startsWith('http') || raw.startsWith('//')) return false;
@@ -1275,7 +1612,7 @@ const handleContentClick = async (e: MouseEvent) => {
       const isCodeFile = !href.toLowerCase().endsWith('.md');
 
       if (href.startsWith('/')) {
-          // Absolute path from root (e.g. /source.md -> source.md)
+          // Absolute path from root (e.g. /App.vue -> App.vue)
           targetPath = href.substring(1);
       } else if (currentFile.value?.path) {
         // Resolve relative path
@@ -1295,15 +1632,37 @@ const handleContentClick = async (e: MouseEvent) => {
           targetPath = href;
       }
 
-      // Try to find exact match
+      // 对于代码文件（非 .md），直接打开代码弹窗
+      if (isCodeFile) {
+        const fileName = targetPath.split('/').pop() || targetPath;
+        await openCodeModal(fileName, 'Loading...', targetPath);
+        
+        // 尝试从 fileSystem 中查找
+        let node = findNodeByPath(fileSystem.value, targetPath);
+        let content = '';
+        
+        if (node && node.type === NodeType.FILE) {
+          // 从 fileSystem 中获取内容
+          if (!node.content) {
+            node.content = await fetchFileContent(node);
+          }
+          content = node.content;
+        } else {
+          // 尝试从项目根目录获取（如 /App.vue, /vite.config.ts 等）
+          content = await fetchSourceCodeFile(targetPath);
+        }
+        
+        codeModalContent.value = content;
+        return;
+      }
+
+      // 对于 .md 文件，尝试在 fileSystem 中查找
       let node = findNodeByPath(fileSystem.value, targetPath);
       
       if (node && node.type === NodeType.FILE) {
         if (node.isSource || node.path.startsWith('source')) { 
             // Treat source*.md as source code too for viewing
-            codeModalTitle.value = node.name;
-            codeModalContent.value = 'Loading...';
-            showCodeModal.value = true;
+            await openCodeModal(node.name, 'Loading...', node.path);
             
             if (!node.content) {
                 node.content = await fetchFileContent(node);
@@ -1435,7 +1794,29 @@ onMounted(async () => {
     if (res.ok) {
       fileSystem.value = await res.json();
       const params = new URLSearchParams(window.location.search);
-      const targetPath = params.get('path'); 
+      const targetPath = params.get('path');
+      const sourcePath = params.get('source'); // 代码弹窗路由
+      
+      // 处理代码文件弹窗路由
+      if (sourcePath) {
+        const fileName = sourcePath.split('/').pop() || sourcePath;
+        await openCodeModal(fileName, 'Loading...', sourcePath);
+        
+        // 尝试获取内容
+        let node = findNodeByPath(fileSystem.value, sourcePath);
+        let content = '';
+        
+        if (node && node.type === NodeType.FILE) {
+          if (!node.content) {
+            node.content = await fetchFileContent(node);
+          }
+          content = node.content;
+        } else {
+          content = await fetchSourceCodeFile(sourcePath);
+        }
+        
+        codeModalContent.value = content;
+      }
       
       if (targetPath) {
         // Decode it just in case, though browser usually does it

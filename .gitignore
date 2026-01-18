@@ -17,5 +17,7 @@ yarn-error.log*
 source*.md
 RyuChan-参考/
 docs/
-# public/raw
-v1.0/
+public/raw
+public/files.json
+public/music.json
+public/wallpapers.json
