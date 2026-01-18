@@ -13,18 +13,67 @@
           v-for="tab in tabs" 
           :key="tab.id"
           @click="activeTab = tab.id"
-          class="px-4 md:px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2"
+          class="px-3 md:px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex flex-col items-center gap-0.5 min-w-[60px] md:min-w-[90px]"
           :class="activeTab === tab.id ? 'bg-white dark:bg-gray-700 text-sakura-600 dark:text-sakura-300 shadow-md transform scale-105' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
         >
-          <span>{{ tab.icon }}</span>
-          <span class="hidden md:inline">{{ tab.label }}</span>
+          <span class="text-lg md:text-xl">{{ tab.icon }}</span>
+          <span class="text-[10px] md:text-xs">{{ tab.label.split(' ').pop() }}</span>
+          <span class="text-[8px] text-gray-400 hidden md:block">{{ lang === 'zh' ? `第${tab.stage}阶段` : `Stage ${tab.stage}` }}</span>
         </button>
+      </div>
+    </div>
+
+    <!-- Learning Progress Indicator -->
+    <div class="max-w-3xl mx-auto mb-8 px-4">
+      <div class="flex items-center gap-2">
+        <template v-for="(tab, index) in tabs" :key="tab.id">
+          <div 
+            class="flex-1 h-2 rounded-full transition-all duration-300 cursor-pointer"
+            :class="tabs.findIndex(t => t.id === activeTab) >= index ? 'bg-sakura-400' : 'bg-gray-200 dark:bg-gray-700'"
+            @click="activeTab = tab.id"
+          ></div>
+        </template>
+      </div>
+      <div class="flex justify-between mt-2 text-[10px] text-gray-400">
+        <span>{{ lang === 'zh' ? '入门' : 'Beginner' }}</span>
+        <span>{{ lang === 'zh' ? '进阶' : 'Advanced' }}</span>
       </div>
     </div>
 
     <!-- Content Area -->
     <div class="min-h-[500px] transition-all duration-500">
       
+      <!-- Stage Info Banner -->
+      <div class="max-w-4xl mx-auto mb-8 px-4">
+        <div class="bg-gradient-to-r from-sakura-50 to-purple-50 dark:from-sakura-900/20 dark:to-purple-900/20 rounded-2xl p-4 md:p-6 border border-sakura-100 dark:border-sakura-800/30">
+          <div class="flex items-start gap-4">
+            <div class="text-4xl">{{ tabs.find(t => t.id === activeTab)?.icon }}</div>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg">
+                {{ lang === 'zh' ? `第${tabs.find(t => t.id === activeTab)?.stage}阶段：` : `Stage ${tabs.find(t => t.id === activeTab)?.stage}: ` }}
+                {{ tabs.find(t => t.id === activeTab)?.label.replace(/^[^\s]+\s/, '') }}
+              </h3>
+              <p class="text-sm text-sakura-600 dark:text-sakura-400 mt-1">
+                🎯 {{ tabs.find(t => t.id === activeTab)?.goal }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ tabs.find(t => t.id === activeTab)?.desc }}
+              </p>
+            </div>
+            <div class="hidden md:block text-right">
+              <span class="text-xs text-gray-400">{{ lang === 'zh' ? '前置要求' : 'Prerequisites' }}</span>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <template v-if="activeTab === 'foundation'">{{ lang === 'zh' ? '无需基础' : 'None' }} ✅</template>
+                <template v-else-if="activeTab === 'js-advanced'">{{ lang === 'zh' ? '完成 Web 基础' : 'Web Basics' }}</template>
+                <template v-else-if="activeTab === 'engineering'">{{ lang === 'zh' ? '完成 JS 进阶' : 'JS Advanced' }}</template>
+                <template v-else-if="activeTab === 'vue'">{{ lang === 'zh' ? '完成工程化' : 'Engineering' }}</template>
+                <template v-else>{{ lang === 'zh' ? '完成所有阶段' : 'All stages' }}</template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Tab 1: Web Foundation (HTML/CSS/JS) -->
       <div v-if="activeTab === 'foundation'" class="space-y-12 animate-fade-in">
         
@@ -122,56 +171,151 @@
         <section>
           <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🧱</span> {{ t.lab_html_title }}
+            <span class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 px-2 py-0.5 rounded-full ml-2">{{ lang === 'zh' ? 'HTML 解析' : 'HTML Parsing' }}</span>
           </h2>
           <LabHtml :lang="lang" />
         </section>
 
-        <!-- Part 3: JS Event Bubbling & DOM Manipulation -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            <section>
-            <h2 class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4 flex items-center gap-2">
-                <span class="text-2xl">⚡</span> {{ lang === 'zh' ? 'JS 核心机制' : 'JS Core Mechanics' }}
-            </h2>
-            <LabJs :lang="lang" />
-            </section>
-            
-            <section>
-             <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">
-                <span class="text-2xl">🎮</span> {{ t.lab_dom_title }}
-            </h2>
-             <LabDom :lang="lang" />
-            </section>
-        </div>
+        <!-- Part 3: HTML Basics (NEW) -->
+        <section>
+          <LabHtmlBasics :lang="lang" />
+        </section>
 
-        <!-- Learning Path (Roadmap) -->
+        <!-- Next Step Guide -->
+        <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <div class="max-w-2xl mx-auto text-center">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+              {{ lang === 'zh' ? '🎉 完成本阶段后' : '🎉 After this stage' }}
+            </h3>
+            <p class="text-gray-500 text-sm mb-6">
+              {{ lang === 'zh' ? '你已经可以制作静态网页了！接下来学习 JavaScript 进阶，让网页动起来。' : 'You can now build static web pages! Next, learn advanced JS to make them interactive.' }}
+            </p>
+            <button 
+              @click="activeTab = 'js-advanced'"
+              class="px-6 py-3 bg-sakura-500 hover:bg-sakura-600 text-white rounded-xl font-bold transition-all hover:scale-105"
+            >
+              {{ lang === 'zh' ? '进入下一阶段 →' : 'Next Stage →' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: JS Advanced -->
+      <div v-else-if="activeTab === 'js-advanced'" class="space-y-12 animate-fade-in">
+        
+        <!-- JS Core Mechanics (moved from foundation) -->
+        <section>
+          <h2 class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4 flex items-center gap-2">
+            <span class="text-2xl">⚡</span> {{ lang === 'zh' ? 'JavaScript 核心机制' : 'JavaScript Core Mechanics' }}
+            <span class="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-300 px-2 py-0.5 rounded-full ml-2">{{ lang === 'zh' ? '事件冒泡/this' : 'Event Bubbling/this' }}</span>
+          </h2>
+          <LabJs :lang="lang" />
+        </section>
+
+        <!-- DOM Manipulation -->
+        <section>
+          <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">
+            <span class="text-2xl">🎮</span> {{ t.lab_dom_title }}
+            <span class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full ml-2">{{ lang === 'zh' ? 'DOM API' : 'DOM API' }}</span>
+          </h2>
+          <LabDom :lang="lang" />
+        </section>
+
+        <!-- Async Programming (Ajax) -->
         <section class="max-w-4xl mx-auto">
-          <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-8 border border-sakura-100 dark:border-gray-700 shadow-xl">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <span class="text-2xl">🗺️</span>
-              {{ lang === 'zh' ? '前端学习路径' : 'Frontend Learning Path' }}
-            </h2>
-            <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
-              <li>1) HTML / CSS / JS → {{ lang === 'zh' ? '打好基础，并能做简单交互' : 'build essentials and simple interactivity' }}</li>
-              <li>2) TypeScript + DOM / Web API → {{ lang === 'zh' ? '提升类型与浏览器API应用能力' : 'strengthen types and browser APIs' }}</li>
-              <li>3) 模块化（ESM/CJS） → {{ lang === 'zh' ? '理解模块加载与组织' : 'understand module loading and organization' }}</li>
-              <li>4) npm 包管理 → {{ lang === 'zh' ? '学会依赖管理与脚本' : 'learn dependency management and scripts' }}</li>
-              <li>5) CSS 框架（TailwindCSS） → {{ lang === 'zh' ? '快速搭建现代样式' : 'rapidly style modern UIs' }}</li>
-              <li>6) UI 框架（Vue） → {{ lang === 'zh' ? '组件化、响应式与生态' : 'components, reactivity, ecosystem' }}</li>
-            </ul>
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
-              <a href="zh/VUE学习笔记/01-基础概念与MVVM.md" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">📝 HTML/CSS/JS</a>
-              <a href="https://www.typescriptlang.org/docs/" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🧩 TypeScript</a>
-              <a href="https://developer.mozilla.org/docs/Web/API" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🧪 Web API</a>
-              <a href="https://nodejs.org/docs/latest/api/modules.html" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">📦 ESM/CJS</a>
-              <a href="https://docs.npmjs.com/" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🔧 npm</a>
-              <a href="https://tailwindcss.com/docs" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🎨 TailwindCSS</a>
-              <a href="https://vuejs.org/guide/introduction.html" target="_blank" rel="noopener" class="p-4 rounded-xl border hover:border-sakura-400 transition-colors">🟩 Vue</a>
-            </div>
+          <h2 class="text-xl font-bold text-green-600 dark:text-green-400 mb-4 flex items-center gap-2 justify-center">
+            <span class="text-2xl">📡</span> {{ t.lab_ajax_title }}
+            <span class="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 px-2 py-0.5 rounded-full ml-2">{{ lang === 'zh' ? 'Promise/async' : 'Promise/async' }}</span>
+          </h2>
+          <LabAjax :lang="lang" />
+        </section>
+
+        <!-- TypeScript Placeholder -->
+        <section class="max-w-4xl mx-auto">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 text-center">
+            <div class="text-4xl mb-4">🔷</div>
+            <h3 class="font-bold text-gray-700 dark:text-gray-300 text-lg mb-2">
+              {{ lang === 'zh' ? 'TypeScript 类型系统' : 'TypeScript Type System' }}
+            </h3>
+            <p class="text-gray-500 text-sm mb-4">
+              {{ lang === 'zh' ? '类型注解、接口、泛型 - 开发中...' : 'Type annotations, interfaces, generics - Coming soon...' }}
+            </p>
+            <span class="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+              {{ lang === 'zh' ? '🚧 即将推出' : '🚧 Coming Soon' }}
+            </span>
           </div>
         </section>
       </div>
 
-      <!-- Tab 2: Vue Core -->
+      <!-- Tab 3: Engineering -->
+      <div v-else-if="activeTab === 'engineering'" class="space-y-12 animate-fade-in">
+        
+        <!-- Module System Placeholder -->
+        <section class="max-w-4xl mx-auto">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 text-center">
+            <div class="text-4xl mb-4">📦</div>
+            <h3 class="font-bold text-gray-700 dark:text-gray-300 text-lg mb-2">
+              {{ lang === 'zh' ? '模块化系统' : 'Module System' }}
+            </h3>
+            <p class="text-gray-500 text-sm mb-4">
+              {{ lang === 'zh' ? 'ESM vs CommonJS、导入导出、模块作用域' : 'ESM vs CommonJS, import/export, module scope' }}
+            </p>
+            <span class="inline-block px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-sm">
+              {{ lang === 'zh' ? '🚧 即将推出' : '🚧 Coming Soon' }}
+            </span>
+          </div>
+        </section>
+
+        <!-- NPM Placeholder -->
+        <section class="max-w-4xl mx-auto">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 text-center">
+            <div class="text-4xl mb-4">📚</div>
+            <h3 class="font-bold text-gray-700 dark:text-gray-300 text-lg mb-2">
+              {{ lang === 'zh' ? 'NPM 包管理' : 'NPM Package Management' }}
+            </h3>
+            <p class="text-gray-500 text-sm mb-4">
+              {{ lang === 'zh' ? 'package.json、依赖管理、语义化版本' : 'package.json, dependencies, semantic versioning' }}
+            </p>
+            <span class="inline-block px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full text-sm">
+              {{ lang === 'zh' ? '🚧 即将推出' : '🚧 Coming Soon' }}
+            </span>
+          </div>
+        </section>
+
+        <!-- Build Tools Placeholder -->
+        <section class="max-w-4xl mx-auto">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 text-center">
+            <div class="text-4xl mb-4">⚙️</div>
+            <h3 class="font-bold text-gray-700 dark:text-gray-300 text-lg mb-2">
+              {{ lang === 'zh' ? '构建工具 (Vite)' : 'Build Tools (Vite)' }}
+            </h3>
+            <p class="text-gray-500 text-sm mb-4">
+              {{ lang === 'zh' ? '为什么需要打包、Vite 配置、环境变量' : 'Why bundling, Vite config, env variables' }}
+            </p>
+            <span class="inline-block px-4 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full text-sm">
+              {{ lang === 'zh' ? '🚧 即将推出' : '🚧 Coming Soon' }}
+            </span>
+          </div>
+        </section>
+
+        <!-- TailwindCSS Preview -->
+        <section class="max-w-4xl mx-auto">
+          <div class="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-2xl p-8 border border-cyan-200 dark:border-cyan-800/30 text-center">
+            <div class="text-4xl mb-4">🎨</div>
+            <h3 class="font-bold text-gray-700 dark:text-gray-300 text-lg mb-2">
+              {{ lang === 'zh' ? 'TailwindCSS 快速入门' : 'TailwindCSS Quickstart' }}
+            </h3>
+            <p class="text-gray-500 text-sm mb-4">
+              {{ lang === 'zh' ? '工具类 CSS、响应式设计、暗色模式' : 'Utility CSS, responsive design, dark mode' }}
+            </p>
+            <span class="inline-block px-4 py-2 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-full text-sm">
+              {{ lang === 'zh' ? '🚧 即将推出' : '🚧 Coming Soon' }}
+            </span>
+          </div>
+        </section>
+      </div>
+
+       <!-- Tab 4: Vue Core (was Tab 2) -->
       <div v-else-if="activeTab === 'vue'" class="space-y-12 animate-fade-in">
          
         <!-- Part 1: Reactivity - Vue's Core Foundation -->
@@ -255,18 +399,8 @@
           </div>
         </div>
       </div>
-      
-       <!-- Tab 3: Network -->
-      <div v-else-if="activeTab === 'network'" class="space-y-12 animate-fade-in">
-         <section class="max-w-4xl mx-auto">
-           <h2 class="text-xl font-bold text-green-600 dark:text-green-400 mb-4 flex items-center gap-2 justify-center">
-             <span class="text-2xl">📡</span> {{ t.lab_ajax_title }}
-           </h2>
-           <LabAjax :lang="lang" />
-        </section>
-      </div>
 
-      <!-- Tab 4: Challenge -->
+      <!-- Tab 5: Challenge -->
       <div v-else-if="activeTab === 'challenge'" class="animate-fade-in">
          <section class="max-w-3xl mx-auto">
            <h2 class="text-xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2 justify-center">
@@ -288,17 +422,18 @@ import LabReactivity from './LabReactivity.vue';
 import LabDirectives from './LabDirectives.vue';
 import LabLifecycle from './LabLifecycle.vue';
 import LabHtml from './LabHtml.vue';
+import LabHtmlBasics from './LabHtmlBasics.vue';
 import LabJs from './LabJs.vue';
 import LabDom from './LabDom.vue';
-
-defineEmits<{
-  'select-lab': [lab: 'event-handling' | 'slot'];
-}>();
 import LabAjax from './LabAjax.vue';
 import LabVueList from './LabVueList.vue';
 import LabPropsEmit from './LabPropsEmit.vue';
 import LabClassStyle from './LabClassStyle.vue';
 import LabCodeEvolution from './LabCodeEvolution.vue';
+
+defineEmits<{
+  'select-lab': [lab: 'event-handling' | 'slot'];
+}>();
 
 const props = defineProps<{
   lang: 'en' | 'zh';
@@ -308,11 +443,48 @@ const t = computed(() => I18N[props.lang]);
 
 const activeTab = ref('foundation');
 
+// Learning path stages - progressive learning from basics to advanced
 const tabs = computed(() => [
-  { id: 'foundation', label: t.value.cat_foundation, icon: '🌐' },
-  { id: 'vue', label: t.value.cat_vue, icon: '🥝' },
-  { id: 'network', label: t.value.cat_network, icon: '📡' },
-  { id: 'challenge', label: t.value.cat_challenge, icon: '🏆' },
+  { 
+    id: 'foundation', 
+    label: props.lang === 'zh' ? '🌐 Web基础' : '🌐 Web Basics', 
+    icon: '🌐',
+    stage: 1,
+    desc: props.lang === 'zh' ? 'HTML/CSS/JS 基础' : 'HTML/CSS/JS Basics',
+    goal: props.lang === 'zh' ? '能制作经典动态网页' : 'Build interactive web pages'
+  },
+  { 
+    id: 'js-advanced', 
+    label: props.lang === 'zh' ? '⚡ JS进阶' : '⚡ JS Advanced', 
+    icon: '⚡',
+    stage: 2,
+    desc: props.lang === 'zh' ? 'TypeScript/DOM/异步' : 'TypeScript/DOM/Async',
+    goal: props.lang === 'zh' ? '掌握 JS 高级特性' : 'Master JS advanced features'
+  },
+  { 
+    id: 'engineering', 
+    label: props.lang === 'zh' ? '🔧 工程化' : '🔧 Engineering', 
+    icon: '🔧',
+    stage: 3,
+    desc: props.lang === 'zh' ? '模块化/NPM/构建' : 'Modules/NPM/Build',
+    goal: props.lang === 'zh' ? '不借助框架完成项目' : 'Build projects without frameworks'
+  },
+  { 
+    id: 'vue', 
+    label: props.lang === 'zh' ? '🥝 Vue 3' : '🥝 Vue 3', 
+    icon: '🥝',
+    stage: 4,
+    desc: props.lang === 'zh' ? '响应式/组件/状态' : 'Reactivity/Components/State',
+    goal: props.lang === 'zh' ? '构建现代 Web 应用' : 'Build modern web apps'
+  },
+  { 
+    id: 'challenge', 
+    label: props.lang === 'zh' ? '🏆 挑战赛' : '🏆 Challenge', 
+    icon: '🏆',
+    stage: 5,
+    desc: props.lang === 'zh' ? '测验与项目' : 'Quiz & Projects',
+    goal: props.lang === 'zh' ? '检验综合能力' : 'Test your skills'
+  },
 ]);
 
 // Web Standards State

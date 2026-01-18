@@ -40,10 +40,6 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
     })
     searchIndex.value = miniSearch
     isFullIndexReady.value = false
-    // Eagerly load full content and build index at init
-    if (fetchFileContentFn) {
-      await loadFullContentAndRebuild()
-    }
   }
   
   // Load all file contents and rebuild index with complete data
@@ -59,14 +55,13 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
     
     try {
       // Recursively load file contents (only for current language)
-      const fetchFn = fetchFileContentFn as (file: FileNode) => Promise<string>
       const loadFileContents = async (nodes: FileNode[]) => {
         for (const node of nodes) {
           if (node.type === NodeType.FILE && !node.isSource && !node.content) {
             // Only load files from current language directory
             if (node.path.startsWith(langPrefix)) {
               try {
-                node.content = await fetchFn(node)
+                node.content = await fetchFileContentFn(node)
                 // Rebuild index progressively as content loads
                 rebuildSearchIndex()
               } catch (e) {
@@ -139,7 +134,10 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
       return []
     }
     
-    // Index is built eagerly at init or language change; no lazy trigger here
+    // Trigger full content loading on first search if not ready
+    if (!isFullIndexReady.value && !isLoadingContent.value) {
+      loadFullContentAndRebuild()
+    }
     
     isSearching.value = true
     
@@ -237,8 +235,6 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
       currentLang.value = lang
       isFullIndexReady.value = false // Reset to reload for new language
       rebuildSearchIndex() // Rebuild with current content
-      // Eagerly (re)load all content for the new language
-      loadFullContentAndRebuild()
     }
   }
   

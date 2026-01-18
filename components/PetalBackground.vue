@@ -46,7 +46,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { createPetal, updatePetals, vortexState, startLongPress, updateLongPress, endLongPress, longPressTimer, type Petal } from './petal/usePetals';
 
 const props = defineProps<{
-  speed: 'slow' | 'fast';
+  speed: 'off' | 'slow' | 'fast';
   isDark: boolean;
 }>();
 

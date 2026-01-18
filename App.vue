@@ -72,7 +72,9 @@
         :view-mode="viewMode"
         :current-tool="currentTool"
         :current-file="currentFile"
-        v-model:showParticles="appStore.showParticles"
+        :show-particles="appStore.showParticles"
+        :is-dark="appStore.isDark"
+        :petal-speed="appStore.userSettings.petalSpeed"
         v-model:isRawMode="isRawMode"
         @reset="resetToHome"
         @navigate="navigateToBreadcrumb"
@@ -82,6 +84,8 @@
         @open-search="showSearch = true"
         @open-music="musicStore.showMusicPlayer = true"
         @open-write="showWriteEditor = true"
+        @toggle-theme="toggleTheme(!appStore.isDark)"
+        @update:petal-speed="handlePetalSpeedChange"
       />
 
       <!-- Content Area -->
@@ -166,9 +170,9 @@
                    <button 
                      @click="articleStore.toggleFavorite(currentFile.path)"
                      class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all"
-                     :class="articleStore.isFavorited(currentFile.path) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-amber-50'"
+                     :class="articleStore.isFavorite(currentFile.path) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-amber-50'"
                    >
-                     <span>{{ articleStore.isFavorited(currentFile.path) ? '⭐' : '☆' }}</span>
+                     <span>{{ articleStore.isFavorite(currentFile.path) ? '⭐' : '☆' }}</span>
                      <span>{{ t.favorite }}</span>
                    </button>
                    <span class="text-xs text-gray-400 flex items-center gap-1">
@@ -321,7 +325,6 @@
       :t="t"
       :is-dark="appStore.isDark"
       :settings="appStore.userSettings"
-      @toggle-theme="toggleTheme"
     />
 
     <!-- Search Modal -->
@@ -448,6 +451,13 @@ const toggleTheme = (val: boolean) => {
   else document.documentElement.classList.remove('dark');
 };
 
+// Handle petal speed change
+const handlePetalSpeedChange = (speed: 'off' | 'slow' | 'fast') => {
+  appStore.userSettings.petalSpeed = speed;
+  // When speed is 'off', hide particles; otherwise show them
+  appStore.showParticles = speed !== 'off';
+};
+
 // Data
 const fileSystem = ref<FileNode[]>([]);
 const currentFile = ref<FileNode | null>(null);
@@ -487,7 +497,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
   if (e.key === 'Escape') {
     showSearch.value = false;
-    showMusicPlayer.value = false;
+    musicStore.showMusicPlayer = false;
     showWriteEditor.value = false;
     sidebarOpen.value = false;
   }

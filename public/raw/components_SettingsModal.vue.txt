@@ -3,20 +3,7 @@
     <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full animate-fade-in border border-white/50 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
       <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6">{{ t.settings_title }}</h3>
       
-      <!-- Theme Toggle -->
-      <div class="mb-6">
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.theme }}</label>
-          <div class="flex gap-2">
-            <button @click="toggleTheme(false)" class="flex-1 py-3 border rounded-xl flex items-center justify-center gap-2 transition-colors" :class="!isDark ? 'border-sakura-500 bg-sakura-50 text-sakura-600' : 'border-gray-200 dark:border-gray-700 text-gray-500'">
-              <span>🌞</span> {{ t.theme_light }}
-            </button>
-            <button @click="toggleTheme(true)" class="flex-1 py-3 border rounded-xl flex items-center justify-center gap-2 transition-colors" :class="isDark ? 'border-purple-500 bg-gray-700 text-purple-300' : 'border-gray-200 dark:border-gray-700 text-gray-500'">
-              <span>🌙</span> {{ t.theme_dark }}
-            </button>
-          </div>
-      </div>
-
-      <!-- Banner Mode (NEW) -->
+      <!-- Banner Mode -->
       <div class="mb-6">
           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.banner_settings || 'Banner Mode' }}</label>
           <div class="grid grid-cols-2 gap-2">
@@ -31,36 +18,6 @@
             </button>
             <button @click="settings.bannerMode = 'hide'" class="py-2 border rounded-xl text-sm transition-colors flex items-center justify-center gap-2" :class="settings.bannerMode === 'hide' ? 'border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400' : 'border-gray-200 dark:border-gray-700 text-gray-500'">
               <span>🚫</span> {{ t.banner_hide || 'Hide' }}
-            </button>
-          </div>
-      </div>
-
-      <!-- Wallpaper Switch -->
-      <div class="mb-6">
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.wallpaper || 'Wallpaper' }}</label>
-          <div class="grid grid-cols-3 gap-2">
-            <button 
-              v-for="wp in themeWallpapers" 
-              :key="wp.filename" 
-              @click="setWallpaper(wp.filename)"
-              class="relative border rounded-xl overflow-hidden group"
-              :class="currentWallpaperFilename === wp.filename ? 'border-sakura-500' : 'border-gray-200 dark:border-gray-700'"
-            >
-              <img :src="wp.path" class="w-full h-16 object-cover" />
-              <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </button>
-          </div>
-      </div>
-
-      <!-- Sakura Speed -->
-      <div class="mb-6">
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t.sakura_speed }}</label>
-          <div class="flex flex-col gap-2">
-            <button @click="settings.petalSpeed = 'slow'" class="flex-1 py-3 border rounded-xl text-sm transition-colors flex items-center justify-center gap-2" :class="settings.petalSpeed === 'slow' ? 'border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400' : 'border-gray-200 dark:border-gray-700 text-gray-500'">
-              <span>🌸</span> {{ t.speed_5cm }}
-            </button>
-            <button @click="settings.petalSpeed = 'fast'" class="flex-1 py-3 border rounded-xl text-sm transition-colors flex items-center justify-center gap-2" :class="settings.petalSpeed === 'fast' ? 'border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400' : 'border-gray-200 dark:border-gray-700 text-gray-500'">
-              <span>💨</span> {{ t.speed_10cm }}
             </button>
           </div>
       </div>
@@ -89,10 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useWallpapers } from '../composables/useWallpapers'
-
-const props = defineProps<{
+defineProps<{
   t: any;
   isDark: boolean;
   settings: {
@@ -105,18 +59,5 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'toggle-theme', val: boolean): void;
 }>();
-
-const toggleTheme = (val: boolean) => {
-  emit('toggle-theme', val);
-};
-
-// Wallpaper options for current theme
-const { currentThemeWallpapers, setWallpaper } = useWallpapers()
-const themeWallpapers = computed(() => currentThemeWallpapers.value)
-// Current selection filename is stored in app store; derive via composable
-import { useAppStore } from '../stores/appStore'
-const appStore = useAppStore()
-const currentWallpaperFilename = computed(() => appStore.currentWallpaperFilename)
 </script>

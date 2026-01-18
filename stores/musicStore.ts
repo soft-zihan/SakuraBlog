@@ -203,21 +203,32 @@ export const useMusicStore = defineStore('music', () => {
         const persisted = localStorage.getItem('music_currentTrackFilename')
         if (persisted && playlist.value.length > 0) {
           const index = findTrackByFilename(persisted)
-          currentIndex.value = index
-        }
-        
-        // Restore playing state
-        const playingState = localStorage.getItem('music_isPlaying')
-        if (playingState) {
-          isPlaying.value = playingState === 'true'
+          // If not found (index would be 0 from findTrackByFilename), check if it actually matched
+          if (index === 0 && persisted !== getTrackFilename(playlist.value[0])) {
+            // Track not found, reset to first track and pause
+            currentIndex.value = 0
+            isPlaying.value = false
+            localStorage.removeItem('music_currentTrackFilename')
+            console.log('Persisted track not found, reset to first track')
+          } else {
+            currentIndex.value = index
+            // Restore playing state only if track was found
+            const playingState = localStorage.getItem('music_isPlaying')
+            if (playingState) {
+              isPlaying.value = playingState === 'true'
+            }
+          }
+        } else {
+          // No persisted track, set to first and pause
+          currentIndex.value = 0
+          isPlaying.value = false
         }
       }
     } catch (e) {
       console.warn('Failed to load music playlist:', e)
       // Ensure we have at least one track
-      if (playlist.value.length === 0) {
-        currentIndex.value = 0
-      }
+      currentIndex.value = 0
+      isPlaying.value = false
     }
   }
   

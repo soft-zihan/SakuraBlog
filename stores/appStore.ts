@@ -17,7 +17,7 @@ export const useAppStore = defineStore('app', () => {
   const userSettings = ref({
     fontSize: 'normal' as 'small' | 'normal' | 'large',
     fontFamily: 'sans' as 'sans' | 'serif',
-    petalSpeed: 'slow' as 'slow' | 'fast',
+    petalSpeed: 'slow' as 'off' | 'slow' | 'fast',
     bannerMode: 'normal' as 'normal' | 'fullscreen' | 'background' | 'hide'
   })
   

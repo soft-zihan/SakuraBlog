@@ -59,11 +59,39 @@
         <span class="text-lg">✏️</span>
       </button>
 
-      <!-- Particles Toggle -->
-       <button @click="$emit('update:showParticles', !showParticles)" class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center relative group" :title="showParticles ? 'Hide petals' : 'Show petals'">
-         <span class="text-lg transition-all duration-300" :class="{'opacity-100 filter-none': showParticles, 'opacity-40 grayscale': !showParticles}">🌸</span>
-       </button>
-       <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+      <!-- Theme Toggle -->
+      <button 
+        @click="$emit('toggle-theme')" 
+        class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
+        :title="isDark ? t.theme_light : t.theme_dark"
+      >
+        <span class="text-lg transition-transform duration-300" :class="isDark ? 'rotate-0' : 'rotate-180'">{{ isDark ? '🌙' : '🌞' }}</span>
+      </button>
+
+      <!-- Petal Speed Toggle with rotation animation -->
+      <div class="relative group/petal">
+        <button 
+          @click="cyclePetalSpeed" 
+          class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
+          :title="petalSpeedTitle"
+        >
+          <span 
+            class="text-lg transition-all duration-300" 
+            :class="{
+              'opacity-40 grayscale': petalSpeed === 'off',
+              'animate-spin-slow': petalSpeed === 'slow',
+              'animate-spin-fast': petalSpeed === 'fast'
+            }"
+            :style="{ animationPlayState: petalSpeed === 'off' ? 'paused' : 'running' }"
+          >🌸</span>
+        </button>
+        <!-- Hover tooltip -->
+        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover/petal:opacity-100 transition-opacity pointer-events-none">
+          {{ petalSpeedTitle }}
+        </div>
+      </div>
+       
+      <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
       <!-- Action Buttons -->
       <template v-if="currentFile">
@@ -91,12 +119,15 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { BreadcrumbItem, FileNode } from '../types';
 import { useMusicStore } from '../stores/musicStore';
+import { useAppStore } from '../stores/appStore';
 
 const musicStore = useMusicStore();
+const appStore = useAppStore();
 
-defineProps<{
+const props = defineProps<{
   lang: string;
   t: any;
   breadcrumbs: BreadcrumbItem[];
@@ -105,9 +136,11 @@ defineProps<{
   currentFile: FileNode | null;
   showParticles: boolean;
   isRawMode: boolean;
+  isDark: boolean;
+  petalSpeed: 'off' | 'slow' | 'fast';
 }>();
 
-defineEmits([
+const emit = defineEmits([
   'reset', 
   'navigate', 
   'update:showParticles', 
@@ -117,6 +150,46 @@ defineEmits([
   'open-settings',
   'open-search',
   'open-music',
-  'open-write'
+  'open-write',
+  'toggle-theme',
+  'update:petalSpeed'
 ]);
+
+// Petal speed tooltip text
+const petalSpeedTitle = computed(() => {
+  const titles: Record<string, string> = {
+    off: props.lang === 'zh' ? '关闭' : 'Off',
+    slow: props.lang === 'zh' ? '秒速五厘米' : '5cm/s',
+    fast: props.lang === 'zh' ? '秒速十厘米' : '10cm/s'
+  };
+  return titles[props.petalSpeed] || '';
+});
+
+// Cycle through petal speeds: off -> slow -> fast -> off
+const cyclePetalSpeed = () => {
+  const speeds: Array<'off' | 'slow' | 'fast'> = ['off', 'slow', 'fast'];
+  const currentIndex = speeds.indexOf(props.petalSpeed);
+  const nextIndex = (currentIndex + 1) % speeds.length;
+  emit('update:petalSpeed', speeds[nextIndex]);
+};
 </script>
+
+<style scoped>
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-fast {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-spin-fast {
+  animation: spin-fast 4s linear infinite;
+}
+</style>
