@@ -1,0 +1,55 @@
+{
+  "_meta": {
+    "author": "测试备份名",
+    "timestamp": "2026-01-18T15:05:03.881Z",
+    "version": "1.0",
+    "note": "此备份不包含 GitHub Token，恢复后需要重新设置"
+  },
+  "data": {
+    "app": {
+      "lang": "zh",
+      "isDark": true,
+      "currentWallpaperFilename": "pexels-krisof-1252869.jpg",
+      "userSettings": {
+        "fontSize": "normal",
+        "fontFamily": "sans",
+        "petalSpeed": "slow",
+        "bannerMode": "fullscreen"
+      },
+      "showParticles": true
+    },
+    "lang": "zh-CN",
+    "music_currentTrackFilename": "你若三冬-兰音Reine.m4s",
+    "author_name": "测试作者",
+    "article": {
+      "likedArticles": [
+        "zh/Linux命令行/01_基础/01_文件管理.md"
+      ],
+      "favorites": [
+        "zh/Linux命令行/01_基础/01_文件管理.md"
+      ],
+      "articleStats": {
+        "zh/Linux命令行/04_实战/06_常用场景速查.md": {
+          "likes": 0
+        },
+        "zh/Linux命令行/01_基础/01_文件管理.md": {
+          "likes": 1
+        }
+      },
+      "userFingerprint": "x2g20a",
+      "selectedTags": [
+        "notag"
+      ],
+      "showFavoritesOnly": false
+    },
+    "giscus-session": "95ec7ab8d8a3430912b26140o1DkxWbk0XZqHUmJhHdX8CDGbozHQg7QVozd5jMn1gZxzuQF8TBaZJLzVeKFb+hHmLn0XX9JXj/KJVra7JSzbXKpezOdllLnGioC58pBH9dNfwKo/zQMyUe/BWA=",
+    "music_isPlaying": false,
+    "github_repo_name": "soft-zihan.github.io",
+    "github_repo_owner": "soft-zihan",
+    "music": {
+      "volume": 0.37,
+      "playMode": "sequence"
+    },
+    "publish_author": "测试备份名"
+  }
+}
