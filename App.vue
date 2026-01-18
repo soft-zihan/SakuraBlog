@@ -884,12 +884,11 @@ const cancelEditingRaw = () => {
   editedRawContent.value = '';
 };
 
-const createPullRequestForFileUpdate = async (
+const updateFileOnMain = async (
   options: { owner: string; repo: string; base: string; token: string },
   filePath: string,
   content: string,
-  title: string,
-  authorName: string
+  title: string
 ): Promise<{ success: boolean; message: string; url?: string }> => {
   const { owner, repo, base, token } = options;
   const headers = {
@@ -898,32 +897,7 @@ const createPullRequestForFileUpdate = async (
     'Content-Type': 'application/json'
   };
 
-  const branch = 'edit/raw-editor';
-
   try {
-    const baseRefRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${base}`,
-      { headers }
-    );
-    if (!baseRefRes.ok) throw new Error('Failed to get base branch info');
-    const baseRef = await baseRefRes.json();
-    const baseSha = baseRef.object.sha;
-
-    const createRefRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/git/refs`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: baseSha })
-      }
-    );
-    if (!createRefRes.ok) {
-      const err = await createRefRes.json();
-      if (createRefRes.status !== 422) {
-        throw new Error(err.message || 'Failed to create branch');
-      }
-    }
-
     let sha: string | undefined;
     const fileRes = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${base}`,
@@ -942,53 +916,20 @@ const createPullRequestForFileUpdate = async (
         body: JSON.stringify({
           message: `Update article: ${title}`,
           content: btoa(unescape(encodeURIComponent(content))),
-          branch,
+          branch: base,
           sha
         })
       }
     );
     if (!updateRes.ok) {
       const err = await updateRes.json();
-      throw new Error(err.message || 'Failed to update file on branch');
+      throw new Error(err.message || 'Failed to update file on main');
     }
 
-    const prBody = authorName
-      ? `Contributor: ${authorName}\n\nAuto-generated from Sakura Notes raw editor.`
-      : 'Auto-generated from Sakura Notes raw editor.';
-
-    const existingPrRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/pulls?state=open&head=${owner}:${branch}&base=${base}`,
-      { headers }
-    );
-    if (existingPrRes.ok) {
-      const prs = await existingPrRes.json();
-      if (Array.isArray(prs) && prs.length > 0) {
-        return { success: true, message: 'PR exists', url: prs[0].html_url };
-      }
-    }
-
-    const prRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/pulls`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          title: `Update ${title}`,
-          head: branch,
-          base,
-          body: prBody
-        })
-      }
-    );
-    if (!prRes.ok) {
-      const err = await prRes.json();
-      throw new Error(err.message || 'Failed to create PR');
-    }
-    const prData = await prRes.json();
-
-    return { success: true, message: 'PR created', url: prData.html_url };
+    const updateData = await updateRes.json();
+    return { success: true, message: 'Updated on main', url: updateData.content?.html_url };
   } catch (e: any) {
-    return { success: false, message: e.message || 'PR failed' };
+    return { success: false, message: e.message || 'Update failed' };
   }
 };
 
@@ -1020,12 +961,11 @@ const saveRawContent = async () => {
     const repoOwner = localStorage.getItem('github_repo_owner') || 'soft-zihan';
     const repoName = localStorage.getItem('github_repo_name') || 'soft-zihan.github.io';
     
-    const result = await createPullRequestForFileUpdate(
+    const result = await updateFileOnMain(
       { owner: repoOwner, repo: repoName, base: 'main', token },
       filePath,
       finalContent,
-      currentFile.value.name,
-      contributorName
+      currentFile.value.name
     );
     
     if (result.success) {
@@ -1040,9 +980,9 @@ const saveRawContent = async () => {
       }
       
       if (result.url) {
-        alert(`${lang.value === 'zh' ? '已提交 PR：' : 'PR created: '}${result.url}`);
+        alert(`${lang.value === 'zh' ? '已提交到 main：' : 'Updated on main: '}${result.url}`);
       } else {
-        showToast(lang.value === 'zh' ? '提交成功！' : 'Submitted successfully!');
+        showToast(lang.value === 'zh' ? '已提交到 main！' : 'Updated on main!');
       }
     } else {
       alert(`${lang.value === 'zh' ? '提交失败' : 'Publish failed'}: ${result.message}`);
@@ -1492,6 +1432,14 @@ const normalizeHref = (raw: string): string => {
   }
 };
 
+const stripHashQuery = (raw: string): string => {
+  const trimmed = raw.trim();
+  const hashIndex = trimmed.indexOf('#');
+  const queryIndex = trimmed.indexOf('?');
+  const cutIndex = [hashIndex, queryIndex].filter(i => i >= 0).sort((a, b) => a - b)[0];
+  return cutIndex !== undefined ? trimmed.slice(0, cutIndex) : trimmed;
+};
+
 // 获取项目根目录下的源代码文件（如 App.vue, vite.config.ts 等）
 const fetchSourceCodeFile = async (filePath: string): Promise<string> => {
   // 移除开头的斜杠
@@ -1729,8 +1677,8 @@ const handleContentClick = async (e: MouseEvent) => {
     const isSupportedInternal = (raw?: string | null) => {
       if (!raw) return false;
       if (raw.startsWith('http') || raw.startsWith('//')) return false;
-      const cleaned = normalizeHref(raw);
-      if (!cleaned) return false;
+      const cleaned = stripHashQuery(raw);
+      if (!cleaned || cleaned.startsWith('#')) return false;
       const lower = cleaned.toLowerCase();
       const exts = ['.md', '.vue', '.ts', '.tsx', '.js', '.jsx', '.json', '.html', '.css', '.scss'];
       return exts.some(ext => lower.endsWith(ext));

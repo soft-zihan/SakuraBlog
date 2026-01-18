@@ -746,7 +746,6 @@ const publish = async () => {
 
     const imageRefs = extractImagePaths(processedContent)
     const localRefs = new Set<string>()
-    const remoteRefs = new Set<string>()
 
     for (const raw of imageRefs) {
       const { path } = normalizeImageToken(raw)
@@ -756,22 +755,37 @@ const publish = async () => {
         continue
       }
       if (isDataOrLocalToken(path)) continue
-      if (isHttpUrl(path)) {
-        remoteRefs.add(path)
-        continue
-      }
+      if (isHttpUrl(path)) continue
       localRefs.add(path)
     }
 
-    const totalImages = localRefs.size + remoteRefs.size
+    const totalImages = localRefs.size
     if (totalImages > 0) {
       publishProgress.value = 20
       let step = 0
 
+      const fetchLocalImageFile = async (rawPath: string) => {
+        try {
+          const base = new URL(window.location.href)
+          const target = new URL(rawPath, base)
+          const res = await fetch(target.toString())
+          if (!res.ok) return null
+          const blob = await res.blob()
+          const fileName = decodeURIComponent(target.pathname.split('/').pop() || `image-${Date.now()}`)
+          const type = blob.type || 'image/png'
+          return new File([blob], fileName, { type })
+        } catch {
+          return null
+        }
+      }
+
       for (const ref of localRefs) {
-        const file = localImageTokenMap.get(ref)
+        let file = localImageTokenMap.get(ref)
           || localImageNameMap.get(ref)
           || localImageNameMap.get(getImageBasename(ref))
+        if (!file) {
+          file = await fetchLocalImageFile(ref)
+        }
         if (file) {
           const imageUrl = await uploadImage(
             { owner: repoOwner.value, repo: repoName.value, branch: 'main', token },
@@ -786,34 +800,6 @@ const publish = async () => {
             imageUrlMap.set(encodeURI(file.name), imageUrl)
             imageUrlMap.set(safeDecode(file.name), imageUrl)
           }
-        }
-        step += 1
-        publishProgress.value = 20 + Math.round((step / totalImages) * 40)
-      }
-
-      const fetchRemoteImageFile = async (rawUrl: string) => {
-        try {
-          const finalUrl = rawUrl.startsWith('//') ? `${window.location.protocol}${rawUrl}` : rawUrl
-          const res = await fetch(finalUrl)
-          if (!res.ok) return null
-          const blob = await res.blob()
-          const fileName = decodeURIComponent(new URL(finalUrl).pathname.split('/').pop() || `image-${Date.now()}`)
-          const type = blob.type || 'image/png'
-          return new File([blob], fileName, { type })
-        } catch {
-          return null
-        }
-      }
-
-      for (const imgUrl of remoteRefs) {
-        const file = await fetchRemoteImageFile(imgUrl)
-        if (file) {
-          const imageUrl = await uploadImage(
-            { owner: repoOwner.value, repo: repoName.value, branch: 'main', token },
-            file,
-            imageFolder
-          )
-          if (imageUrl) imageUrlMap.set(imgUrl, imageUrl)
         }
         step += 1
         publishProgress.value = 20 + Math.round((step / totalImages) * 40)
@@ -1124,7 +1110,6 @@ const publishImportedFiles = async () => {
 
     const contentMap = new Map<string, string>()
     const localImageRefs = new Set<string>()
-    const remoteImageRefs = new Set<string>()
 
     for (const item of selectedItems) {
       const text = await item.file.text()
@@ -1133,10 +1118,7 @@ const publishImportedFiles = async () => {
       for (const raw of paths) {
         const { path } = normalizeImageToken(raw)
         if (!path || isDataOrLocalToken(path)) continue
-        if (isHttpUrl(path)) {
-          remoteImageRefs.add(path)
-          continue
-        }
+        if (isHttpUrl(path)) continue
         const resolved = resolveImagePath(item.relPath, path)
         if (resolved && imageMap.has(resolved)) {
           localImageRefs.add(resolved)
@@ -1149,7 +1131,7 @@ const publishImportedFiles = async () => {
       }
     }
 
-    const totalSteps = localImageRefs.size + remoteImageRefs.size + selectedItems.length
+    const totalSteps = localImageRefs.size + selectedItems.length
     let step = 0
 
     const imageUrlMap = new Map<string, string>()
@@ -1166,34 +1148,6 @@ const publishImportedFiles = async () => {
         imageUrlMap.set(imgPath, url)
         const base = getImageBasename(imgPath)
         if (base) imageUrlMap.set(base, url)
-      }
-      step += 1
-      importProgress.value = Math.round((step / totalSteps) * 100)
-    }
-
-    const fetchRemoteImageFile = async (rawUrl: string) => {
-      try {
-        const finalUrl = rawUrl.startsWith('//') ? `${window.location.protocol}${rawUrl}` : rawUrl
-        const res = await fetch(finalUrl)
-        if (!res.ok) return null
-        const blob = await res.blob()
-        const fileName = decodeURIComponent(new URL(finalUrl).pathname.split('/').pop() || `image-${Date.now()}`)
-        const type = blob.type || 'image/png'
-        return new File([blob], fileName, { type })
-      } catch {
-        return null
-      }
-    }
-
-    for (const imgUrl of remoteImageRefs) {
-      const file = await fetchRemoteImageFile(imgUrl)
-      if (file) {
-        const url = await uploadImage(
-          { owner: repoOwner.value, repo: repoName.value, branch: 'main', token },
-          file,
-          imageFolder
-        )
-        if (url) imageUrlMap.set(imgUrl, url)
       }
       step += 1
       importProgress.value = Math.round((step / totalSteps) * 100)
