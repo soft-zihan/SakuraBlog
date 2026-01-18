@@ -743,10 +743,10 @@ const publish = async () => {
           imageFolder
         )
         if (imageUrl) {
-          processedContent = processedContent.replace(
-            new RegExp(`local-image:${img.id}`, 'g'),
-            imageUrl
-          )
+          const token = `local-image:${img.id}`
+          processedContent = processedContent
+            .replace(new RegExp(token, 'g'), imageUrl)
+            .replace(new RegExp(`src=["']${token}["']`, 'g'), `src="${imageUrl}"`)
         }
         publishProgress.value = 20 + Math.round((i + 1) / totalImages * 40)
       }

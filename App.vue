@@ -126,6 +126,13 @@
           <button @click="applyFormat('underline-double')" class="p-2 hover:bg-white/20 rounded-xl text-xs font-bold flex items-center gap-1 transition-all" title="Double Underline">
              <span class="underline decoration-double decoration-blue-400 underline-offset-2">≡</span>
           </button>
+
+          <div class="w-px bg-white/20 mx-0.5"></div>
+
+          <!-- Block Highlight -->
+          <button @click="applyFormat('highlight-block')" class="p-2 hover:bg-white/20 rounded-xl text-xs font-bold flex items-center gap-1 transition-all" title="Block Highlight">
+            <span class="px-2 py-0.5 border border-yellow-300 rounded bg-yellow-200/40">▭</span>
+          </button>
         </div>
 
         <!-- Center Stage -->
@@ -426,6 +433,7 @@ import WriteEditor from './components/WriteEditor.vue';
 import GiscusComments from './components/GiscusComments.vue';
 import ArticleCard from './components/ArticleCard.vue';
 import { marked } from 'marked';
+import hljs from 'highlight.js/lib/common';
 
 // Pinia Stores
 import { useAppStore } from './stores/appStore';
@@ -788,6 +796,11 @@ const setupMarkedRenderer = () => {
       .replace(/\s+/g, '-')
       .replace(/[^\w\-\u4e00-\u9fa5]+/g, '');
       return `<h${level} id="${id}">${text}</h${level}>`;
+  };
+  renderer.code = function(code, language) {
+      const lang = (language && hljs.getLanguage(language)) ? language : 'plaintext';
+      const highlighted = hljs.highlight(code, { language: lang }).value;
+      return `<pre class="hljs"><code class="hljs language-${lang}">${highlighted}</code></pre>`;
   };
   marked.use({ renderer });
 };
@@ -1176,7 +1189,7 @@ const getSelectionRangeInViewer = () => {
   return { range, viewer };
 };
 
-const applyFormat = (type: 'highlight-yellow' | 'highlight-green' | 'highlight-blue' | 'highlight-pink' | 'underline-wavy' | 'underline-double') => {
+const applyFormat = (type: 'highlight-yellow' | 'highlight-green' | 'highlight-blue' | 'highlight-pink' | 'underline-wavy' | 'underline-double' | 'highlight-block') => {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
 
@@ -1190,7 +1203,8 @@ const applyFormat = (type: 'highlight-yellow' | 'highlight-green' | 'highlight-b
     'highlight-blue': 'bg-blue-200 dark:bg-blue-800/60 rounded px-0.5 transition-colors shadow-sm',
     'highlight-pink': 'bg-pink-200 dark:bg-pink-800/60 rounded px-0.5 transition-colors shadow-sm',
     'underline-wavy': 'underline decoration-wavy decoration-sakura-500 underline-offset-4',
-    'underline-double': 'underline decoration-double decoration-blue-500 underline-offset-4'
+    'underline-double': 'underline decoration-double decoration-blue-500 underline-offset-4',
+    'highlight-block': 'sakura-block-highlight'
   };
 
   try {
@@ -1232,8 +1246,7 @@ const applyFormat = (type: 'highlight-yellow' | 'highlight-green' | 'highlight-b
 // Lightbox logic & Link Interception
 const handleContentClick = async (e: MouseEvent) => {
   const target = e.target as HTMLElement;
-  const sel = window.getSelection();
-  if (selectionMenu.value.locked && sel && !sel.isCollapsed) return;
+  if (selectionMenu.value.locked) return;
   
   // 1. Handle Lightbox
   if (target.tagName === 'IMG') {
@@ -1491,5 +1504,14 @@ textarea,
 pre,
 code {
   user-select: text;
+}
+
+.sakura-block-highlight {
+  background: rgba(252, 211, 77, 0.35);
+  border: 1px solid rgba(252, 211, 77, 0.8);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.05em 0.2em;
+  border-radius: 0.35rem;
 }
 </style>
