@@ -118,14 +118,16 @@ export function useContentClick(
     // 2. 拦截内部链接
     const link = target.closest('a')
     if (link) {
-      const href = link.getAttribute('href')
+      // 优先使用 data-internal-href（由 marked 渲染器设置的内部链接）
+      const internalHref = link.getAttribute('data-internal-href')
+      const href = internalHref || link.getAttribute('href')
       
-      // 先检查是否需要拦截，如果需要则立即阻止默认行为
-      if (href && isSupportedInternalLink(href)) {
+      // 检查是否需要处理（内部链接或有 data-internal-href）
+      if (internalHref || (href && isSupportedInternalLink(href))) {
         e.preventDefault()
         e.stopPropagation()
         
-        const targetPath = resolveTargetPath(href, currentFile.value?.path)
+        const targetPath = resolveTargetPath(href!, currentFile.value?.path)
         const isCode = isCodeFile(targetPath)
 
         // 对于代码文件，直接打开代码弹窗

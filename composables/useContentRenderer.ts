@@ -3,6 +3,7 @@ import { marked } from 'marked'
 import hljs from 'highlight.js/lib/common'
 import type { FileNode, TocItem } from '../types'
 import { stripMetaComment } from './useArticleMeta'
+import { isSupportedInternalLink } from './useContentClick'
 
 /**
  * 内容渲染 composable
@@ -28,6 +29,16 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
       const lang = (language && hljs.getLanguage(language)) ? language : 'plaintext'
       const highlighted = hljs.highlight(code, { language: lang }).value
       return `<pre class="hljs"><code class="hljs language-${lang}">${highlighted}</code></pre>`
+    }
+    // 自定义链接渲染：为内部链接添加 data-internal 属性，防止浏览器自动跳转
+    renderer.link = function(href, title, text) {
+      const titleAttr = title ? ` title="${title}"` : ''
+      if (isSupportedInternalLink(href)) {
+        // 内部链接：使用 data-href 存储原始路径，href 设为 javascript:void(0) 防止跳转
+        return `<a href="javascript:void(0)" data-internal-href="${href}"${titleAttr}>${text}</a>`
+      }
+      // 外部链接：正常渲染，新窗口打开
+      return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`
     }
     marked.use({ renderer })
   }

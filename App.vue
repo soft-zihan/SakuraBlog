@@ -877,8 +877,10 @@ const handleContentClickEvent = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   const link = target.closest('a');
   if (link) {
+    // 检查 data-internal-href（由 marked 渲染器设置）或普通 href
+    const internalHref = link.getAttribute('data-internal-href');
     const href = link.getAttribute('href');
-    if (href && isSupportedInternalLink(href)) {
+    if (internalHref || (href && isSupportedInternalLink(href))) {
       e.preventDefault();
       e.stopPropagation();
     }
