@@ -885,9 +885,8 @@ const clearImportSelection = () => {
   importSelected.value = []
 }
 
-const isRemotePath = (p: string) => {
-  return /^https?:\/\//i.test(p) || p.startsWith('//') || p.startsWith('data:') || p.startsWith('local-image:')
-}
+const isHttpUrl = (p: string) => /^https?:\/\//i.test(p) || p.startsWith('//')
+const isDataOrLocalToken = (p: string) => p.startsWith('data:') || p.startsWith('local-image:')
 
 const extractImagePaths = (text: string) => {
   const paths: string[] = []
@@ -910,7 +909,7 @@ const normalizeImageToken = (raw: string) => {
 }
 
 const resolveImagePath = (mdRelPath: string, imgPath: string) => {
-  if (!imgPath || isRemotePath(imgPath)) return null
+  if (!imgPath || isHttpUrl(imgPath) || isDataOrLocalToken(imgPath)) return null
   if (imgPath.startsWith('/')) return null
   const mdDir = mdRelPath.split('/').slice(0, -1)
   const parts = imgPath.split('/')
@@ -923,12 +922,29 @@ const resolveImagePath = (mdRelPath: string, imgPath: string) => {
   return normalizePath(stack.join('/'))
 }
 
+const getImageBasename = (p: string) => {
+  const cleaned = p.split('?')[0].split('#')[0]
+  const parts = cleaned.split('/')
+  return parts[parts.length - 1] || ''
+}
+
+const getImageKeyCandidates = (mdRelPath: string, raw: string) => {
+  const { path } = normalizeImageToken(raw)
+  const keys = [path]
+  const resolved = resolveImagePath(mdRelPath, path)
+  if (resolved) keys.push(resolved)
+  const base = getImageBasename(path)
+  if (base) keys.push(base)
+  return keys
+}
+
 const replaceLocalImages = (text: string, mdRelPath: string, urlMap: Map<string, string>) => {
   const replacePath = (raw: string) => {
     const { path, tail } = normalizeImageToken(raw)
-    const resolved = resolveImagePath(mdRelPath, path)
-    if (resolved && urlMap.has(resolved)) {
-      const url = urlMap.get(resolved) as string
+    const candidates = getImageKeyCandidates(mdRelPath, raw)
+    const matched = candidates.find(key => urlMap.has(key))
+    if (matched) {
+      const url = urlMap.get(matched) as string
       return tail ? `${url} ${tail}` : url
     }
     return raw
@@ -984,13 +1000,16 @@ const publishImportedFiles = async () => {
   try {
     const imageFiles = importFiles.value.filter((f: File) => /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name))
     const imageMap = new Map<string, File>()
+    const imageNameMap = new Map<string, File>()
     for (const file of imageFiles) {
       const rel = normalizePath(getFileRelPath(file, importMode.value))
       imageMap.set(rel, file)
+      imageNameMap.set(file.name, file)
     }
 
     const contentMap = new Map<string, string>()
-    const imageRefs = new Set<string>()
+    const localImageRefs = new Set<string>()
+    const remoteImageRefs = new Set<string>()
 
     for (const item of selectedItems) {
       const text = await item.file.text()
@@ -998,25 +1017,69 @@ const publishImportedFiles = async () => {
       const paths = extractImagePaths(text)
       for (const raw of paths) {
         const { path } = normalizeImageToken(raw)
+        if (!path || isDataOrLocalToken(path)) continue
+        if (isHttpUrl(path)) {
+          remoteImageRefs.add(path)
+          continue
+        }
         const resolved = resolveImagePath(item.relPath, path)
-        if (resolved && imageMap.has(resolved)) imageRefs.add(resolved)
+        if (resolved && imageMap.has(resolved)) {
+          localImageRefs.add(resolved)
+          continue
+        }
+        const base = getImageBasename(path)
+        if (base && imageNameMap.has(base)) {
+          localImageRefs.add(base)
+        }
       }
     }
 
-    const totalSteps = imageRefs.size + selectedItems.length
+    const totalSteps = localImageRefs.size + remoteImageRefs.size + selectedItems.length
     let step = 0
 
     const imageUrlMap = new Map<string, string>()
     const imageFolder = 'notes/images'
-    for (const imgPath of imageRefs) {
-      const file = imageMap.get(imgPath)
+    for (const imgPath of localImageRefs) {
+      const file = imageMap.get(imgPath) || imageNameMap.get(imgPath)
       if (!file) continue
       const url = await uploadImage(
         { owner: repoOwner.value, repo: repoName.value, branch: 'main', token },
         file,
         imageFolder
       )
-      if (url) imageUrlMap.set(imgPath, url)
+      if (url) {
+        imageUrlMap.set(imgPath, url)
+        const base = getImageBasename(imgPath)
+        if (base) imageUrlMap.set(base, url)
+      }
+      step += 1
+      importProgress.value = Math.round((step / totalSteps) * 100)
+    }
+
+    const fetchRemoteImageFile = async (rawUrl: string) => {
+      try {
+        const finalUrl = rawUrl.startsWith('//') ? `${window.location.protocol}${rawUrl}` : rawUrl
+        const res = await fetch(finalUrl)
+        if (!res.ok) return null
+        const blob = await res.blob()
+        const fileName = decodeURIComponent(new URL(finalUrl).pathname.split('/').pop() || `image-${Date.now()}`)
+        const type = blob.type || 'image/png'
+        return new File([blob], fileName, { type })
+      } catch {
+        return null
+      }
+    }
+
+    for (const imgUrl of remoteImageRefs) {
+      const file = await fetchRemoteImageFile(imgUrl)
+      if (file) {
+        const url = await uploadImage(
+          { owner: repoOwner.value, repo: repoName.value, branch: 'main', token },
+          file,
+          imageFolder
+        )
+        if (url) imageUrlMap.set(imgUrl, url)
+      }
       step += 1
       importProgress.value = Math.round((step / totalSteps) * 100)
     }

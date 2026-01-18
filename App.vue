@@ -537,7 +537,7 @@ const showCodeModal = ref(false);
 const codeModalContent = ref('');
 const codeModalTitle = ref('');
 
-const selectionMenu = ref({ show: false, x: 0, y: 0 });
+const selectionMenu = ref({ show: false, x: 0, y: 0, locked: false });
 const lastSelectionRange = ref<Range | null>(null);
 
 // Wallpaper URLs (user to place files in project; hardcoded paths)
@@ -810,12 +810,18 @@ const updateRenderedContent = async () => {
         const parentDirParts = currentFile.value.path.split('/');
         parentDirParts.pop(); // remove filename
         const parentDir = parentDirParts.join('/'); 
-        const serverPrefix = '/notes/'; 
+        const baseUrl = (import.meta as any).env?.BASE_URL || '/';
+        const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+        const serverPrefix = `${normalizedBase}notes/`; 
         
         const resolvePath = (relPath: string) => {
-            if (relPath.startsWith('http') || relPath.startsWith('/') || relPath.startsWith('data:')) return relPath;
+          const cleaned = relPath.replace(/^\.+\//, '');
+          if (cleaned.startsWith('http') || cleaned.startsWith('data:')) return relPath;
+            if (cleaned.startsWith('/notes/')) return `${normalizedBase}notes/${cleaned.replace(/^\/notes\//, '')}`;
+            if (cleaned.startsWith('notes/')) return `${normalizedBase}${cleaned}`;
+            if (cleaned.startsWith('/')) return `${normalizedBase}${cleaned.replace(/^\/+/, '')}`;
             
-            const parts = relPath.split('/');
+          const parts = cleaned.split('/');
             const parentParts = parentDir.split('/').filter(p => p); 
             
             for (const part of parts) {
@@ -829,13 +835,28 @@ const updateRenderedContent = async () => {
             return `${serverPrefix}${parentParts.join('/')}`;
         };
 
-        rawContent = rawContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, relPath) => {
-            return `![${alt}](${resolvePath(relPath)})`;
-        });
+          const splitImageToken = (raw: string) => {
+            let cleaned = raw.trim();
+            if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+              cleaned = cleaned.slice(1, -1);
+            }
+            const [pathPart, ...rest] = cleaned.split(/\s+/);
+            return { path: pathPart, tail: rest.join(' ') };
+          };
 
-        rawContent = rawContent.replace(/src="([^"]+)"/g, (match, src) => {
-            return `src="${resolvePath(src)}"`;
-        });
+          rawContent = rawContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, raw) => {
+            const { path, tail } = splitImageToken(raw);
+            const resolved = resolvePath(path);
+            const finalToken = tail ? `${resolved} ${tail}` : resolved;
+            return `![${alt}](${finalToken})`;
+          });
+
+          rawContent = rawContent.replace(/src="([^"]+)"/g, (match, src) => {
+            const { path, tail } = splitImageToken(src);
+            const resolved = resolvePath(path);
+            const finalToken = tail ? `${resolved} ${tail}` : resolved;
+            return `src="${finalToken}"`;
+          });
     }
 
     try {
@@ -921,6 +942,7 @@ const openFile = async (file: FileNode) => {
   if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
   
   selectionMenu.value.show = false;
+  selectionMenu.value.locked = false;
 
   if (!file.content) {
     contentLoading.value = true;
@@ -1053,14 +1075,20 @@ const getArticleViews = (path: string): number => {
 const handleSelection = () => {
   if (currentFile.value?.isSource) return; // No highlight for source code
   const selection = window.getSelection();
-  if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
-    selectionMenu.value.show = false;
+  if (!selection || selection.rangeCount === 0) {
+    if (!selectionMenu.value.locked) selectionMenu.value.show = false;
     return;
   }
   
-  const range = selection.getRangeAt(0);
+  const range = (selection.isCollapsed && selectionMenu.value.locked && lastSelectionRange.value)
+    ? lastSelectionRange.value
+    : selection.getRangeAt(0);
+  if (!range || range.collapsed) {
+    if (!selectionMenu.value.locked) selectionMenu.value.show = false;
+    return;
+  }
   const viewer = document.getElementById('markdown-viewer');
-  if (!viewer || !viewer.contains(range.commonAncestorContainer)) {
+  if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) {
       selectionMenu.value.show = false;
       return;
   }
@@ -1082,7 +1110,8 @@ const handleSelection = () => {
   selectionMenu.value = {
     show: true,
     x: rect.left + rect.width / 2,
-    y: rect.top - 10
+    y: rect.top - 10,
+    locked: false
   };
 };
 
@@ -1106,7 +1135,7 @@ const handleSelectionContextMenu = (e: MouseEvent) => {
   }
   
   const viewer = document.getElementById('markdown-viewer');
-  if (!viewer || !viewer.contains(range.commonAncestorContainer)) {
+  if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) {
     selectionMenu.value.show = false;
     return;
   }
@@ -1115,24 +1144,29 @@ const handleSelectionContextMenu = (e: MouseEvent) => {
   selectionMenu.value = {
     show: true,
     x: e.clientX,
-    y: e.clientY
+    y: e.clientY,
+    locked: true
   };
 };
 
 const handleSelectionChange = () => {
   if (currentFile.value?.isSource) return;
   const sel = window.getSelection();
-  if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
-    selectionMenu.value.show = false;
+  if (!sel || sel.rangeCount === 0) {
+    if (!selectionMenu.value.locked) selectionMenu.value.show = false;
     return;
   }
   const range = sel.getRangeAt(0);
   const viewer = document.getElementById('markdown-viewer');
-  if (!viewer || !viewer.contains(range.commonAncestorContainer)) {
-    selectionMenu.value.show = false;
+  if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) {
+    if (!selectionMenu.value.locked) selectionMenu.value.show = false;
     return;
   }
   lastSelectionRange.value = range.cloneRange();
+  if (sel.isCollapsed && !selectionMenu.value.locked) {
+    selectionMenu.value.show = false;
+    return;
+  }
   handleSelection();
 };
 
@@ -1166,6 +1200,7 @@ const applyFormat = (type: 'highlight-yellow' | 'highlight-green' | 'highlight-b
         range.surroundContents(span);
         selection.removeAllRanges();
         selectionMenu.value.show = false;
+        selectionMenu.value.locked = false;
     } catch (e) {
         showToast(t.value.selection_error);
     }
@@ -1179,6 +1214,7 @@ const handleContentClick = async (e: MouseEvent) => {
   if (target.tagName === 'IMG') {
     lightboxImage.value = (target as HTMLImageElement).src;
     selectionMenu.value.show = false;
+    selectionMenu.value.locked = false;
     return;
   }
   
@@ -1246,6 +1282,7 @@ const handleContentClick = async (e: MouseEvent) => {
   }
 
   selectionMenu.value.show = false;
+  selectionMenu.value.locked = false;
 };
 
 const generateToc = () => {
@@ -1412,3 +1449,14 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<style>
+#scroll-container * {
+  user-select: none;
+}
+
+#scroll-container #markdown-viewer,
+#scroll-container #markdown-viewer * {
+  user-select: text;
+}
+</style>
