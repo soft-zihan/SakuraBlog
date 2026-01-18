@@ -1,20 +1,18 @@
 {
+  "_comment": "此文件由 scripts/generate-music.js 自动生成，请勿手动编辑",
+  "_generated": "2026-01-18T13:09:58.713Z",
   "tracks": [
     {
-      "id": "local-1",
-      "title": "你若三冬",
-      "artist": "兰音Reine",
-      "cover": "/image/music-default.jpg",
-      "url": "/music/你若三冬-兰音Reine.m4s",
-      "lrc": ""
-    },
-    {
-      "id": "local-2",
       "title": "回马枪",
       "artist": "兰音Reine",
-      "cover": "/image/music-default.jpg",
-      "url": "/music/回马枪-兰音Reine.mp3",
-      "lrc": ""
+      "url": "./music/回马枪-兰音Reine.mp3",
+      "cover": null
+    },
+    {
+      "title": "你若三冬",
+      "artist": "兰音Reine",
+      "url": "./music/你若三冬-兰音Reine.m4s",
+      "cover": null
     }
   ]
 }

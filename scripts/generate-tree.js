@@ -1,6 +1,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 const rootDir = process.cwd();
 const publicDir = path.join(rootDir, 'public');
@@ -14,6 +15,33 @@ console.log("🌸 Sakura Notes: Generating File Tree...");
 if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
 if (fs.existsSync(rawDir)) fs.rmSync(rawDir, { recursive: true, force: true });
 fs.mkdirSync(rawDir, { recursive: true });
+
+// 获取文件的 Git 最后提交时间（解决 CI 环境中文件时间戳问题）
+function getGitLastModified(filePath) {
+  try {
+    // 获取文件相对于仓库根目录的路径
+    const relativePath = path.relative(rootDir, filePath);
+    // 使用 git log 获取最后一次提交时间
+    const result = execSync(
+      `git log -1 --format="%aI" -- "${relativePath}"`,
+      { cwd: rootDir, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
+    ).trim();
+    
+    if (result) {
+      return new Date(result).toISOString();
+    }
+  } catch (e) {
+    // Git 不可用或文件未被跟踪，使用文件系统时间
+  }
+  
+  // 回退到文件系统时间
+  try {
+    const stat = fs.statSync(filePath);
+    return stat.mtime.toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+}
 
 // Helper to recursively scan directory
 function scanDirectory(basePath, relativePath, isSourceCode = false) {
@@ -79,7 +107,7 @@ function scanDirectory(basePath, relativePath, isSourceCode = false) {
           path: itemRelativePath, // Logical path for UI
           fetchPath: fetchPath,   // Actual path to fetch content
           type: 'file',
-          lastModified: stat.mtime,
+          lastModified: getGitLastModified(fullPath),
           isSource: isCode,
           wordCount: isMd ? wordCount : undefined,
           lineCount: isMd ? lineCount : undefined,
@@ -114,7 +142,7 @@ rootFilesToScan.forEach(file => {
             path: file,
             fetchPath: `raw/${rawFileName}`,
             type: 'file',
-            lastModified: fs.statSync(fullPath).mtime,
+            lastModified: getGitLastModified(fullPath),
             isSource: true
         });
     }
