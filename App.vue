@@ -1451,12 +1451,20 @@ onUnmounted(() => {
 </script>
 
 <style>
-#scroll-container * {
+body {
   user-select: none;
 }
 
-#scroll-container #markdown-viewer,
-#scroll-container #markdown-viewer * {
+#markdown-viewer,
+#markdown-viewer * {
+  user-select: text;
+}
+
+input,
+textarea,
+[contenteditable="true"],
+pre,
+code {
   user-select: text;
 }
 </style>
