@@ -596,7 +596,18 @@ const currentLangRoot = computed(() => {
 });
 
 const filteredFileSystem = computed(() => {
-  return currentLangRoot.value || [];
+  const filterTree = (nodes: FileNode[]): FileNode[] => {
+    return nodes.map((node) => {
+      if (node.type === NodeType.FILE) {
+        return isFileVisible(node) ? node : null;
+      }
+      const children = node.children ? filterTree(node.children) : [];
+      // 保留目录结构，即使没有匹配文件
+      return { ...node, children } as FileNode;
+    }).filter(Boolean) as FileNode[];
+  };
+
+  return filterTree(currentLangRoot.value || []);
 });
 
 const filteredFlatFiles = computed(() => {
@@ -609,25 +620,8 @@ const filteredFlatFiles = computed(() => {
     return files;
   };
   
-  let files = flatten(filteredFileSystem.value);
-  
-  // 应用收藏筛选
-  if (articleStore.showFavoritesOnly) {
-    files = files.filter(f => articleStore.isFavorite(f.path));
-  }
-  
-  // 应用 tag 筛选
-  if (articleStore.selectedTags.length < articleStore.availableTags.length) {
-    files = files.filter(f => {
-      const fileTags = extractTagsFromContent(f.content || '');
-      if (fileTags.length === 0) {
-        // 无 tag 的文章，检查 notag 是否被选中
-        return articleStore.isTagSelected('notag');
-      }
-      // 有 tag 的文章，检查是否有任一 tag 被选中
-      return fileTags.some(tag => articleStore.isTagSelected(tag));
-    });
-  }
+  let files = flatten(currentLangRoot.value || []);
+  files = files.filter(isFileVisible);
   
   return files.sort((a, b) => new Date(b.lastModified || 0).getTime() - new Date(a.lastModified || 0).getTime());
 });
@@ -658,9 +652,24 @@ const extractTagsFromContent = (content: string): string[] => {
   return [];
 };
 
+// 文件是否可见（收藏/标签筛选）
+const isFileVisible = (file: FileNode): boolean => {
+  if (articleStore.showFavoritesOnly && !articleStore.isFavorite(file.path)) {
+    return false;
+  }
+  if (articleStore.selectedTags.length < articleStore.availableTags.length) {
+    const fileTags = extractTagsFromContent(file.content || '');
+    if (fileTags.length === 0) {
+      return articleStore.isTagSelected('notag');
+    }
+    return fileTags.some(tag => articleStore.isTagSelected(tag));
+  }
+  return true;
+};
+
 // 从所有文章中收集 tags
 const collectAllTags = () => {
-  const allFiles = filteredFileSystem.value;
+  const allFiles = currentLangRoot.value || [];
   const flatten = (nodes: FileNode[]): FileNode[] => {
     let files: FileNode[] = [];
     for (const node of nodes) {

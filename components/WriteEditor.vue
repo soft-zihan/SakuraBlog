@@ -237,23 +237,37 @@ const showFolderBrowser = ref(false)
 const repoOwner = ref('soft-zihan')
 const repoName = ref('soft-zihan.github.io')
 
-// 默认的发布目录列表
-const defaultFolders = [
-  'notes/zh',
-  'notes/zh/Linux命令行',
-  'notes/zh/Linux命令行/01_基础',
-  'notes/zh/Linux命令行/02_核心',
-  'notes/zh/Linux命令行/03_进阶',
-  'notes/zh/Linux命令行/04_实战',
-  'notes/en',
-  'notes/en/Linux Command Line',
-  'notes/en/Linux Command Line/1 Basics',
-  'notes/en/Linux Command Line/2 Intermediate',
-  'notes/en/Linux Command Line/3 Tips and Tricks',
-  'notes/VUE学习笔记',
-  'notes/VUE Learning'
-]
-const availableFolders = ref([...defaultFolders])
+// 默认的发布目录列表（按语言）
+const defaultFoldersByLang: Record<'zh' | 'en', string[]> = {
+  zh: [
+    'notes/zh',
+    'notes/zh/Linux命令行',
+    'notes/zh/Linux命令行/01_基础',
+    'notes/zh/Linux命令行/02_核心',
+    'notes/zh/Linux命令行/03_进阶',
+    'notes/zh/Linux命令行/04_实战'
+  ],
+  en: [
+    'notes/en',
+    'notes/en/Linux Command Line',
+    'notes/en/Linux Command Line/1 Basics',
+    'notes/en/Linux Command Line/2 Intermediate',
+    'notes/en/Linux Command Line/3 Tips and Tricks'
+  ]
+}
+
+const customFoldersByLang = ref<Record<'zh' | 'en', string[]>>({
+  zh: [],
+  en: []
+})
+
+const availableFolders = computed(() => {
+  const langKey = props.lang as 'zh' | 'en'
+  const base = defaultFoldersByLang[langKey] || []
+  const custom = customFoldersByLang.value[langKey] || []
+  const merged = [...base, ...custom]
+  return Array.from(new Set(merged))
+})
 
 // 根据语言获取根目录
 const getRootFolder = () => props.lang === 'zh' ? 'notes/zh' : 'notes/en'
@@ -264,30 +278,38 @@ const addCustomFolder = () => {
   if (!folder) return
   
   const rootFolder = getRootFolder()
+  const langKey = props.lang as 'zh' | 'en'
   
-  // 移除开头的斜杠
-  folder = folder.replace(/^\/+/, '')
-  
-  // 如果用户没有输入 notes/xx 前缀，自动添加
-  if (!folder.startsWith('notes/')) {
-    folder = `${rootFolder}/${folder}`
-  } else if (!folder.startsWith(rootFolder)) {
-    // 如果输入的是 notes/ 开头但不是当前语言的目录，提示错误
+  // 统一分隔符
+  folder = folder.replace(/\\/g, '/')
+  // 禁止跨目录
+  if (folder.includes('..') || folder.startsWith('/')) {
     alert(props.lang === 'zh' 
-      ? `路径必须在 ${rootFolder} 目录下` 
-      : `Path must be under ${rootFolder}`)
+      ? '路径非法：禁止使用 .. 或以 / 开头' 
+      : 'Invalid path: do not use .. or leading /')
     return
   }
-  
-  if (!availableFolders.value.includes(folder)) {
-    availableFolders.value.unshift(folder)
-    // 只保存自定义添加的文件夹
-    const customFolders = availableFolders.value.filter(f => 
-      !defaultFolders.includes(f)
-    )
-    localStorage.setItem('custom_folders', JSON.stringify(customFolders))
+
+  // 只允许在当前语言根目录下
+  if (folder.startsWith('notes/')) {
+    if (!folder.startsWith(rootFolder)) {
+      alert(props.lang === 'zh' 
+        ? `路径必须在 ${rootFolder} 目录下` 
+        : `Path must be under ${rootFolder}`)
+      return
+    }
+  } else {
+    folder = `${rootFolder}/${folder}`
   }
-  targetFolder.value = folder
+
+  const normalized = folder.replace(/\/+$/g, '')
+  const customList = customFoldersByLang.value[langKey] || []
+  if (!customList.includes(normalized)) {
+    customFoldersByLang.value[langKey] = [normalized, ...customList]
+    localStorage.setItem(`custom_folders_${langKey}`, JSON.stringify(customFoldersByLang.value[langKey]))
+  }
+
+  targetFolder.value = normalized
   customFolder.value = ''
   showFolderBrowser.value = false
 }
@@ -423,7 +445,8 @@ const loadDraft = () => {
     const { title: t, content: c, targetFolder: f } = JSON.parse(draft)
     title.value = t || ''
     content.value = c || ''
-    targetFolder.value = f || 'notes/zh'
+    const rootFolder = getRootFolder()
+    targetFolder.value = (f && f.startsWith(rootFolder)) ? f : rootFolder
   }
 }
 
@@ -513,8 +536,15 @@ const publish = async () => {
       .replace(/^-|-$/g, '')
       + '.md'
     
-    // 确保目标文件夹不以斜杠开头或结尾
+    // 确保目标文件夹不以斜杠开头或结尾，并限制在语言根目录
+    const rootFolder = getRootFolder()
     const cleanFolder = targetFolder.value.replace(/^\/+|\/+$/g, '')
+    if (!cleanFolder.startsWith(rootFolder) || cleanFolder.includes('..')) {
+      alert(props.lang === 'zh' 
+        ? `发布路径必须在 ${rootFolder} 目录下` 
+        : `Publish path must be under ${rootFolder}`)
+      return
+    }
     const path = `${cleanFolder}/${fileName}`
     
     publishProgress.value = 80
@@ -559,16 +589,26 @@ onMounted(() => {
   repoName.value = localStorage.getItem('github_repo_name') || 'soft-zihan.github.io'
   
   // 加载自定义文件夹
-  const customFolders = localStorage.getItem('custom_folders')
-  if (customFolders) {
-    try {
-      const folders = JSON.parse(customFolders)
-      folders.forEach((f: string) => {
-        if (!availableFolders.value.includes(f)) {
-          availableFolders.value.unshift(f)
-        }
-      })
-    } catch {}
+  (['zh', 'en'] as Array<'zh' | 'en'>).forEach((langKey) => {
+    const customFolders = localStorage.getItem(`custom_folders_${langKey}`)
+    if (customFolders) {
+      try {
+        const folders = JSON.parse(customFolders)
+        customFoldersByLang.value[langKey] = Array.isArray(folders) ? folders : []
+      } catch {}
+    }
+  })
+
+  const rootFolder = getRootFolder()
+  if (!targetFolder.value.startsWith(rootFolder)) {
+    targetFolder.value = rootFolder
+  }
+})
+
+watch(() => props.lang, () => {
+  const rootFolder = getRootFolder()
+  if (!targetFolder.value.startsWith(rootFolder)) {
+    targetFolder.value = rootFolder
   }
 })
 </script>

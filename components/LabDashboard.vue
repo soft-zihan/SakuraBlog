@@ -66,7 +66,8 @@
                 <template v-if="activeTab === 'foundation'">{{ lang === 'zh' ? '无需基础' : 'None' }} ✅</template>
                 <template v-else-if="activeTab === 'js-advanced'">{{ lang === 'zh' ? '完成 Web 基础' : 'Web Basics' }}</template>
                 <template v-else-if="activeTab === 'engineering'">{{ lang === 'zh' ? '完成 JS 进阶' : 'JS Advanced' }}</template>
-                <template v-else-if="activeTab === 'vue'">{{ lang === 'zh' ? '完成工程化' : 'Engineering' }}</template>
+                <template v-else-if="activeTab === 'css-framework'">{{ lang === 'zh' ? '完成工程化' : 'Engineering' }}</template>
+                <template v-else-if="activeTab === 'vue'">{{ lang === 'zh' ? '完成 CSS 框架' : 'CSS Frameworks' }}</template>
                 <template v-else>{{ lang === 'zh' ? '完成所有阶段' : 'All stages' }}</template>
               </div>
             </div>
@@ -254,13 +255,20 @@
           <LabBuildTools :lang="lang" />
         </section>
 
-        <!-- TailwindCSS Lab -->
+      </div>
+
+      <!-- Tab 4: CSS Frameworks -->
+      <div v-else-if="activeTab === 'css-framework'" class="space-y-12 animate-fade-in">
         <section>
           <LabTailwind :lang="lang" />
         </section>
+
+        <section>
+          <LabCssFrameworks :lang="lang" />
+        </section>
       </div>
 
-       <!-- Tab 4: Vue Core (was Tab 2) -->
+       <!-- Tab 5: Vue Core (was Tab 2) -->
       <div v-else-if="activeTab === 'vue'" class="space-y-12 animate-fade-in">
          
         <!-- Part 1: Reactivity - Vue's Core Foundation -->
@@ -345,7 +353,7 @@
         </div>
       </div>
 
-      <!-- Tab 5: Challenge -->
+      <!-- Tab 6: Challenge -->
       <div v-else-if="activeTab === 'challenge'" class="animate-fade-in">
          <section class="max-w-3xl mx-auto">
            <h2 class="text-xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2 justify-center">
@@ -380,6 +388,7 @@ import LabModuleSystem from './LabModuleSystem.vue';
 import LabNpm from './LabNpm.vue';
 import LabBuildTools from './LabBuildTools.vue';
 import LabTailwind from './LabTailwind.vue';
+import LabCssFrameworks from './LabCssFrameworks.vue';
 
 defineEmits<{
   'select-lab': [lab: 'event-handling' | 'slot'];
@@ -420,10 +429,18 @@ const tabs = computed(() => [
     goal: props.lang === 'zh' ? '不借助框架完成项目' : 'Build projects without frameworks'
   },
   { 
+    id: 'css-framework', 
+    label: props.lang === 'zh' ? '🎨 CSS框架' : '🎨 CSS Frameworks', 
+    icon: '🎨',
+    stage: 4,
+    desc: props.lang === 'zh' ? 'Tailwind/组件库' : 'Tailwind/Component libs',
+    goal: props.lang === 'zh' ? '提升样式开发效率' : 'Boost UI development speed'
+  },
+  { 
     id: 'vue', 
     label: props.lang === 'zh' ? '🥝 Vue 3' : '🥝 Vue 3', 
     icon: '🥝',
-    stage: 4,
+    stage: 5,
     desc: props.lang === 'zh' ? '响应式/组件/状态' : 'Reactivity/Components/State',
     goal: props.lang === 'zh' ? '构建现代 Web 应用' : 'Build modern web apps'
   },
@@ -431,7 +448,7 @@ const tabs = computed(() => [
     id: 'challenge', 
     label: props.lang === 'zh' ? '🏆 挑战赛' : '🏆 Challenge', 
     icon: '🏆',
-    stage: 5,
+    stage: 6,
     desc: props.lang === 'zh' ? '测验与项目' : 'Quiz & Projects',
     goal: props.lang === 'zh' ? '检验综合能力' : 'Test your skills'
   },
