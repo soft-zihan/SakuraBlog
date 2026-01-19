@@ -14,7 +14,7 @@ Here is the English translation of the README file. I have maintained the origin
 
 **A pure static personal blog system designed for GitHub Pages**
 
-[🌐 Live Demo](https://soft-zihan.github.io/) · [📖 中文](README_zh.md) · [🐛 Report Issues](https://github.com/soft-zihan/soft-zihan.github.io/issues)
+[🌐 Live Demo](https://soft-zihan.github.io/) · [📖 中文](README_zh.md) · [🐛 Report Issues](https://github.com/soft-zihan/soft-zihan.github.io/issues) · [🔎 DeepWiki](https://deepwiki.com/soft-zihan/soft-zihan.github.io)
 
 </div>
 
