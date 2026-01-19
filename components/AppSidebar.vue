@@ -70,11 +70,36 @@
               </div>
             </div>
 
-            <!-- Tip: Go to Archive for notes -->
-            <div class="p-3 rounded-xl bg-sakura-50/50 dark:bg-sakura-900/10 border border-sakura-100 dark:border-sakura-800/30 mb-4">
-              <p class="text-[11px] text-sakura-600 dark:text-sakura-400">
-                💡 {{ lang === 'zh' ? '配套笔记请切换到「归档」标签页查看' : 'Switch to "Archive" tab to read companion notes' }}
-              </p>
+            <!-- VUE Learning Notes Section -->
+            <div v-if="labFolder" class="mb-4">
+              <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1 pl-1">
+                📚 {{ lang === 'zh' ? 'VUE 学习笔记' : 'VUE Learning Notes' }}
+              </h3>
+              <div class="space-y-1">
+                <div 
+                  v-for="note in labFolderFiles" 
+                  :key="note.path"
+                  @click="$emit('select-file', note)"
+                  class="p-2 rounded-lg cursor-pointer transition-all hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm border border-transparent hover:border-sakura-100 dark:hover:border-gray-700 flex items-center gap-2"
+                  :class="{'bg-sakura-50 dark:bg-sakura-900/20 border-sakura-100 dark:border-sakura-800/30': currentFile?.path === note.path}"
+                >
+                  <span class="text-sm">📝</span>
+                  <span class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{{ note.name.replace('.md', '') }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Source Code Explorer Link -->
+            <div 
+              @click="$emit('select-tool', 'source-code')"
+              class="p-3 rounded-xl border border-green-100 dark:border-green-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-4 flex items-center gap-3 bg-green-50/50 dark:bg-gray-800/30"
+              :class="{'ring-2 ring-green-300 dark:ring-green-700 bg-white dark:bg-gray-800': currentTool === 'source-code'}"
+            >
+              <span class="text-xl">💻</span>
+              <div class="flex-1">
+                <div class="text-sm font-bold text-green-900 dark:text-green-300">{{ lang === 'zh' ? '源码展示' : 'Source Code' }}</div>
+                <div class="text-[10px] text-green-500 dark:text-green-400">{{ lang === 'zh' ? '带笔记的项目源码阅读' : 'Read project source with notes' }}</div>
+              </div>
             </div>
             
             <!-- External Resources Section -->
@@ -161,7 +186,7 @@
           :file="file"
           :isActive="currentFile?.path === file.path"
           :showPath="true"
-          :lang="lang"
+          :lang="lang as 'en' | 'zh'"
           @click="$emit('select-file', file)"
         />
       </div>
@@ -191,15 +216,16 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from 'vue';
+import { ref, computed } from 'vue';
 import FileTree from './FileTree.vue';
 import ArticleCard from './ArticleCard.vue';
 import type { FileNode } from '../types';
+import { NodeType } from '../types';
 import { useArticleStore } from '../stores/articleStore';
 
 const articleStore = useArticleStore();
 
-defineProps<{
+const props = defineProps<{
   lang: string;
   t: any;
   viewMode: string;
@@ -214,6 +240,14 @@ defineProps<{
   resourceCategories: any[];
   currentTool: string | null;
 }>();
+
+// Compute files in labFolder (VUE学习笔记 or VUE Learning)
+const labFolderFiles = computed(() => {
+  if (!props.labFolder || !props.labFolder.children) return [];
+  return props.labFolder.children
+    .filter(node => node.type === NodeType.FILE && node.name.endsWith('.md'))
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN', { numeric: true }));
+});
 
 const emit = defineEmits([
   'toggle-lang',

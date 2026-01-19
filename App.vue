@@ -79,6 +79,7 @@
         :is-dark="appStore.isDark"
         :petal-speed="appStore.userSettings.petalSpeed"
         :header-hidden="headerHidden"
+        :dual-column-mode="dualColumnMode"
         v-model:isRawMode="isRawMode"
         @reset="resetToHome"
         @navigate="navigateToBreadcrumb"
@@ -90,6 +91,7 @@
         @open-write="showWriteEditor = true"
         @toggle-theme="toggleTheme(!appStore.isDark)"
         @update:petal-speed="handlePetalSpeedChange"
+        @toggle-dual-column="dualColumnMode = !dualColumnMode; if(dualColumnMode && !currentTool) currentTool = 'dashboard'"
       />
 
       <!-- Content Area -->
@@ -141,9 +143,29 @@
           class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full" 
         >
           
+          <!-- Dual Column Mode -->
+          <div v-if="viewMode === 'lab' && dualColumnMode" class="w-full h-full animate-fade-in">
+            <DualColumnView 
+              :lang="lang"
+              :left-panel="dualColumnLeft"
+              :right-panel="dualColumnRight"
+              :lab-dashboard-tab="labDashboardTab"
+              :lab-folder="labFolder"
+              @update:left-panel="dualColumnLeft = $event"
+              @update:right-panel="dualColumnRight = $event"
+              @tab-change="handleLabTabChange"
+              @select-file="openFile"
+            />
+          </div>
+
           <!-- Lab Tool View (Unified Dashboard) -->
-          <div v-if="viewMode === 'lab' && currentTool === 'dashboard'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
+          <div v-else-if="viewMode === 'lab' && currentTool === 'dashboard'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
              <LabDashboard :lang="lang" :initial-tab="labDashboardTab" @tab-change="handleLabTabChange" @select-lab="selectTool" />
+          </div>
+
+          <!-- Lab: Source Code Viewer -->
+          <div v-else-if="viewMode === 'lab' && currentTool === 'source-code'" class="w-full h-[calc(100vh-12rem)] animate-fade-in">
+             <SourceCodeViewer :lang="lang" />
           </div>
 
           <!-- Lab: Event Handling -->
@@ -489,6 +511,8 @@ import type { FileNode, BreadcrumbItem, TocItem } from './types';
 
 // Components
 import LabDashboard from './components/lab/LabDashboard.vue';
+import SourceCodeViewer from './components/lab/SourceCodeViewer.vue';
+import DualColumnView from './components/lab/DualColumnView.vue';
 import SettingsModal from './components/SettingsModal.vue';
 import PetalBackground from './components/PetalBackground.vue';
 import WallpaperLayer from './components/WallpaperLayer.vue';
@@ -547,7 +571,7 @@ const viewMode = ref<'latest' | 'files' | 'lab'>('latest');
 const expandedFolders = ref<string[]>([]);
 const loading = ref(true);
 const contentLoading = ref(false);
-const currentTool = ref<'dashboard' | 'event-handling' | 'slot' | null>(null);
+const currentTool = ref<'dashboard' | 'event-handling' | 'slot' | 'source-code' | null>(null);
 const isRawMode = ref(false);
 
 // Modal States
@@ -555,6 +579,11 @@ const showSettings = ref(false);
 const showSearch = searchModalOpen;
 const showWriteEditor = ref(false);
 const sidebarOpen = ref(false);
+
+// Dual Column Mode
+const dualColumnMode = ref(false);
+const dualColumnLeft = ref<'notes' | 'lab' | 'source'>('notes');
+const dualColumnRight = ref<'notes' | 'lab' | 'source'>('lab');
 
 // Mobile header scroll behavior
 const headerHidden = ref(false);
@@ -840,9 +869,10 @@ const openFolder = (folder: FileNode) => {
 };
 
 const selectTool = (tool: string) => {
-  currentTool.value = tool as 'dashboard' | 'event-handling' | 'slot';
+  currentTool.value = tool as 'dashboard' | 'event-handling' | 'slot' | 'source-code';
   currentFile.value = null;
   currentFolder.value = null;
+  dualColumnMode.value = false; // Exit dual column when selecting specific tool
 };
 
 const labDashboardTab = ref<string>('foundation');

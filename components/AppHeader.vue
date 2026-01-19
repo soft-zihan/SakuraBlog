@@ -49,6 +49,23 @@
           <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
         </template>
 
+        <!-- Dual Column Mode Toggle (Lab Mode Only) -->
+        <button 
+          v-if="viewMode === 'lab'"
+          @click="$emit('toggle-dual-column')"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-sm"
+          :class="dualColumnMode 
+            ? 'bg-sakura-500 text-white' 
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 hover:text-sakura-600'"
+          :title="lang === 'zh' ? '双栏阅读' : 'Dual Column'"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="18" rx="1"/>
+            <rect x="14" y="3" width="7" height="18" rx="1"/>
+          </svg>
+          <span>{{ lang === 'zh' ? '双栏' : 'Dual' }}</span>
+        </button>
+
         <!-- Search Button -->
         <button 
           @click="$emit('open-search')" 
@@ -195,6 +212,7 @@ const props = defineProps<{
   isDark: boolean;
   petalSpeed: 'off' | 'slow' | 'fast';
   headerHidden?: boolean;
+  dualColumnMode?: boolean;
 }>();
 
 const emit = defineEmits([
@@ -209,7 +227,8 @@ const emit = defineEmits([
   'open-music',
   'open-write',
   'toggle-theme',
-  'update:petalSpeed'
+  'update:petalSpeed',
+  'toggle-dual-column'
 ]);
 
 // Mobile detection
