@@ -5,7 +5,7 @@
   <!-- Global Audio Player -->
   <GlobalAudio />
 
-  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
+  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500 relative z-10" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
     
     <!-- Mobile Menu Button (repositioned to avoid overlap) -->
     <button 
