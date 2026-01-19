@@ -19,28 +19,28 @@
     <!-- Center: Code View -->
     <div class="flex-1 flex flex-col min-w-0">
       <!-- File Tab Bar -->
-      <div class="flex items-center gap-2 px-4 py-2 bg-[#252526] border-b border-gray-700 overflow-x-auto">
-        <div v-if="selectedFile" class="flex items-center gap-2 px-3 py-1.5 bg-[#1e1e1e] rounded text-sm">
+      <div class="flex items-center gap-2 px-4 py-2 border-b overflow-x-auto" :class="isDark ? 'bg-[#252526] border-gray-700' : 'bg-gray-100 border-gray-300'">
+        <div v-if="selectedFile" class="flex items-center gap-2 px-3 py-1.5 rounded text-sm" :class="isDark ? 'bg-[#1e1e1e]' : 'bg-white shadow-sm'">
           <span>{{ getFileIcon(selectedFile.name) }}</span>
-          <span class="text-gray-300 font-mono text-xs">{{ selectedFile.name }}</span>
+          <span class="font-mono text-xs" :class="isDark ? 'text-gray-300' : 'text-gray-700'">{{ selectedFile.name }}</span>
         </div>
-        <div v-else class="text-gray-500 dark:text-gray-400 text-sm italic">
+        <div v-else class="text-sm italic" :class="isDark ? 'text-gray-500' : 'text-gray-400'">
           {{ isZh ? '选择文件查看源码' : 'Select a file to view source' }}
         </div>
         <div class="ml-auto flex items-center gap-3">
-          <!-- Fold/Unfold All -->
+          <!-- Preset Notes Toggle -->
           <button 
-            v-if="selectedFile && foldableRanges.length > 0"
-            @click="toggleAllFolds"
-            class="text-xs px-2 py-1 rounded transition-colors flex items-center gap-1 bg-gray-700 text-gray-400 hover:bg-gray-600"
+            @click="showPresetNotes = !showPresetNotes"
+            class="text-xs px-2 py-1 rounded transition-colors flex items-center gap-1"
+            :class="showPresetNotes ? 'bg-cyan-500 text-white' : (isDark ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300')"
           >
-            <span>{{ allFolded ? '▶' : '▼' }}</span>
-            {{ isZh ? (allFolded ? '展开全部' : '折叠全部') : (allFolded ? 'Expand All' : 'Fold All') }}
+            <span>💡</span>
+            {{ isZh ? '预置' : 'Preset' }}
           </button>
           <button 
             @click="showNotes = !showNotes"
             class="text-xs px-2 py-1 rounded transition-colors flex items-center gap-1"
-            :class="showNotes ? 'bg-sakura-500 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'"
+            :class="showNotes ? 'bg-sakura-500 text-white' : (isDark ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300')"
           >
             <span>📝</span>
             {{ isZh ? '笔记' : 'Notes' }}
@@ -72,92 +72,98 @@
       <!-- Code Content with Inline Notes -->
       <div class="flex-1 flex overflow-hidden">
         <!-- Main Code Area -->
-        <div class="flex-1 overflow-auto bg-[#1e1e1e] custom-scrollbar relative" ref="codeContainer" @scroll="syncMinimapScroll">
+        <div 
+          class="flex-1 overflow-auto custom-scrollbar relative" 
+          :class="isDark ? 'bg-[#1e1e1e]' : 'bg-[#fafafa]'"
+          ref="codeContainer" 
+          @scroll="syncMinimapScroll"
+        >
           <div v-if="selectedFile && fileContent" class="py-4">
             <!-- Render each line with possible inline note -->
             <template v-for="(line, idx) in fileLines" :key="idx">
-              <!-- Skip lines that are inside a folded range -->
-              <template v-if="!isLineHiddenByFold(idx + 1)">
-                <!-- Drop indicator line -->
+              <!-- Drop indicator line -->
+              <div 
+                v-if="showNotes && dragOverLine === idx + 1 && draggingNoteLine !== idx + 1"
+                class="h-1 mx-4 bg-sakura-400 rounded-full animate-pulse"
+              ></div>
+              
+              <!-- Code Line -->
+              <div 
+                class="flex group relative"
+                :class="[
+                  isDark ? 'hover:bg-[#2a2d2e]' : 'hover:bg-gray-100',
+                  { 'bg-sakura-900/20 dark:bg-sakura-900/20': hasNonEmptyUserNoteAtLine(idx + 1) && !isLineCollapsed(idx + 1) }
+                ]"
+                @dragover.prevent="onDragOver($event, idx + 1)"
+                @dragleave="onDragLeave"
+                @drop.prevent="onDrop($event, idx + 1)"
+              >
+                <!-- Indent Guide Lines -->
+                <div class="flex-shrink-0 relative" :style="{ width: getIndentWidth(line) + 'px', minWidth: '8px' }">
+                  <template v-for="level in getIndentLevels(line)" :key="'indent-' + level">
+                    <div 
+                      class="absolute top-0 bottom-0 w-px"
+                      :style="{ left: (level * indentSize) + 'px' }"
+                      :class="getIndentGuideClass(level)"
+                    ></div>
+                  </template>
+                </div>
+                <!-- Line Number - click to toggle notes (only user notes) -->
                 <div 
-                  v-if="showNotes && dragOverLine === idx + 1 && draggingNoteLine !== idx + 1"
-                  class="h-1 mx-4 bg-sakura-400 rounded-full animate-pulse"
-                ></div>
-                
-                <!-- Code Line -->
-                <div 
-                  class="flex hover:bg-[#2a2d2e] group"
-                  :class="{ 'bg-sakura-900/20': hasNonEmptyNoteAtLine(idx + 1) && !isLineCollapsed(idx + 1) }"
-                  @dragover.prevent="onDragOver($event, idx + 1)"
-                  @dragleave="onDragLeave"
-                  @drop.prevent="onDrop($event, idx + 1)"
+                  class="flex-shrink-0 w-10 pr-2 text-right select-none font-mono text-xs leading-6 cursor-pointer transition-colors"
+                  :class="getLineNumberClass(idx + 1)"
+                  @click="toggleUserNoteAtLine(idx + 1)"
                 >
-                  <!-- Fold Toggle Button -->
-                  <div class="flex-shrink-0 w-4 flex items-center justify-center">
+                  {{ idx + 1 }}</div>
+                <!-- Code Content with enhanced syntax highlighting -->
+                <pre 
+                  class="flex-1 pr-4 text-sm font-mono leading-6 whitespace-pre-wrap break-all"
+                  :class="isDark ? 'text-gray-200' : 'text-gray-800'"
+                ><code v-html="highlightLine(line)" :class="isDark ? 'hljs-dark' : 'hljs-light'"></code></pre>
+              </div>
+              
+              <!-- Preset Note (below the line) - Blue/Cyan theme - controlled by global toggle only -->
+              <div 
+                v-if="showPresetNotes && hasPresetNoteAtLine(idx + 1)"
+                class="flex mx-4 my-1"
+              >
+                <div class="w-14"></div>
+                <div class="flex-1 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/20 rounded-lg p-3 border border-cyan-200 dark:border-cyan-700/50 shadow-sm">
+                  <div class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ getPresetNoteContent(idx + 1) }}</div>
+                </div>
+              </div>
+              
+              <!-- User Note (below the line) - Pink/Sakura theme -->
+              <div 
+                v-if="showNotes && hasUserNoteAtLine(idx + 1) && !isLineCollapsed(idx + 1)"
+                class="flex mx-4 my-1"
+                draggable="true"
+                @dragstart="onDragStart($event, idx + 1)"
+                @dragend="onDragEnd"
+              >
+                <div class="w-14"></div>
+                <div class="flex-1 bg-gradient-to-r from-sakura-50 to-amber-50 dark:from-sakura-900/30 dark:to-amber-900/20 rounded-lg p-3 border border-sakura-200 dark:border-sakura-700/50 shadow-sm group relative">
+                  <!-- Drag Handle -->
+                  <div class="absolute -left-6 top-1/2 -translate-y-1/2 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-sakura-400">
+                    ⋮⋮
+                  </div>
+                  <div class="flex items-end justify-end gap-2 mb-1">
                     <button 
-                      v-if="isFoldStartLine(idx + 1)"
-                      @click="toggleFoldAtLine(idx + 1)"
-                      class="text-gray-500 hover:text-gray-300 text-xs font-mono"
+                      @click="deleteUserNote(idx + 1)"
+                      class="text-gray-400 hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      {{ isLineFolded(idx + 1) ? '▶' : '▼' }}
+                      🗑️
                     </button>
                   </div>
-                  <!-- Line Number - click to toggle notes -->
-                  <div 
-                    class="flex-shrink-0 w-10 pr-2 text-right select-none font-mono text-xs leading-6 cursor-pointer transition-colors"
-                    :class="getLineNumberClass(idx + 1)"
-                    @click="toggleNoteAtLine(idx + 1)"
-                  >
-                    {{ idx + 1 }}</div>
-                  <!-- Code Content -->
-                  <pre 
-                    class="flex-1 pr-4 text-sm font-mono leading-6 whitespace-pre-wrap break-all"
-                  ><code v-html="highlightLine(line)" class="hljs"></code><span v-if="isLineFolded(idx + 1)" class="ml-2 text-gray-500 bg-gray-700 px-2 py-0.5 rounded text-xs">{{ getFoldedLinesCount(idx + 1) }} {{ isZh ? '行已折叠' : 'lines folded' }}</span></pre>
+                  <textarea
+                    :value="getUserNoteContent(idx + 1)"
+                    @input="handleNoteInput($event, idx + 1)"
+                    class="w-full text-sm bg-transparent border-none outline-none resize-none text-gray-700 dark:text-gray-200 placeholder-gray-400 overflow-hidden"
+                    :placeholder="isZh ? '在此输入笔记...' : 'Type your note here...'"
+                    rows="1"
+                  ></textarea>
                 </div>
-                
-                <!-- Preset Note (below the line) - Blue/Cyan theme -->
-                <div 
-                  v-if="showNotes && hasPresetNoteAtLine(idx + 1) && !isLineCollapsed(idx + 1)"
-                  class="flex mx-4 my-1"
-                >
-                  <div class="w-14"></div>
-                  <div class="flex-1 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/20 rounded-lg p-3 border border-cyan-200 dark:border-cyan-700/50 shadow-sm">
-                    <div class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ getPresetNoteContent(idx + 1) }}</div>
-                  </div>
-                </div>
-                
-                <!-- User Note (below the line) - Pink/Sakura theme -->
-                <div 
-                  v-if="showNotes && hasUserNoteAtLine(idx + 1) && !isLineCollapsed(idx + 1)"
-                  class="flex mx-4 my-1"
-                  draggable="true"
-                  @dragstart="onDragStart($event, idx + 1)"
-                  @dragend="onDragEnd"
-                >
-                  <div class="w-14"></div>
-                  <div class="flex-1 bg-gradient-to-r from-sakura-50 to-amber-50 dark:from-sakura-900/30 dark:to-amber-900/20 rounded-lg p-3 border border-sakura-200 dark:border-sakura-700/50 shadow-sm group relative">
-                    <!-- Drag Handle -->
-                    <div class="absolute -left-6 top-1/2 -translate-y-1/2 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-sakura-400">
-                      ⋮⋮
-                    </div>
-                    <div class="flex items-end justify-end gap-2 mb-1">
-                      <button 
-                        @click="deleteUserNote(idx + 1)"
-                        class="text-gray-400 hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                    <textarea
-                      :value="getUserNoteContent(idx + 1)"
-                      @input="handleNoteInput($event, idx + 1)"
-                      class="w-full text-sm bg-transparent border-none outline-none resize-none text-gray-700 dark:text-gray-200 placeholder-gray-400 overflow-hidden"
-                      :placeholder="isZh ? '在此输入笔记...' : 'Type your note here...'"
-                      rows="1"
-                    ></textarea>
-                  </div>
-                </div>
-              </template>
+              </div>
             </template>
             
             <!-- Drop indicator at the end -->
@@ -247,6 +253,7 @@ import bash from 'highlight.js/lib/languages/bash'
 import python from 'highlight.js/lib/languages/python'
 import java from 'highlight.js/lib/languages/java'
 import { useGitHubPublish } from '../../composables/useGitHubPublish'
+import { useAppStore } from '../../stores/appStore'
 
 // Register languages
 hljs.registerLanguage('typescript', typescript)
@@ -302,6 +309,13 @@ const props = defineProps<{
 }>()
 
 const isZh = computed(() => props.lang === 'zh')
+
+// App Store for theme
+const appStore = useAppStore()
+const isDark = computed(() => appStore.isDark)
+
+// Toggle for preset notes visibility
+const showPresetNotes = ref(true)
 
 // GitHub API
 const { hasToken: checkHasToken, uploadFile, getToken } = useGitHubPublish()
@@ -922,6 +936,87 @@ const getMinimapLineColor = (line: string, lineNum: number) => {
 
 // ==================== Note Functions ====================
 
+// Indent guide constants and functions
+const indentSize = 16 // pixels per indent level
+
+const getIndentWidth = (line: string): number => {
+  const match = line.match(/^(\s*)/)
+  if (!match) return 0
+  const spaces = match[1].replace(/\t/g, '  ').length
+  return Math.floor(spaces / 2) * indentSize
+}
+
+const getIndentLevels = (line: string): number[] => {
+  const match = line.match(/^(\s*)/)
+  if (!match) return []
+  const spaces = match[1].replace(/\t/g, '  ').length
+  const levels = Math.floor(spaces / 2)
+  return Array.from({ length: levels }, (_, i) => i)
+}
+
+const getIndentGuideClass = (level: number): string => {
+  // Colorful indent guides based on level
+  const colors = [
+    'bg-gray-600/30',
+    'bg-blue-500/30',
+    'bg-green-500/30',
+    'bg-yellow-500/30',
+    'bg-purple-500/30',
+    'bg-pink-500/30',
+    'bg-cyan-500/30',
+    'bg-orange-500/30',
+  ]
+  return colors[level % colors.length]
+}
+
+// Check if user has non-empty note at line
+const hasNonEmptyUserNoteAtLine = (line: number) => {
+  return currentUserNotes.value.some(n => n.line === line && n.content.trim())
+}
+
+// Toggle only user notes at line (preset notes are controlled by global toggle)
+const toggleUserNoteAtLine = (line: number) => {
+  if (!selectedFile.value) return
+  const path = selectedFile.value.path
+  
+  const hasUser = hasUserNoteAtLine(line)
+  const isCollapsed = isLineCollapsed(line)
+  
+  if (hasUser) {
+    if (!collapsedState.value[path]) {
+      collapsedState.value[path] = []
+    }
+    
+    if (isCollapsed) {
+      collapsedState.value[path] = collapsedState.value[path].filter(l => l !== line)
+    } else {
+      const userNote = currentUserNotes.value.find(n => n.line === line)
+      if (userNote && !userNote.content.trim()) {
+        // Remove empty user note
+        userNotes.value[path] = userNotes.value[path].filter(n => n.line !== line)
+        saveUserNotes()
+        return
+      }
+      collapsedState.value[path].push(line)
+    }
+    saveCollapsedState()
+  } else {
+    // Create new user note
+    if (!userNotes.value[path]) {
+      userNotes.value[path] = []
+    }
+    userNotes.value[path].push({ line, content: '' })
+    userNotes.value[path].sort((a, b) => a.line - b.line)
+    saveUserNotes()
+    
+    // Uncollapse if collapsed
+    if (collapsedState.value[path]) {
+      collapsedState.value[path] = collapsedState.value[path].filter(l => l !== line)
+      saveCollapsedState()
+    }
+  }
+}
+
 const highlightLine = (line: string) => {
   const language = getLanguage()
   try {
@@ -1311,5 +1406,131 @@ defineExpose({
 
 .minimap-content {
   pointer-events: none;
+}
+
+/* Enhanced syntax highlighting for dark theme */
+:deep(.hljs-dark) {
+  color: #d4d4d4;
+}
+:deep(.hljs-dark .hljs-comment),
+:deep(.hljs-dark .hljs-quote) {
+  color: #6a9955;
+  font-style: italic;
+}
+:deep(.hljs-dark .hljs-keyword),
+:deep(.hljs-dark .hljs-selector-tag),
+:deep(.hljs-dark .hljs-built_in) {
+  color: #569cd6;
+  font-weight: 500;
+}
+:deep(.hljs-dark .hljs-string),
+:deep(.hljs-dark .hljs-doctag),
+:deep(.hljs-dark .hljs-attr) {
+  color: #ce9178;
+}
+:deep(.hljs-dark .hljs-number),
+:deep(.hljs-dark .hljs-literal) {
+  color: #b5cea8;
+}
+:deep(.hljs-dark .hljs-function),
+:deep(.hljs-dark .hljs-title) {
+  color: #dcdcaa;
+}
+:deep(.hljs-dark .hljs-variable),
+:deep(.hljs-dark .hljs-template-variable) {
+  color: #9cdcfe;
+}
+:deep(.hljs-dark .hljs-type),
+:deep(.hljs-dark .hljs-class .hljs-title) {
+  color: #4ec9b0;
+}
+:deep(.hljs-dark .hljs-tag) {
+  color: #808080;
+}
+:deep(.hljs-dark .hljs-name) {
+  color: #569cd6;
+}
+:deep(.hljs-dark .hljs-attribute) {
+  color: #9cdcfe;
+}
+:deep(.hljs-dark .hljs-regexp) {
+  color: #d16969;
+}
+:deep(.hljs-dark .hljs-symbol),
+:deep(.hljs-dark .hljs-bullet) {
+  color: #d7ba7d;
+}
+:deep(.hljs-dark .hljs-meta) {
+  color: #569cd6;
+}
+:deep(.hljs-dark .hljs-params) {
+  color: #9cdcfe;
+}
+:deep(.hljs-dark .hljs-selector-class),
+:deep(.hljs-dark .hljs-selector-id) {
+  color: #d7ba7d;
+}
+
+/* Enhanced syntax highlighting for light theme */
+:deep(.hljs-light) {
+  color: #383a42;
+}
+:deep(.hljs-light .hljs-comment),
+:deep(.hljs-light .hljs-quote) {
+  color: #008000;
+  font-style: italic;
+}
+:deep(.hljs-light .hljs-keyword),
+:deep(.hljs-light .hljs-selector-tag),
+:deep(.hljs-light .hljs-built_in) {
+  color: #0000ff;
+  font-weight: 500;
+}
+:deep(.hljs-light .hljs-string),
+:deep(.hljs-light .hljs-doctag),
+:deep(.hljs-light .hljs-attr) {
+  color: #a31515;
+}
+:deep(.hljs-light .hljs-number),
+:deep(.hljs-light .hljs-literal) {
+  color: #098658;
+}
+:deep(.hljs-light .hljs-function),
+:deep(.hljs-light .hljs-title) {
+  color: #795e26;
+}
+:deep(.hljs-light .hljs-variable),
+:deep(.hljs-light .hljs-template-variable) {
+  color: #001080;
+}
+:deep(.hljs-light .hljs-type),
+:deep(.hljs-light .hljs-class .hljs-title) {
+  color: #267f99;
+}
+:deep(.hljs-light .hljs-tag) {
+  color: #800000;
+}
+:deep(.hljs-light .hljs-name) {
+  color: #800000;
+}
+:deep(.hljs-light .hljs-attribute) {
+  color: #ff0000;
+}
+:deep(.hljs-light .hljs-regexp) {
+  color: #811f3f;
+}
+:deep(.hljs-light .hljs-symbol),
+:deep(.hljs-light .hljs-bullet) {
+  color: #0451a5;
+}
+:deep(.hljs-light .hljs-meta) {
+  color: #0000ff;
+}
+:deep(.hljs-light .hljs-params) {
+  color: #001080;
+}
+:deep(.hljs-light .hljs-selector-class),
+:deep(.hljs-light .hljs-selector-id) {
+  color: #800000;
 }
 </style>

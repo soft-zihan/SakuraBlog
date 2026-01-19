@@ -55,7 +55,7 @@
             class="px-2 py-1 text-xs rounded-full transition-colors"
             :class="selectedDownloadTags.includes(tag) ? 'bg-sakura-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'"
           >
-            {{ tag }}
+            {{ tag === 'notag' ? (lang === 'zh' ? '无标签' : 'No Tag') : tag }}
           </button>
         </div>
       </div>
@@ -155,20 +155,32 @@ const isDownloading = ref(false)
 const downloadMessage = ref('')
 const downloadSuccess = ref(false)
 
-// Get available tags
+// Get available tags (including 'notag' for files without tags)
 const availableTags = computed(() => {
   const tags = new Set<string>()
+  let hasNoTagFiles = false
+  
   const processFiles = (files: any[]) => {
     for (const file of files) {
       if (file.children) {
         processFiles(file.children)
-      } else if (file.tags && Array.isArray(file.tags)) {
-        file.tags.forEach((tag: string) => tags.add(tag))
+      } else {
+        if (file.tags && Array.isArray(file.tags) && file.tags.length > 0) {
+          file.tags.forEach((tag: string) => tags.add(tag))
+        } else {
+          hasNoTagFiles = true
+        }
       }
     }
   }
   processFiles(props.fileSystem || [])
-  return Array.from(tags).sort()
+  
+  const sortedTags = Array.from(tags).sort()
+  // Add 'notag' at the beginning if there are files without tags
+  if (hasNoTagFiles) {
+    return ['notag', ...sortedTags]
+  }
+  return sortedTags
 })
 
 // Get favorites count
@@ -254,7 +266,12 @@ const filteredFiles = computed(() => {
               include = true
             } else {
               const fileTags = item.tags || []
-              include = selectedDownloadTags.value.some(tag => fileTags.includes(tag))
+              const hasNoTags = !fileTags || fileTags.length === 0
+              // Check if 'notag' is selected and file has no tags, or if any selected tag matches
+              include = selectedDownloadTags.value.some(tag => {
+                if (tag === 'notag') return hasNoTags
+                return fileTags.includes(tag)
+              })
             }
             break
           case 'custom':
@@ -285,17 +302,46 @@ const downloadNotes = async () => {
   try {
     const zip = new JSZip()
     const files = filteredFiles.value
+    let successCount = 0
     
     for (const file of files) {
       try {
-        const res = await fetch(file.path)
-        if (res.ok) {
-          const content = await res.text()
+        // Try multiple path formats to ensure we can fetch the file
+        const pathsToTry = [
+          file.path,
+          `./${file.path}`,
+          `/${file.path}`,
+          (import.meta as any).env?.BASE_URL ? `${(import.meta as any).env.BASE_URL}${file.path}` : null
+        ].filter(Boolean)
+        
+        let content = null
+        for (const pathToTry of pathsToTry) {
+          try {
+            const res = await fetch(pathToTry as string)
+            if (res.ok) {
+              content = await res.text()
+              break
+            }
+          } catch {
+            // Try next path
+          }
+        }
+        
+        if (content) {
           zip.file(file.relativePath, content)
+          successCount++
+        } else {
+          console.warn('Failed to fetch file after trying all paths:', file.path)
         }
       } catch (e) {
         console.error('Failed to fetch file:', file.path, e)
       }
+    }
+    
+    if (successCount === 0) {
+      downloadMessage.value = props.lang === 'zh' ? '没有成功获取任何文件' : 'Failed to fetch any files'
+      downloadSuccess.value = false
+      return
     }
     
     const blob = await zip.generateAsync({ type: 'blob' })
@@ -306,9 +352,10 @@ const downloadNotes = async () => {
     a.click()
     URL.revokeObjectURL(url)
     
-    downloadMessage.value = `${props.lang === 'zh' ? '下载成功' : 'Download success'}: ${files.length} ${props.lang === 'zh' ? '个文件' : 'files'}`
+    downloadMessage.value = `${props.lang === 'zh' ? '下载成功' : 'Download success'}: ${successCount}/${files.length} ${props.lang === 'zh' ? '个文件' : 'files'}`
     downloadSuccess.value = true
   } catch (e) {
+    console.error('Download error:', e)
     downloadMessage.value = props.lang === 'zh' ? '下载失败' : 'Download failed'
     downloadSuccess.value = false
   } finally {
@@ -351,16 +398,43 @@ const downloadVueNotes = async () => {
       return
     }
     
+    let successCount = 0
     for (const file of vueFiles) {
       try {
-        const res = await fetch(file.path)
-        if (res.ok) {
-          const content = await res.text()
+        // Try multiple path formats
+        const pathsToTry = [
+          file.path,
+          `./${file.path}`,
+          `/${file.path}`,
+          (import.meta as any).env?.BASE_URL ? `${(import.meta as any).env.BASE_URL}${file.path}` : null
+        ].filter(Boolean)
+        
+        let content = null
+        for (const pathToTry of pathsToTry) {
+          try {
+            const res = await fetch(pathToTry as string)
+            if (res.ok) {
+              content = await res.text()
+              break
+            }
+          } catch {
+            // Try next path
+          }
+        }
+        
+        if (content) {
           zip.file(file.name, content)
+          successCount++
         }
       } catch (e) {
         console.error('Failed to fetch VUE note:', file.path, e)
       }
+    }
+    
+    if (successCount === 0) {
+      downloadMessage.value = props.lang === 'zh' ? '没有成功获取任何文件' : 'Failed to fetch any files'
+      downloadSuccess.value = false
+      return
     }
     
     const blob = await zip.generateAsync({ type: 'blob' })
@@ -371,9 +445,10 @@ const downloadVueNotes = async () => {
     a.click()
     URL.revokeObjectURL(url)
     
-    downloadMessage.value = `${props.lang === 'zh' ? '下载成功' : 'Download success'}: ${vueFiles.length} ${props.lang === 'zh' ? '个文件' : 'files'}`
+    downloadMessage.value = `${props.lang === 'zh' ? '下载成功' : 'Download success'}: ${successCount}/${vueFiles.length} ${props.lang === 'zh' ? '个文件' : 'files'}`
     downloadSuccess.value = true
   } catch (e) {
+    console.error('Download error:', e)
     downloadMessage.value = props.lang === 'zh' ? '下载失败' : 'Download failed'
     downloadSuccess.value = false
   } finally {
