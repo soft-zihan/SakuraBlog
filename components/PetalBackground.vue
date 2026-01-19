@@ -2,7 +2,7 @@
   <!-- Container: pointer-events-none by default, never blocks page interaction -->
   <div 
     class="fixed inset-0 pointer-events-none overflow-hidden"
-    :class="layer === 'front' ? 'z-[1000]' : 'z-[3]'"
+    :class="layer === 'front' ? 'z-[1000]' : 'z-[2]'"
   >
     <!-- Vortex interaction layer: only visible when active -->
     <div 
