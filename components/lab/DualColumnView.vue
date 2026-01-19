@@ -1,6 +1,6 @@
 <template>
   <!-- 双栏阅读：完全全屏覆盖，z-50确保在所有元素之上 -->
-  <div class="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col">
+  <div class="fixed inset-0 z-10000 bg-white dark:bg-gray-900 flex flex-col">
     <!-- Top Control Bar with toggle buttons -->
     <div class="flex items-center justify-between p-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <!-- Left: Exit Button + Left Panel Selector -->
