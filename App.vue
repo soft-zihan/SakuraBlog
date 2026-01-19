@@ -147,24 +147,8 @@
           class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full" 
         >
           
-          <!-- Dual Column Mode -->
-          <div v-if="viewMode === 'lab' && dualColumnMode" class="w-full h-full animate-fade-in">
-            <DualColumnView 
-              :lang="lang"
-              :left-panel="dualColumnLeft"
-              :right-panel="dualColumnRight"
-              :lab-dashboard-tab="labDashboardTab"
-              :lab-folder="labFolder"
-              @update:left-panel="dualColumnLeft = $event"
-              @update:right-panel="dualColumnRight = $event"
-              @tab-change="handleLabTabChange"
-              @select-file="openFile"
-              @close="dualColumnMode = false"
-            />
-          </div>
-
           <!-- Lab Tool View (Unified Dashboard) -->
-          <div v-else-if="viewMode === 'lab' && currentTool === 'dashboard'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
+          <div v-if="viewMode === 'lab' && currentTool === 'dashboard'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
              <LabDashboard :lang="lang" v-model="labDashboardTab" @tab-change="handleLabTabChange" @select-lab="selectTool" />
           </div>
 
@@ -453,6 +437,23 @@
 
       </div>
     </main>
+    
+    <!-- Dual Column Mode - Teleport to body for true fullscreen -->
+    <Teleport to="body">
+      <DualColumnView 
+        v-if="viewMode === 'lab' && dualColumnMode"
+        :lang="lang"
+        :left-panel="dualColumnLeft"
+        :right-panel="dualColumnRight"
+        :lab-dashboard-tab="labDashboardTab"
+        :lab-folder="labFolder"
+        @update:left-panel="dualColumnLeft = $event"
+        @update:right-panel="dualColumnRight = $event"
+        @tab-change="handleLabTabChange"
+        @select-file="openFile"
+        @close="dualColumnMode = false"
+      />
+    </Teleport>
     
     <!-- Lightbox (Images) -->
     <div 

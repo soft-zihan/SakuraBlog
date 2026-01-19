@@ -469,6 +469,22 @@ const toRawFilePath = (filePath: string): string => {
   return filePath.replace(/\//g, '_') + '.txt'
 }
 
+// User notes localStorage key (same as SourceCodeViewer)
+const USER_NOTES_KEY = 'sakura_source_code_notes_user'
+
+// Load user notes from localStorage
+const loadUserNotes = (): Record<string, Array<{line: number, content: string}>> => {
+  try {
+    const saved = localStorage.getItem(USER_NOTES_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (e) {
+    console.warn('Failed to load user notes:', e)
+  }
+  return {}
+}
+
 // Download source code with optional embedded notes
 const downloadSourceCodeWithNotes = async (withNotes: boolean) => {
   if (isDownloading.value) return
@@ -481,7 +497,10 @@ const downloadSourceCodeWithNotes = async (withNotes: boolean) => {
     
     // Load preset notes for embedding (only if withNotes is true)
     let presetNotes: Record<string, Array<{line: number, content: string}>> = {}
+    let userNotes: Record<string, Array<{line: number, content: string}>> = {}
+    
     if (withNotes) {
+      // Load preset notes from server
       try {
         const baseUrl = (import.meta as any).env?.BASE_URL || './'
         const notesRes = await fetch(`${baseUrl}source-notes-preset.json`)
@@ -492,6 +511,9 @@ const downloadSourceCodeWithNotes = async (withNotes: boolean) => {
       } catch (e) {
         console.warn('Failed to load preset notes:', e)
       }
+      
+      // Load user notes from localStorage
+      userNotes = loadUserNotes()
     }
     
     // Fetch and process source files
@@ -508,17 +530,28 @@ const downloadSourceCodeWithNotes = async (withNotes: boolean) => {
           
           // Embed notes as comments if available and withNotes is true
           if (withNotes) {
-            const fileNotes = presetNotes[filePath]
-            if (fileNotes && fileNotes.length > 0) {
-              const lines = content.split('\n')
-              const ext = filePath.split('.').pop()?.toLowerCase()
-              const commentStyle = getCommentStyle(ext || '')
-              
+            const lines = content.split('\n')
+            const ext = filePath.split('.').pop()?.toLowerCase()
+            const commentStyle = getCommentStyle(ext || '')
+            
+            // Merge preset notes and user notes for this file
+            const filePresetNotes = presetNotes[filePath] || []
+            const fileUserNotes = userNotes[filePath] || []
+            
+            // Combine both with different markers
+            type NoteWithType = { line: number, content: string, type: 'preset' | 'user' }
+            const allNotes: NoteWithType[] = [
+              ...filePresetNotes.map(n => ({ ...n, type: 'preset' as const })),
+              ...fileUserNotes.map(n => ({ ...n, type: 'user' as const }))
+            ]
+            
+            if (allNotes.length > 0) {
               // Insert notes from bottom to top to preserve line numbers
-              const sortedNotes = [...fileNotes].sort((a, b) => b.line - a.line)
+              const sortedNotes = allNotes.sort((a, b) => b.line - a.line)
               for (const note of sortedNotes) {
                 if (note.line > 0 && note.line <= lines.length && note.content) {
-                  const commentedNote = formatNoteAsComment(note.content, commentStyle)
+                  const marker = note.type === 'user' ? '👤 [My Note]' : '💡 [Note]'
+                  const commentedNote = formatNoteAsComment(note.content, commentStyle, marker)
                   lines.splice(note.line, 0, commentedNote)
                 }
               }
@@ -587,13 +620,13 @@ const getCommentStyle = (ext: string): { start: string, end: string, line: strin
 }
 
 // Format note content as comment
-const formatNoteAsComment = (content: string, style: { start: string, end: string, line: string }): string => {
+const formatNoteAsComment = (content: string, style: { start: string, end: string, line: string }, marker: string = '📝 [Note]'): string => {
   const lines = content.split('\n')
   if (lines.length === 1) {
-    return `${style.line}📝 [Note] ${content}`
+    return `${style.line}${marker} ${content}`
   }
   return lines.map((line, i) => {
-    if (i === 0) return `${style.line}📝 [Note] ${line}`
+    if (i === 0) return `${style.line}${marker} ${line}`
     return `${style.line}    ${line}`
   }).join('\n')
 }
