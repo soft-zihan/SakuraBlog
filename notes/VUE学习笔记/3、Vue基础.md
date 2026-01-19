@@ -1,17 +1,102 @@
 前面两天，我们已经学习了前端网页开发的三剑客：HTML、CSS、JS。那通过这三种技术呢，我们就可以开发出一个网页程序了，但是如果我们使用原生的JS来处理界面的交互行为，开发效率呢，是比较低的。而在现在的企业项目开发中，一般会借助于Vue这样的js框架来简化操作、提高开发效率。 那么我们今天呢，就来学习Vue这个框架。
 
-> 📚 **本项目联动**：本文中的 `code://` 链接可直接打开项目源码；建议同时打开 [🧪 可视化学习中心](lab:dashboard?tab=note3-vue-basics) 对照学习。
+---
 
-**与本项目对应的真实入口与结构**
+<details>
+<summary>🔍 <strong>本站源码对照：Vue 项目入口与结构</strong>（点击展开）</summary>
 
-| 功能 | 项目文件 | 关键代码 |
-|------|----------|----------|
-| 入口与挂载 | [index.tsx](code://index.tsx) | `createApp(App).mount('#app')` |
-| 根组件结构 | [App.vue](code://App.vue#template) | 组件组合、响应式状态 |
-| 组件拆分 | [AppHeader.vue](code://components/AppHeader.vue#template) | 头部组件模板 |
-| 侧边栏 | [AppSidebar.vue](code://components/AppSidebar.vue#template) | v-for/v-if 实际应用 |
-| 渲染逻辑 | [useContentRenderer.ts](code://composables/useContentRenderer.ts#renderContent) | Markdown 渲染 |
-| 点击处理 | [useContentClick.ts](code://composables/useContentClick.ts#handleContentClick) | 链接拦截与处理 |
+**📄 index.tsx** - 项目入口文件（对应 `createApp` 挂载）
+
+```typescript
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+import App from './App.vue';
+
+const app = createApp(App);         // 创建 Vue 应用实例
+
+// 安装 Pinia 状态管理
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+app.use(pinia);
+
+app.mount('#app');                  // 挂载到 #app 容器
+```
+
+**📄 App.vue (template 部分)** - 根组件结构
+
+```vue
+<template>
+  <!-- 花瓣背景组件（条件渲染 v-if） -->
+  <PetalBackground v-if="appStore.showParticles" 
+    :speed="appStore.userSettings.petalSpeed" 
+    :isDark="appStore.isDark" />
+
+  <!-- 全局音频播放器 -->
+  <GlobalAudio />
+
+  <div class="flex flex-col md:flex-row w-full h-full">
+    
+    <!-- 侧边栏组件（传递多个 props） -->
+    <AppSidebar 
+      :lang="lang"
+      :t="t"
+      v-model:viewMode="viewMode"
+      :current-file="currentFile"
+      @toggle-lang="toggleLang"
+      @select-file="handleSidebarFileSelect"
+    />
+
+    <!-- 主内容区 -->
+    <main class="flex-1 flex flex-col h-full">
+      <AppHeader :lang="lang" :t="t" :current-file="currentFile" />
+      
+      <!-- 内容显示区域 -->
+      <div class="flex-1 overflow-hidden">
+        <!-- 文章内容或其他视图 -->
+      </div>
+    </main>
+  </div>
+</template>
+```
+
+**📄 composables/useFile.ts** - 组合式函数（响应式数据管理）
+
+```typescript
+import { ref, computed, type Ref } from 'vue'
+import type { FileNode } from '../types'
+
+export function useFile(fileSystem: Ref<FileNode[]>, lang: Ref<'en' | 'zh'>) {
+  // 响应式状态
+  const currentFile = ref<FileNode | null>(null)
+  const currentFolder = ref<FileNode | null>(null)
+  const expandedFolders = ref<string[]>([])
+  
+  // 计算属性：根据语言过滤文件
+  const filteredFileSystem = computed(() => {
+    const root = fileSystem.value?.find(node => node.name === lang.value)
+    return root ? root.children : []
+  })
+  
+  // 方法：查找节点
+  const findNodeByPath = (nodes: FileNode[], path: string): FileNode | null => {
+    for (const node of nodes) {
+      if (node.path === path) return node
+      if (node.children) {
+        const found = findNodeByPath(node.children, path)
+        if (found) return found
+      }
+    }
+    return null
+  }
+  
+  return { currentFile, filteredFileSystem, findNodeByPath }
+}
+```
+
+</details>
+
+---
 
 
 
@@ -56,13 +141,7 @@ userList: [
 
 也就是说，并不需要全部学习完毕就可以直接使用Vue进行开发，简化操作、提高效率了。 Vue是一个框架，但其实也是一个生态。
 
-在本项目中，工程化与渐进式的真实体现：
-
-| 功能 | 项目文件 | 说明 |
-|------|----------|------|
-| Vite 构建配置 | [vite.config.ts](code://vite.config.ts) | 插件、别名、构建输出 |
-| 依赖管理 | [package.json](code://package.json) | 脚本命令与依赖版本 |
-| TS 配置 | [tsconfig.json](code://tsconfig.json) | TypeScript 编译选项 |
+> 💡 **本站工程化实践**：本项目使用 Vite + Vue 3 + TypeScript + Pinia 构建，体现了渐进式开发——从核心 Vue 逐步集成构建工具、类型系统和状态管理。
 
 那由此呢，也就引出了Vue中两种常见的开发模式：
 
@@ -284,7 +363,64 @@ userList: [
 
 ---
 
-> 🔗 **本项目实例**：在 [AppSidebar.vue](code://components/AppSidebar.vue#template) 中，使用 `v-for` 遍历文件列表，在 [FileTree.vue](code://components/FileTree.vue#template) 中递归渲染文件树。点击链接查看真实用法！
+<details>
+<summary>🔍 <strong>本站源码对照：v-for 实战应用</strong>（点击展开）</summary>
+
+**📄 components/FileTree.vue** - 递归文件树渲染
+
+```vue
+<template>
+  <ul class="pl-2">
+    <!-- v-for 遍历文件节点数组，:key 使用唯一路径 -->
+    <li v-for="node in nodes" :key="node.path" class="select-none mb-0.5">
+      
+      <!-- 文件夹（条件渲染 v-if） -->
+      <div v-if="node.type === 'directory'" class="mb-1">
+        <div class="flex items-center gap-1">
+          <span>📁</span>
+          <span>{{ node.name }}</span>
+        </div>
+        
+        <!-- ✨ 递归调用自身渲染子目录 -->
+        <div v-show="isOpen(node.path)">
+          <FileTree 
+            v-if="node.children" 
+            :nodes="node.children" 
+            :expanded-paths="expandedPaths"
+            @select-file="$emit('select-file', $event)"
+          />
+        </div>
+      </div>
+
+      <!-- 文件（v-else 分支） -->
+      <div v-else @click="$emit('select-file', node)">
+        <span>{{ getFileIcon(node) }}</span>
+        <span>{{ node.name }}</span>
+      </div>
+    </li>
+  </ul>
+</template>
+
+<script setup lang="ts">
+import type { FileNode } from '../types';
+
+defineOptions({ name: 'FileTree' });  // 递归组件需要命名
+
+const props = defineProps<{
+  nodes: FileNode[];
+  expandedPaths: string[];
+}>();
+
+const isOpen = (path: string) => props.expandedPaths.includes(path);
+</script>
+```
+
+**要点解析：**
+- `v-for="node in nodes"` 遍历数组
+- `:key="node.path"` 使用唯一标识符
+- 递归组件通过 `defineOptions({ name: 'FileTree' })` 自引用
+
+</details>
 
 ---
 
@@ -681,10 +817,61 @@ v-show：
 
 ---
 
-> 🔗 **本项目实例**：
-> - 在 [App.vue](code://App.vue#template) 中，`v-if` 用于条件渲染不同的视图（文件视图、实验室视图等）
-> - 在 [AppSidebar.vue](code://components/AppSidebar.vue#template) 中，`v-if/v-else-if` 用于切换不同的侧边栏模式
-> - `v-show` 用于控制弹窗的显示隐藏（频繁切换场景）
+<details>
+<summary>🔍 <strong>本站源码对照：v-if 与 v-show 实战应用</strong>（点击展开）</summary>
+
+**📄 components/AppSidebar.vue** - 条件渲染不同视图模式
+
+```vue
+<template>
+  <!-- 加载状态 (v-if) -->
+  <div v-if="loading" class="flex flex-col items-center">
+    <div class="animate-bounce text-2xl">🌸</div>
+    <span>{{ t.reading_notes }}</span>
+  </div>
+
+  <!-- 实验室模式 (v-else-if) -->
+  <div v-else-if="viewMode === 'lab'" class="animate-fade-in">
+    <h3>{{ t.lab_tools }}</h3>
+    <!-- 实验室工具列表 -->
+  </div>
+
+  <!-- 最新文章模式 (v-if，不同区域) -->
+  <div v-if="viewMode === 'latest'" class="space-y-3">
+    <ArticleCard v-for="file in filteredFlatFiles" :key="file.path" />
+  </div>
+
+  <!-- 归档模式 (v-else，默认分支) -->
+  <div v-else class="animate-fade-in">
+    <FileTree :nodes="filteredFileSystem" />
+  </div>
+</template>
+```
+
+**📄 App.vue** - v-show 控制弹窗（频繁切换）
+
+```vue
+<template>
+  <!-- v-show 用于频繁切换的场景（弹窗） -->
+  <div v-show="selectionMenu.show" class="fixed z-50 bg-white rounded-xl">
+    <!-- 选择菜单内容 -->
+  </div>
+
+  <!-- 设置弹窗 -->
+  <SettingsModal v-if="showSettings" @close="showSettings = false" />
+  
+  <!-- 搜索弹窗 -->
+  <SearchModal v-if="showSearch" @close="showSearch = false" />
+</template>
+```
+
+**v-if vs v-show 选择原则：**
+| 指令 | 原理 | 适用场景 |
+|------|------|----------|
+| v-if | 销毁/创建 DOM | 条件很少改变 |
+| v-show | CSS display | 频繁切换显示 |
+
+</details>
 
 ---
 
@@ -1810,12 +1997,65 @@ mounted：挂载完成，Vue初始化成功，HTML页面渲染成功。**以后�
 
 ---
 
-> 🔗 **本项目实例**：在 [App.vue](code://App.vue#setup) 中，使用 `onMounted` 钩子函数在页面加载时：
-> - 初始化主题设置
-> - 加载文件系统数据
-> - 处理 URL 参数（深链接恢复）
-> 
-> 点击查看 [onMounted 实际用法](code://App.vue#onMounted)
+<details>
+<summary>🔍 <strong>本站源码对照：onMounted 生命周期钩子</strong>（点击展开）</summary>
+
+**📄 App.vue** - onMounted 实际应用
+
+```typescript
+import { ref, onMounted, watch, nextTick } from 'vue';
+
+// =====================
+// 生命周期钩子
+// =====================
+onMounted(async () => {
+  // 1. 检测移动端
+  const checkMobile = () => {
+    isMobile.value = window.innerWidth < 768;
+  };
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+
+  // 2. 移动端滚动行为（隐藏/显示头部）
+  const scrollContainer = document.getElementById('scroll-container');
+  const handleScroll = () => {
+    if (!isMobile.value) {
+      headerHidden.value = false;
+      return;
+    }
+    // 滚动时隐藏头部逻辑...
+  };
+
+  // 3. 注册键盘快捷键
+  document.addEventListener('keydown', handleKeydown);
+  
+  // 4. 初始化暗色主题
+  if (appStore.isDark) document.documentElement.classList.add('dark');
+
+  // 5. 加载文件系统数据 ⭐ 核心初始化
+  try {
+    const res = await fetch(`./files.json?t=${Date.now()}`);
+    fileSystem.value = await res.json();
+  } catch (error) {
+    console.error('Failed to load file system:', error);
+  }
+
+  // 6. 处理 URL 参数（深链接恢复）
+  const urlParams = new URLSearchParams(window.location.search);
+  const filePath = urlParams.get('file');
+  if (filePath) {
+    const node = findNodeByPath(fileSystem.value, filePath);
+    if (node) await openFile(node);
+  }
+});
+```
+
+**核心要点：**
+- `onMounted` 在组件挂载到 DOM 后执行
+- 适合进行：DOM 操作、事件监听、初始数据加载
+- 支持 `async/await` 异步操作
+
+</details>
 
 ---
 

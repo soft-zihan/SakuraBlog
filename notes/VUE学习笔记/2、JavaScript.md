@@ -4,14 +4,96 @@
 
 ---
 
-> 📘 **学习中心入口**：进入 [VUE学习笔记 - JavaScript](lab:dashboard?tab=note2-javascript) 查看本章交互式学习内容
->
-> | 项目源码参考 | 说明 |
-> |-------------|------|
-> | [composables/](code://composables/index.ts) | Composables 组合式函数（JS/TS 核心） |
-> | [stores/appStore.ts](code://stores/appStore.ts) | Pinia 状态管理（JS 对象操作） |
-> | [useMarkdown.ts](code://composables/useMarkdown.ts) | Markdown 解析（字符串处理） |
-> | [useSearch.ts](code://composables/useSearch.ts) | 搜索功能（数组方法） |
+<details>
+<summary>🔍 <strong>本站源码对照：JavaScript 核心应用</strong>（点击展开）</summary>
+
+**📄 composables/useSearch.ts** - JS 数组方法与异步操作
+
+```typescript
+import { ref, onMounted } from 'vue'
+import MiniSearch from 'minisearch'
+import type { FileNode } from '../types'
+
+// 定义搜索结果接口
+export interface SearchResult {
+  id: string
+  path: string
+  name: string
+  content: string
+  excerpt: string
+  score: number
+}
+
+export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<string>) {
+  // 响应式变量
+  const searchQuery = ref('')
+  const searchResults = ref<SearchResult[]>([])
+  const isSearching = ref(false)
+  
+  // 数组遍历与处理
+  const loadFileContents = async (nodes: FileNode[]) => {
+    for (const node of nodes) {  // for...of 遍历
+      if (node.type === 'file' && !node.content) {
+        try {
+          node.content = await fetchFileContentFn(node)  // async/await
+        } catch (e) {
+          console.warn(`加载失败: ${node.path}`, e)
+        }
+      }
+      if (node.children) {
+        await loadFileContents(node.children)  // 递归调用
+      }
+    }
+  }
+  
+  // 搜索并过滤结果
+  const performSearch = (query: string) => {
+    const results = miniSearch.search(query)
+    return results
+      .map(result => ({        // map 转换
+        ...result,
+        excerpt: extractExcerpt(result.content, query)
+      }))
+      .filter(r => r.score > 0.5)  // filter 过滤
+      .slice(0, 20)                // slice 截取
+  }
+  
+  return { searchQuery, searchResults, performSearch }
+}
+```
+
+**📄 stores/appStore.ts** - JS 对象与函数
+
+```typescript
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+export const useAppStore = defineStore('app', () => {
+  // 对象字面量
+  const userSettings = ref({
+    fontSize: 'normal',
+    fontFamily: 'sans',
+    petalSpeed: 'slow'
+  })
+  
+  // 函数定义
+  function toggleLang() {
+    lang.value = lang.value === 'en' ? 'zh' : 'en'  // 三元运算符
+  }
+  
+  // 箭头函数
+  const showToast = (msg: string, duration = 2000) => {
+    toastMessage.value = msg
+    setTimeout(() => {  // 回调函数
+      toastMessage.value = ''
+    }, duration)
+  }
+  
+  return { userSettings, toggleLang, showToast }
+})
+```
+
+</details>
 
 ---
 
@@ -555,10 +637,54 @@ if(undefined){//false
 
 ---
 
-> 🔗 **本项目实例**：查看项目中的函数定义方式：
-> - [useMarkdown.ts](code://composables/useMarkdown.ts#renderMarkdown) - 普通函数定义（Markdown 渲染）
-> - [useSearch.ts](code://composables/useSearch.ts#performSearch) - 箭头函数（搜索功能）
-> - [appStore.ts](code://stores/appStore.ts#actions) - Pinia actions 中的方法定义
+<details>
+<summary>🔍 <strong>本站源码对照：函数定义方式</strong>（点击展开）</summary>
+
+**📄 composables/useMarkdown.ts** - 普通函数定义
+
+```typescript
+// function 关键字定义函数
+function renderMarkdown(content: string): string {
+  // 处理 Markdown 文本
+  return marked.parse(content)
+}
+
+// 异步函数
+async function fetchAndRender(path: string): Promise<string> {
+  const response = await fetch(path)
+  const text = await response.text()
+  return renderMarkdown(text)
+}
+```
+
+**📄 stores/appStore.ts** - 箭头函数与方法简写
+
+```typescript
+export const useAppStore = defineStore('app', () => {
+  // 箭头函数（常用于回调）
+  const showToast = (msg: string, duration = 2000) => {
+    toastMessage.value = msg
+    setTimeout(() => toastMessage.value = '', duration)
+  }
+  
+  // 普通函数（用于 action）
+  function toggleTheme() {
+    isDark.value = !isDark.value
+  }
+  
+  return { showToast, toggleTheme }
+})
+```
+
+**函数定义方式对比：**
+
+| 方式 | 语法 | 特点 |
+|------|------|------|
+| function | `function fn() {}` | 有提升，可在定义前调用 |
+| 箭头函数 | `const fn = () => {}` | 无 this 绑定，简洁 |
+| 方法简写 | `{ fn() {} }` | 对象/类中使用 |
+
+</details>
 
 ---
 
@@ -706,10 +832,68 @@ JavaScript中的对象有很多，主要可以分为如下3大类，我们可以
 
 ---
 
-> 🔗 **本项目实例**：查看项目中的数组操作：
-> - [useSearch.ts](code://composables/useSearch.ts#searchResults) - 数组 `filter`、`map` 方法（搜索过滤）
-> - [FileTree.vue](code://components/FileTree.vue#computed) - 数组遍历与排序
-> - [appStore.ts](code://stores/appStore.ts#state) - 响应式数组状态管理
+<details>
+<summary>🔍 <strong>本站源码对照：数组操作实战</strong>（点击展开）</summary>
+
+**📄 composables/useSearch.ts** - 数组方法链式调用
+
+```typescript
+// 搜索并处理结果
+const performSearch = (query: string) => {
+  const results = miniSearch.search(query)
+  
+  return results
+    // map: 转换每个元素
+    .map(result => ({
+      ...result,
+      excerpt: extractExcerpt(result.content, query)
+    }))
+    // filter: 过滤低分结果
+    .filter(r => r.score > 0.5)
+    // sort: 按分数排序
+    .sort((a, b) => b.score - a.score)
+    // slice: 只取前20条
+    .slice(0, 20)
+}
+```
+
+**📄 composables/useFile.ts** - 数组遍历与递归
+
+```typescript
+// 递归扁平化文件树
+const flatten = (nodes: FileNode[]): FileNode[] => {
+  let files: FileNode[] = []
+  
+  for (const node of nodes) {
+    if (node.type === 'file') {
+      files.push(node)           // push: 添加到数组末尾
+    } else if (node.children) {
+      files = files.concat(flatten(node.children))  // concat: 合并数组
+    }
+  }
+  
+  return files
+}
+
+// 按时间排序
+const sortedFiles = flatten(fileSystem)
+  .sort((a, b) => 
+    new Date(b.lastModified || 0).getTime() - 
+    new Date(a.lastModified || 0).getTime()
+  )
+```
+
+**常用数组方法：**
+
+| 方法 | 作用 | 示例 |
+|------|------|------|
+| `map()` | 转换每个元素 | `arr.map(x => x * 2)` |
+| `filter()` | 条件过滤 | `arr.filter(x => x > 0)` |
+| `find()` | 查找单个 | `arr.find(x => x.id === 1)` |
+| `forEach()` | 遍历 | `arr.forEach(x => console.log(x))` |
+| `reduce()` | 累积计算 | `arr.reduce((a, b) => a + b, 0)` |
+
+</details>
 
 ---
 

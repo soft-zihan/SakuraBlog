@@ -1,22 +1,106 @@
 ## 1. Vue工程化
 
-> 📚 **本项目联动**：工程化配置可以直接对照源码阅读。建议同时打开 [🧪 可视化学习中心](lab:dashboard?tab=note4-vue-engineering) 对照学习。
-
-**与本项目对应的工程化配置**
-
-| 功能 | 项目文件 | 关键内容 |
-|------|----------|----------|
-| 构建配置 | [vite.config.ts](code://vite.config.ts) | Vue 插件、路径别名、构建输出 |
-| 依赖与脚本 | [package.json](code://package.json) | 依赖版本、npm scripts |
-| TS 配置 | [tsconfig.json](code://tsconfig.json) | 编译选项、模块解析 |
-| 全局类型 | [types.ts](code://types.ts) | FileNode、NodeType 等类型定义 |
-| 全局常量 | [constants.ts](code://constants.ts) | I18N、配置常量 |
+> 📚 **本项目联动**：工程化配置可以直接对照下方源码阅读。
 
 前面我们在介绍Vue的时候，我们讲到Vue是一款用于构建用户界面的渐进式JavaScript框架 。（官方：https://cn.vuejs.org/）
 
 <img src="assets/image-20231215142214177.png" alt="image-20231215142214177" style="zoom:80%;" /> 
 
 那在前面的课程中，我们已经学习了Vue的基本语法、表达式、指令，并基于Vue的核心包，完成了Vue的案例。 那今天呢，我们要来讲解的基于Vue进行整站开发。
+
+---
+
+<details>
+<summary>🔍 <strong>本站源码对照：工程化配置文件一览</strong>（点击展开）</summary>
+
+**📄 vite.config.ts** - Vite 构建配置
+
+```typescript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
+
+export default defineConfig({
+  plugins: [vue()],          // 使用 Vue 插件
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./', import.meta.url))  // 路径别名
+    }
+  },
+  base: './',                // GitHub Pages 相对路径
+  build: {
+    outDir: 'dist',          // 输出目录
+    assetsDir: 'assets',     // 静态资源目录
+    emptyOutDir: true
+  }
+})
+```
+
+**📄 package.json** - 项目依赖与脚本
+
+```json
+{
+  "name": "sakura-notes",
+  "version": "1.2.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",                           // 开发服务器
+    "build": "npm run gen-tree && ... && vite build",  // 构建流程
+    "preview": "vite preview"                // 预览构建结果
+  },
+  "dependencies": {
+    "vue": "^3.5.13",         // Vue 3 核心
+    "pinia": "^3.0.0",        // 状态管理
+    "marked": "^12.0.2",      // Markdown 解析
+    "shiki": "^1.22.0"        // 代码高亮
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",   // TypeScript
+    "vite": "^4.4.5",         // Vite 构建工具
+    "@vitejs/plugin-vue": "^4.2.3"
+  }
+}
+```
+
+**📄 tsconfig.json** - TypeScript 编译配置
+
+```jsonc
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "strict": true,                    // 严格模式
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] }        // 路径映射
+  },
+  "include": ["**/*.ts", "**/*.vue"]   // 包含 Vue 文件
+}
+```
+
+**📄 types.ts** - 全局类型定义
+
+```typescript
+export enum NodeType {
+  FILE = 'file',
+  DIRECTORY = 'directory'
+}
+
+export interface FileNode {
+  name: string;
+  path: string;           // 如 "notes/tech/vue.md"
+  type: NodeType;
+  children?: FileNode[];  // 子节点（目录）
+  content?: string;       // 文件内容
+  wordCount?: number;     // 字数统计
+  lastModified?: string;  // 修改时间
+}
+```
+
+</details>
+
+---
 
 
 
@@ -384,16 +468,6 @@ import UserList from './views/user/UserList.vue'
 
 ## 2. TS
 
----
-
-> 🔗 **本项目实例**：查看本项目中的 TypeScript 应用：
-> - [types.ts](code://types.ts) - 全局类型定义（FileNode、NodeType 等）
-> - [env.d.ts](code://env.d.ts) - 环境变量类型声明
-> - [composables/useFile.ts](code://composables/useFile.ts) - 带类型注解的组合式函数
-> - [stores/appStore.ts](code://stores/appStore.ts) - Pinia Store 类型定义
-
----
-
 ### 2.1 概述
 
 - TypeScript（简称 TS）是JavaScript的超集（继承了JS全部语法），TypeScript = Type + JavaScript。
@@ -412,7 +486,95 @@ import UserList from './views/user/UserList.vue'
   
   **类型注解**：是指在变量、函数等定义的时候，使用特定语法（: type）来指定其类型，并在代码中限制只能接收特定类型的值。
 
+---
 
+<details>
+<summary>🔍 <strong>本站源码对照：TypeScript 实战应用</strong>（点击展开）</summary>
+
+**📄 types.ts** - 全局类型定义（枚举 + 接口）
+
+```typescript
+// 枚举类型：限定节点类型只能是 file 或 directory
+export enum NodeType {
+  FILE = 'file',
+  DIRECTORY = 'directory'
+}
+
+// 接口类型：定义文件节点的数据结构
+export interface FileNode {
+  name: string;
+  path: string;           // 类型注解：字符串
+  type: NodeType;         // 类型注解：枚举
+  children?: FileNode[];  // 可选属性 + 递归类型
+  content?: string;
+  wordCount?: number;     // 类型注解：数字
+  lastModified?: string;
+}
+```
+
+**📄 stores/appStore.ts** - Pinia Store 类型定义
+
+```typescript
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+export const useAppStore = defineStore('app', () => {
+  // 泛型类型注解：ref<'en' | 'zh'> 限定只能是这两个值
+  const lang = ref<'en' | 'zh'>('zh')
+  
+  // 字面量类型：限定 fontSize 只能是这三个值之一
+  const userSettings = ref({
+    fontSize: 'normal' as 'small' | 'normal' | 'large',
+    fontFamily: 'sans' as 'sans' | 'serif',
+  })
+  
+  // 函数参数类型注解
+  function showToast(msg: string, duration = 2000) {
+    // ...
+  }
+  
+  // 泛型函数：K 必须是 userSettings 的键
+  function updateSettings<K extends keyof typeof userSettings.value>(
+    key: K, 
+    value: typeof userSettings.value[K]
+  ) {
+    userSettings.value[key] = value
+  }
+})
+```
+
+**📄 composables/useFile.ts** - 组合式函数类型
+
+```typescript
+import { ref, computed, type Ref } from 'vue'
+import type { FileNode } from '../types'
+
+// 函数参数使用 Ref 泛型类型
+export function useFile(
+  fileSystem: Ref<FileNode[]>,   // Ref<T> 泛型
+  lang: Ref<'en' | 'zh'>         // 联合类型
+) {
+  // 泛型 ref：初始值为 null 或 FileNode
+  const currentFile = ref<FileNode | null>(null)
+  
+  // 函数返回类型注解
+  const findNodeByPath = (
+    nodes: FileNode[], 
+    path: string
+  ): FileNode | null => {
+    // ...
+  }
+  
+  // 异步函数返回 Promise<string>
+  const fetchFileContent = async (file: FileNode): Promise<string> => {
+    // ...
+  }
+}
+```
+
+</details>
+
+---
 
 **为什么要用TypeScript ?**
 

@@ -83,6 +83,20 @@
 
       <!-- Note 1: HTML & CSS -->
       <div v-if="activeTab === 'note1-html-css'" class="space-y-12 animate-fade-in">
+        
+        <!-- Introduction Text -->
+        <div class="max-w-3xl mx-auto px-4">
+          <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-800/30">
+            <h3 class="font-bold text-blue-800 dark:text-blue-200 mb-2">📚 {{ isZh ? '学习路线' : 'Learning Path' }}</h3>
+            <p class="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
+              {{ isZh 
+                ? 'Web 开发的基础是理解「三剑客」：HTML 负责结构、CSS 负责样式、JavaScript 负责行为。本章我们从代码的演化历史开始，逐步理解现代 Web 标准，并通过本站源码实例来巩固所学。' 
+                : 'Web development basics: HTML for structure, CSS for styling, JavaScript for behavior. We start from code evolution history, understand modern web standards, and solidify learning through real site examples.'
+              }}
+            </p>
+          </div>
+        </div>
+
         <!-- Section: Web Standards -->
         <section>
           <LabCodeEvolution :lang="lang" />
@@ -152,6 +166,11 @@
 
         <!-- Section: HTML Basics -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-orange-400">
+              💡 {{ isZh ? '理解了 Web 标准后，我们来深入学习 HTML——网页的「骨架」。HTML 使用标签来描述页面结构，每个标签都有特定的语义含义。' : 'After understanding web standards, let\'s dive into HTML — the "skeleton" of web pages. HTML uses tags to describe page structure, each with specific semantic meaning.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🧱</span> {{ t.lab_html_title }}
           </h2>
@@ -164,6 +183,11 @@
 
         <!-- Section: CSS Basics & Layout -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-blue-400">
+              💡 {{ isZh ? 'HTML 搭建好骨架后，CSS 负责「穿衣打扮」。通过选择器、属性值的组合，我们可以精确控制每个元素的外观。' : 'After HTML builds the skeleton, CSS handles the "styling". Through selectors and property values, we can precisely control each element\'s appearance.' }}
+            </p>
+          </div>
           <LabCssBasics :lang="lang" />
         </section>
 
@@ -197,6 +221,20 @@
 
       <!-- Note 2: JavaScript -->
       <div v-else-if="activeTab === 'note2-javascript'" class="space-y-12 animate-fade-in">
+        
+        <!-- Introduction Text -->
+        <div class="max-w-3xl mx-auto px-4">
+          <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-6 border border-yellow-100 dark:border-yellow-800/30">
+            <h3 class="font-bold text-yellow-800 dark:text-yellow-200 mb-2">📚 {{ isZh ? '学习路线' : 'Learning Path' }}</h3>
+            <p class="text-sm text-yellow-700 dark:text-yellow-300 leading-relaxed">
+              {{ isZh 
+                ? 'JavaScript 是网页的「大脑」，负责处理用户交互、数据操作和动态更新。我们将从变量、函数等基础语法开始，逐步深入到 DOM 操作和异步编程。掌握 JS 是学习 Vue 的前提。' 
+                : 'JavaScript is the "brain" of web pages, handling user interactions, data operations, and dynamic updates. We start from variables and functions, then advance to DOM manipulation and async programming. Mastering JS is prerequisite for learning Vue.'
+              }}
+            </p>
+          </div>
+        </div>
+
         <!-- JS Basics -->
         <section>
           <LabJsBasics :lang="lang" />
@@ -204,6 +242,11 @@
 
         <!-- JS Core Mechanics -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-yellow-400">
+              💡 {{ isZh ? '变量和函数是编程的基础。理解作用域、闭包等核心概念，能帮助你写出更健壮的代码。' : 'Variables and functions are programming fundamentals. Understanding scope and closures helps write more robust code.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">⚡</span> {{ isZh ? 'JavaScript 核心机制' : 'JavaScript Core Mechanics' }}
           </h2>
@@ -212,6 +255,11 @@
 
         <!-- DOM -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-blue-400">
+              💡 {{ isZh ? 'DOM（文档对象模型）是 JS 与 HTML 的桥梁。通过 DOM API，我们可以动态修改页面内容、样式和结构。Vue 的响应式系统正是基于 DOM 操作实现的。' : 'DOM (Document Object Model) bridges JS and HTML. Through DOM APIs, we can dynamically modify page content, styles, and structure. Vue\'s reactivity is built on DOM manipulation.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🎮</span> {{ t.lab_dom_title }}
           </h2>
@@ -229,15 +277,34 @@
 
         <NextStageGuide 
           :is-zh="isZh" 
-          :next-text="isZh ? '你已掌握 JavaScript 核心！接下来学习 Vue 3 框架基础。' : 'You\'ve mastered JavaScript core! Next, learn Vue 3 framework basics.'"
+          :next-text="isZh ? '🎉 你已掌握 JavaScript 核心！接下来学习 Vue 3 框架基础。' : '🎉 You\'ve mastered JavaScript core! Next, learn Vue 3 framework basics.'"
           @next="activeTab = 'note3-vue-basics'"
         />
       </div>
 
       <!-- Note 3: Vue Basics -->
       <div v-else-if="activeTab === 'note3-vue-basics'" class="space-y-12 animate-fade-in">
+        
+        <!-- Introduction Text -->
+        <div class="max-w-3xl mx-auto px-4">
+          <div class="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-100 dark:border-green-800/30">
+            <h3 class="font-bold text-green-800 dark:text-green-200 mb-2">📚 {{ isZh ? '学习路线' : 'Learning Path' }}</h3>
+            <p class="text-sm text-green-700 dark:text-green-300 leading-relaxed">
+              {{ isZh 
+                ? 'Vue 3 是现代前端框架的代表，核心概念包括：响应式系统（ref/reactive）、模板指令（v-if/v-for）、组件化开发。本节从项目导览开始，逐步体验 Vue 的核心特性。' 
+                : 'Vue 3 represents modern frontend frameworks. Core concepts include: reactivity (ref/reactive), template directives (v-if/v-for), and component-based development. This section starts with a project tour.'
+              }}
+            </p>
+          </div>
+        </div>
+
         <!-- Project Tour -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-sakura-400">
+              💡 {{ isZh ? '先从宏观角度了解这个博客项目的结构，看看 Vue 项目是如何组织代码的。' : 'First, get a macro view of this blog project\'s structure and how Vue projects organize code.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-sakura-600 dark:text-sakura-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🧭</span> {{ isZh ? '项目实战导览' : 'Project Tour' }}
           </h2>
@@ -246,6 +313,11 @@
 
         <!-- Reactivity -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-purple-400">
+              💡 {{ isZh ? 'ref() 和 reactive() 是 Vue 3 响应式的核心。数据变化时，视图会自动更新，这是「声明式」编程的魅力。' : 'ref() and reactive() are Vue 3 reactivity core. Views auto-update when data changes - that\'s the power of declarative programming.' }}
+            </p>
+          </div>
            <h2 class="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4 flex items-center gap-2">
              <span class="text-2xl">🧪</span> {{ t.lab_reactivity }}
            </h2>
@@ -271,6 +343,11 @@
 
         <!-- Event Handling -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-blue-400">
+              💡 {{ isZh ? 'Vue 用 @click、@input 等语法糖简化事件绑定，比原生 addEventListener 更直观。' : 'Vue uses @click, @input syntax sugar to simplify event binding, more intuitive than native addEventListener.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🖱️</span> {{ isZh ? '事件处理' : 'Event Handling' }}
           </h2>
@@ -279,6 +356,11 @@
 
         <!-- List Rendering -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-teal-400">
+              💡 {{ isZh ? 'v-for 用于循环渲染列表，v-if 用于条件渲染。注意：v-for 需要 :key 属性来优化 DOM 更新。' : 'v-for renders lists, v-if for conditional rendering. Note: v-for needs :key for optimized DOM updates.' }}
+            </p>
+          </div>
             <h2 class="text-xl font-bold text-teal-600 dark:text-teal-400 mb-4 flex items-center gap-2">
               <span class="text-2xl">📋</span> {{ t.lab_vue_list_title }}
             </h2>
@@ -295,15 +377,26 @@
 
         <!-- Async Programming -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-yellow-400">
+              💡 {{ isZh ? 'Promise 和 async/await 是处理异步操作的核心。理解它们对于处理 API 请求、文件读取等场景至关重要。' : 'Promise and async/await are core for async operations. Understanding them is crucial for API requests, file reading, etc.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">⚡</span> {{ isZh ? '异步编程' : 'Async Programming' }}
             <span class="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-300 px-2 py-0.5 rounded-full ml-2">Promise & async/await</span>
           </h2>
           <LabAsync :lang="lang" />
+
         </section>
 
         <!-- Lifecycle -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-blue-400">
+              💡 {{ isZh ? '组件有「生命周期」：创建→挂载→更新→销毁。onMounted 是最常用的钩子，用于组件挂载后执行初始化逻辑。' : 'Components have lifecycle: create → mount → update → unmount. onMounted is the most common hook for initialization after mounting.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🎢</span> {{ t.lab_lifecycle }}
           </h2>
@@ -312,15 +405,34 @@
 
         <NextStageGuide 
           :is-zh="isZh" 
-          :next-text="isZh ? '你已掌握 Vue 3 核心！接下来学习 Vue 工程化与 TypeScript。' : 'You\'ve mastered Vue 3 core! Next, learn Vue Engineering and TypeScript.'"
+          :next-text="isZh ? '🎉 你已掌握 Vue 3 核心！接下来学习 Vue 工程化与 TypeScript。' : '🎉 You\'ve mastered Vue 3 core! Next, learn Vue Engineering and TypeScript.'"
           @next="activeTab = 'note4-vue-engineering'"
         />
       </div>
 
       <!-- Note 4: Vue Engineering & TS -->
       <div v-else-if="activeTab === 'note4-vue-engineering'" class="space-y-12 animate-fade-in">
+        
+        <!-- Introduction Text -->
+        <div class="max-w-3xl mx-auto px-4">
+          <div class="bg-purple-50 dark:bg-purple-900/20 rounded-2xl p-6 border border-purple-100 dark:border-purple-800/30">
+            <h3 class="font-bold text-purple-800 dark:text-purple-200 mb-2">📚 {{ isZh ? '学习路线' : 'Learning Path' }}</h3>
+            <p class="text-sm text-purple-700 dark:text-purple-300 leading-relaxed">
+              {{ isZh 
+                ? '工程化是大型项目的基石：TypeScript 提供类型安全，NPM 管理依赖，Vite 负责构建，Pinia 处理全局状态，组件通信则是 Vue 应用的神经系统。掌握这些，你就能驾驭真实项目。' 
+                : 'Engineering is the foundation of large projects: TypeScript for type safety, NPM for dependencies, Vite for building, Pinia for global state, and component communication as the nervous system. Master these to handle real projects.'
+              }}
+            </p>
+          </div>
+        </div>
+
         <!-- TypeScript -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-blue-400">
+              💡 {{ isZh ? 'TypeScript 是 JavaScript 的超集，添加了类型系统。类型检查能在编译时发现错误，提高代码质量。' : 'TypeScript is a superset of JavaScript with a type system. Type checking catches errors at compile time, improving code quality.' }}
+            </p>
+          </div>
           <LabTypeScript :lang="lang" />
         </section>
 
@@ -331,11 +443,21 @@
 
         <!-- NPM -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-red-400">
+              💡 {{ isZh ? 'NPM 是 Node.js 的包管理器，package.json 定义项目依赖。理解 npm install、npm run dev 等命令是必备技能。' : 'NPM is Node.js package manager, package.json defines dependencies. Understanding npm install, npm run dev commands is essential.' }}
+            </p>
+          </div>
           <LabNpm :lang="lang" />
         </section>
 
         <!-- Build Tools -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-orange-400">
+              💡 {{ isZh ? 'Vite 是新一代构建工具，开发时使用原生 ES 模块实现极速热更新，生产环境使用 Rollup 打包优化。' : 'Vite is next-gen build tool, using native ES modules for blazing-fast HMR in dev, Rollup for optimized production builds.' }}
+            </p>
+          </div>
           <LabBuildTools :lang="lang" />
         </section>
 
@@ -350,6 +472,11 @@
 
         <!-- Props & Emit -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-indigo-400">
+              💡 {{ isZh ? 'Props 是父→子单向数据流，Emit 是子→父事件通信。这是 Vue 组件通信的基础模式。' : 'Props are parent→child one-way data flow, Emit is child→parent event communication. This is the basic Vue component communication pattern.' }}
+            </p>
+          </div>
             <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2">
               <span class="text-2xl">📡</span> {{ t.lab_props_title }}
             </h2>
@@ -366,6 +493,11 @@
 
         <!-- Composables -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-green-400">
+              💡 {{ isZh ? 'Composables 是 Vue 3 的逻辑复用方案，类似 React Hooks。把可复用逻辑封装成 use* 函数，多个组件共享。' : 'Composables are Vue 3\'s logic reuse pattern, similar to React Hooks. Encapsulate reusable logic into use* functions shared across components.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-green-600 dark:text-green-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🧩</span> {{ isZh ? 'Composables 组合式函数' : 'Composables' }}
             <span class="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 px-2 py-0.5 rounded-full ml-2">{{ isZh ? '本站源码剖析' : 'Site Code Analysis' }}</span>
@@ -375,6 +507,11 @@
 
         <!-- Pinia -->
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-indigo-400">
+              💡 {{ isZh ? 'Pinia 是 Vue 官方推荐的状态管理库，替代 Vuex。用于管理跨组件共享的全局状态，如用户信息、主题设置等。' : 'Pinia is Vue\'s official state management library, replacing Vuex. For managing global state shared across components, like user info, theme settings.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🍍</span> {{ isZh ? 'Pinia 状态管理' : 'Pinia State Management' }}
             <span class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 px-2 py-0.5 rounded-full ml-2">{{ isZh ? '本站源码剖析' : 'Site Code Analysis' }}</span>
@@ -410,6 +547,20 @@
 
       <!-- Challenge -->
       <div v-else-if="activeTab === 'challenge'" class="animate-fade-in space-y-12">
+        
+        <!-- Introduction Text -->
+        <div class="max-w-3xl mx-auto px-4">
+          <div class="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-100 dark:border-orange-800/30">
+            <h3 class="font-bold text-orange-800 dark:text-orange-200 mb-2">🏆 {{ isZh ? '挑战赛' : 'Challenge' }}</h3>
+            <p class="text-sm text-orange-700 dark:text-orange-300 leading-relaxed">
+              {{ isZh 
+                ? '恭喜你完成了所有学习内容！现在是检验成果的时刻。通过测验检测知识掌握程度，通过迷你项目锻炼实战能力。准备好了吗？' 
+                : 'Congratulations on completing all learning content! Now it\'s time to test your skills. Quiz tests knowledge, mini projects build practical ability. Ready?'
+              }}
+            </p>
+          </div>
+        </div>
+
          <section class="max-w-3xl mx-auto">
            <h2 class="text-xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2 justify-center">
              <span class="text-2xl">🥷</span> {{ t.lab_quiz }}
@@ -418,6 +569,11 @@
         </section>
 
         <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-orange-400">
+              💡 {{ isZh ? '最好的学习方式是动手实践。尝试完成这些迷你项目，把学到的知识转化为实际技能。' : 'The best way to learn is hands-on practice. Try completing these mini projects to turn knowledge into practical skills.' }}
+            </p>
+          </div>
           <h2 class="text-xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2">
             <span class="text-2xl">🏆</span> {{ isZh ? '迷你项目挑战' : 'Mini Project Challenge' }}
             <span class="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-300 px-2 py-0.5 rounded-full ml-2">{{ isZh ? '综合实战' : 'Hands-on Practice' }}</span>

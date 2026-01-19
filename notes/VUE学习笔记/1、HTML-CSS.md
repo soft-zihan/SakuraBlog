@@ -2,13 +2,53 @@
 
 ---
 
-> 📘 **学习中心入口**：进入 [VUE学习笔记 - HTML & CSS](lab:dashboard?tab=note1-html-css) 查看本章交互式学习内容
->
-> | 项目源码参考 | 说明 |
-> |-------------|------|
-> | [index.html](code://index.html) | 项目入口 HTML 文件 |
-> | [App.vue template](code://App.vue#template) | Vue 单文件组件模板结构 |
-> | [ArticleCard.vue](code://components/ArticleCard.vue#template) | 文章卡片组件布局 |
+<details>
+<summary>🔍 <strong>本站源码对照：HTML 项目结构</strong>（点击展开）</summary>
+
+**📄 index.html** - 项目入口文件
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sakura Notes</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    
+    <!-- Tailwind 配置 -->
+    <script>
+      tailwind.config = {
+        darkMode: 'class',  // 手动切换暗色模式
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+            },
+            colors: {
+              sakura: { /* 自定义樱花色系 */ }
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-sakura-50 to-white">
+    <div id="app"></div>  <!-- Vue 挂载点 -->
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
+```
+
+**要点解析：**
+- `<!DOCTYPE html>` 声明 HTML5 文档类型
+- `<meta charset="UTF-8">` 设置字符编码
+- `<meta name="viewport">` 响应式布局关键
+- `<div id="app">` 作为 Vue 应用挂载点
+
+</details>
 
 ---
 
@@ -464,10 +504,51 @@ B. 效果 : h1为一级标题，字体也是最大的 ； h6为六级标题，�
 
 ---
 
-> 🔗 **本项目实例**：查看本项目中的 CSS 选择器应用：
-> - [AppHeader.vue](code://components/AppHeader.vue#style) - 头部组件的 scoped 样式
-> - [ArticleCard.vue](code://components/ArticleCard.vue#style) - 文章卡片类选择器
-> - [SearchModal.vue](code://components/SearchModal.vue#style) - ID 选择器与动画效果
+<details>
+<summary>🔍 <strong>本站源码对照：CSS 选择器实战</strong>（点击展开）</summary>
+
+**📄 components/ArticleCard.vue** - Vue 组件中的 CSS 类选择器
+
+```vue
+<template>
+  <!-- 类选择器应用：article-card, group 等 -->
+  <div 
+    class="article-card group p-4 bg-white/40 rounded-2xl hover:bg-white cursor-pointer transition-all"
+    :class="{ 'ring-2 ring-sakura-300': isActive }"
+    @click="emit('click')"
+  >
+    <!-- 元素选择器 + 类选择器组合 -->
+    <div class="flex justify-between items-start">
+      <span class="text-xl">{{ getFileIcon(file) }}</span>
+      <span class="font-bold text-gray-700 truncate">{{ file.name }}</span>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+/* scoped 样式：只作用于当前组件 */
+.article-card {
+  /* 动画过渡效果 */
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+```
+
+**CSS 选择器对照：**
+
+| 类型 | 语法 | 示例 |
+|------|------|------|
+| 元素选择器 | `元素名 {}` | `div { }` |
+| 类选择器 | `.类名 {}` | `.article-card { }` |
+| ID选择器 | `#id名 {}` | `#app { }` |
+| 属性选择器 | `[attr] {}` | `[disabled] { }` |
+
+</details>
 
 ---
 

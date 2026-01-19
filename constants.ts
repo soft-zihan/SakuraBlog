@@ -25,7 +25,7 @@ export const I18N = {
     lab_dashboard_desc: "Front-end magic",
     lab_tools: "Visual Playground",
     lab_resources: "Learning Resources",
-    lab_course: "Vue Ninja Training (Project Based)",
+    lab_course: "Vue Learning Notes",
     
     // New v1.1 strings
     search_title: "Search Notes",
@@ -334,7 +334,7 @@ export const I18N = {
     lab_dashboard_desc: "前端魔法",
     lab_tools: "交互演示",
     lab_resources: "前端修炼场",
-    lab_course: "Vue 实战笔记 (源码解析)",
+    lab_course: "Vue 学习笔记",
 
     // New v1.1 strings
     search_title: "搜索笔记",

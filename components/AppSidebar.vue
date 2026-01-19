@@ -70,23 +70,11 @@
               </div>
             </div>
 
-
-            <!-- Course Section -->
-            <div class="mb-6">
-              <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_course }}</h3>
-              <div v-if="labFolder && labFolder.children">
-                <FileTree 
-                  :nodes="labFolder.children" 
-                  :expanded-paths="expandedFolders"
-                  :current-path="currentPath"
-                  @toggle-folder="$emit('toggle-folder', $event)"
-                  @select-file="$emit('select-file', $event)"
-                  @select-folder="$emit('select-folder', $event)"
-                />
-              </div>
-              <div v-else class="text-[10px] text-gray-400 italic px-2">
-                {{ t.no_vue_notes }}
-              </div>
+            <!-- Tip: Go to Archive for notes -->
+            <div class="p-3 rounded-xl bg-sakura-50/50 dark:bg-sakura-900/10 border border-sakura-100 dark:border-sakura-800/30 mb-4">
+              <p class="text-[11px] text-sakura-600 dark:text-sakura-400">
+                💡 {{ lang === 'zh' ? '配套笔记请切换到「归档」标签页查看' : 'Switch to "Archive" tab to read companion notes' }}
+              </p>
             </div>
             
             <!-- External Resources Section -->
