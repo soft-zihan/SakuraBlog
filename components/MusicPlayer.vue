@@ -7,7 +7,7 @@
         @click.self="musicStore.showMusicPlayer = false"
       >
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="musicStore.showMusicPlayer = false"></div>
         
         <!-- Player Card -->
         <div class="relative w-full max-w-lg bg-gradient-to-br from-white/95 to-sakura-50/95 dark:from-gray-900/95 dark:to-gray-800/95 rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700 overflow-hidden animate-fade-in">

@@ -42,6 +42,7 @@ export const useAppStore = defineStore('app', () => {
   const showSettings = ref(false)
   const sidebarOpen = ref(true) // For mobile
   const toastMessage = ref('')
+  const readingMode = ref(false)
   
   // Actions
   function toggleLang() {
@@ -81,6 +82,14 @@ export const useAppStore = defineStore('app', () => {
     sidebarOpen.value = !sidebarOpen.value
   }
 
+  function toggleReadingMode() {
+    readingMode.value = !readingMode.value
+  }
+
+  function setReadingMode(value: boolean) {
+    readingMode.value = value
+  }
+
   function setLang(newLang: 'en' | 'zh') {
     lang.value = newLang
   }
@@ -115,6 +124,7 @@ export const useAppStore = defineStore('app', () => {
     showSettings,
     sidebarOpen,
     toastMessage,
+    readingMode,
     // Actions
     toggleLang,
     toggleTheme,
@@ -125,11 +135,13 @@ export const useAppStore = defineStore('app', () => {
     showToast,
     updateSettings,
     toggleSidebar,
+    toggleReadingMode,
+    setReadingMode,
     // Computed
     fontSizeClass
   }
 }, {
   persist: {
-    pick: ['lang', 'isDark', 'currentWallpaperFilename', 'customWallpapers', 'wallpaperApiSettings', 'userSettings', 'showParticles']
+    pick: ['lang', 'isDark', 'currentWallpaperFilename', 'customWallpapers', 'wallpaperApiSettings', 'userSettings', 'showParticles', 'readingMode']
   }
 })

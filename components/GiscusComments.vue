@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { GISCUS_CONFIG } from '../constants'
 
 const props = defineProps<{
   lang: 'en' | 'zh'
@@ -29,6 +30,10 @@ const props = defineProps<{
   categoryId?: string // 在 giscus.app 配置页面获取
 }>()
 
+const emit = defineEmits<{
+  (e: 'update-comment-count', payload: { path: string; count: number }): void
+}>()
+
 const giscusContainer = ref<HTMLElement | null>(null)
 const loaded = ref(false)
 
@@ -39,10 +44,10 @@ const loaded = ref(false)
 // 3. 选择 Discussion 分类 (建议使用 Announcements)
 // 4. 复制生成的 data-repo-id 和 data-category-id
 const config = {
-  repo: props.repo || 'soft-zihan/soft-zihan.github.io',
-  repoId: props.repoId || 'R_kgDOQ1b8-A',
-  category: props.category || 'Announcements',
-  categoryId: props.categoryId || 'DIC_kwDOQ1b8-M4C1Ezk',
+  repo: props.repo || GISCUS_CONFIG.repo,
+  repoId: props.repoId || GISCUS_CONFIG.repoId,
+  category: props.category || GISCUS_CONFIG.category,
+  categoryId: props.categoryId || GISCUS_CONFIG.categoryId,
 }
 
 const loadGiscus = () => {
@@ -72,7 +77,7 @@ const loadGiscus = () => {
   script.setAttribute('data-term', normalizedPath)  // 指定具体的路径作为 term
   script.setAttribute('data-strict', '1')  // 严格匹配
   script.setAttribute('data-reactions-enabled', '1')
-  script.setAttribute('data-emit-metadata', '0')
+  script.setAttribute('data-emit-metadata', '1')
   script.setAttribute('data-input-position', 'bottom')
   script.setAttribute('data-theme', 'preferred_color_scheme')
   script.setAttribute('data-lang', props.lang === 'zh' ? 'zh-CN' : 'en')
@@ -98,6 +103,16 @@ const updateGiscusTheme = () => {
   }
 }
 
+const handleGiscusMessage = (event: MessageEvent) => {
+  if (event.origin !== 'https://giscus.app') return
+  const discussion = (event.data as any)?.giscus?.discussion
+  if (!discussion) return
+  const count = discussion.totalCommentCount ?? discussion.totalReplyCount
+  if (typeof count === 'number') {
+    emit('update-comment-count', { path: props.path, count })
+  }
+}
+
 watch(() => props.isDark, () => {
   updateGiscusTheme()
 })
@@ -111,6 +126,7 @@ watch(() => props.path, () => {
 })
 
 onMounted(() => {
+  window.addEventListener('message', handleGiscusMessage)
   // Only load if we have required config
   if (config.repoId && config.categoryId) {
     loadGiscus()
@@ -147,5 +163,9 @@ onMounted(() => {
       `
     }
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('message', handleGiscusMessage)
 })
 </script>

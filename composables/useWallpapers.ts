@@ -192,7 +192,6 @@ export function useWallpapers() {
     if (wallpapers.length && !appStore.currentWallpaperFilename) {
       appStore.setWallpaper(wallpapers[0].filename)
     }
-    updateBingDaily()
   })
   
   return {

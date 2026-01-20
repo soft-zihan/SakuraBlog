@@ -5,7 +5,7 @@
   <!-- Global Audio Player -->
   <GlobalAudio />
 
-  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
+  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '', readingMode ? 'reading-mode' : '']">
     
     <!-- Mobile Menu Button (repositioned to avoid overlap) -->
     <button 
@@ -150,7 +150,8 @@
         <div 
           v-if="currentFile || (viewMode === 'lab' && currentTool) || currentFolder" 
           id="scroll-container" 
-          class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full" 
+          class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full"
+          :class="readingMode ? 'reading-scroll' : ''"
         >
           
           <!-- Lab Tool View (Unified Dashboard) -->
@@ -184,7 +185,7 @@
           <!-- Note Content View -->
           <div v-else-if="currentFile" 
              class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/80 dark:bg-gray-900/80 p-8 md:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-sakura-200/50 dark:border-gray-700 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
-             :class="fontSizeClass"
+             :class="[fontSizeClass, readingMode ? 'reading-article' : '']"
           >
              <div v-if="contentLoading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
                <div class="flex flex-col items-center gap-4">
@@ -384,6 +385,7 @@
               :path="currentFile.path"
               :lang="lang"
               :is-dark="appStore.isDark"
+              @update-comment-count="handleCommentCountUpdate"
             />
           </div>
         </div>
@@ -628,7 +630,11 @@ const loading = ref(true);
 const contentLoading = ref(false);
 const currentTool = ref<'dashboard' | 'event-handling' | 'slot' | 'source-code' | null>(null);
 const isRawMode = ref(false);
-const readingMode = ref(false);
+const readingMode = computed({
+  get: () => appStore.readingMode,
+  set: (value) => appStore.setReadingMode(value)
+});
+const commentCounts = ref<Record<string, number>>({});
 
 // Modal States
 const showSettings = ref(false);
@@ -1217,6 +1223,10 @@ const handleLike = () => {
   }
 };
 
+const handleCommentCountUpdate = (payload: { path: string; count: number }) => {
+  commentCounts.value[payload.path] = payload.count;
+};
+
 const getArticleViews = (path: string): number => {
   const likes = articleStore.getLikes(path);
   const baseViews = likes * (5 + Math.random() * 5);
@@ -1224,14 +1234,8 @@ const getArticleViews = (path: string): number => {
 };
 
 const getArticleComments = (path: string): number => {
-  let hash = 0
-  for (let i = 0; i < path.length; i++) {
-    hash = ((hash << 5) - hash) + path.charCodeAt(i)
-    hash |= 0
-  }
-  const likes = articleStore.getLikes(path)
-  const base = Math.abs(hash) % 18
-  return Math.max(0, base + likes)
+  const count = commentCounts.value[path];
+  return typeof count === 'number' ? count : 0;
 }
 
 // =====================
