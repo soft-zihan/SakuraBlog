@@ -10,13 +10,14 @@ export interface BackupFile {
   download_url: string
   created_at?: string
   isLocal?: boolean  // 是否为本地备份
+  forkRepo?: string  // fork 仓库名称（用于云端备份）
 }
 
 export interface BackupResult {
   success: boolean
   message: string
   filename?: string
-  isPR?: boolean  // 是否通过 PR 方式提交
+  forkRepo?: string  // fork 仓库名称
 }
 
 export type BackupTarget = 'local' | 'cloud'
@@ -28,19 +29,25 @@ const EXCLUDED_KEYS = [
   'github_pat_iv',  // 加密 IV 不备份
   'github_pat_salt',  // 加密盐值不备份
   'local_backups',  // 本地备份列表不要循环备份
+  // 临时/编辑状态数据（不需要持久化跨设备）
+  'custom_folders_zh',  // 临时自定义文件夹
+  'custom_folders_en',
+  'publish_tags_zh',  // 发布标签缓存
+  'publish_tags_en',
+  'article_content',  // 文章编辑临时内容
+  'article_title',
+  'article_desc',
+  'article_path',
 ]
-
-// 本地备份的 localStorage key
-const LOCAL_BACKUPS_KEY = 'local_backups'
 
 export function useBackup() {
   const isBackingUp = ref(false)
   const isRestoring = ref(false)
   const backupError = ref('')
   const backupList = ref<BackupFile[]>([])
-  const localBackupList = ref<BackupFile[]>([])
+  const userForkRepo = ref('')  // 用户 fork 的仓库完整名称
   
-  const { checkWriteAccess, getCurrentUser } = useGitHubPublish()
+  const { getCurrentUser } = useGitHubPublish()
   
   const getToken = async (): Promise<string | null> => {
     return tokenSecurity.getToken()
@@ -77,20 +84,153 @@ export function useBackup() {
   
   /**
    * 生成备份文件名
+   * @param authorName 可选，用于云端备份标识作者
    */
-  const generateBackupFilename = (authorName: string): string => {
+  const generateBackupFilename = (authorName?: string): string => {
     const timestamp = new Date().toISOString()
       .replace(/[:.]/g, '-')
       .replace('T', '_')
       .slice(0, 19)
-    const safeName = authorName.replace(/[^\w\u4e00-\u9fa5]/g, '_') || 'anonymous'
-    return `${safeName}_${timestamp}.json`
+    if (authorName) {
+      const safeName = authorName.replace(/[^\w\u4e00-\u9fa5]/g, '_') || 'anonymous'
+      return `${safeName}_${timestamp}.json`
+    }
+    return `sakura_backup_${timestamp}.json`
   }
   
   /**
-   * 确保 backup 分支存在，如果不存在则创建
+   * 获取当前用户名
    */
-  const ensureBackupBranch = async (
+  const getUsername = async (token: string): Promise<string | null> => {
+    return getCurrentUser(token)
+  }
+
+  /**
+   * 检查 fork 是否存在
+   */
+  const checkForkExists = async (token: string, owner: string, repo: string, username: string): Promise<boolean> => {
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${username}/${repo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json'
+          }
+        }
+      )
+      if (response.ok) {
+        const data = await response.json()
+        // 检查是否是从目标仓库 fork 的
+        return data.fork && data.parent?.full_name === `${owner}/${repo}`
+      }
+      return false
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * 创建 fork
+   */
+  const createFork = async (token: string, owner: string, repo: string): Promise<string | null> => {
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/forks`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json'
+          }
+        }
+      )
+      if (response.ok || response.status === 202) {
+        const data = await response.json()
+        return data.full_name // 返回 "username/repo"
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * 等待 fork 准备就绪
+   */
+  const waitForFork = async (token: string, username: string, repo: string, maxWait = 30000): Promise<boolean> => {
+    const startTime = Date.now()
+    while (Date.now() - startTime < maxWait) {
+      try {
+        const response = await fetch(
+          `https://api.github.com/repos/${username}/${repo}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/vnd.github.v3+json'
+            }
+          }
+        )
+        if (response.ok) {
+          return true
+        }
+      } catch {}
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+    return false
+  }
+
+  /**
+   * 确保用户有 fork 且 backup 分支存在
+   */
+  const ensureUserForkWithBackupBranch = async (
+    token: string,
+    owner: string,
+    repo: string
+  ): Promise<{ success: boolean; forkOwner?: string; message?: string }> => {
+    try {
+      // 获取当前用户名
+      const username = await getUsername(token)
+      if (!username) {
+        return { success: false, message: '无法获取用户信息' }
+      }
+
+      // 检查 fork 是否存在
+      let forkExists = await checkForkExists(token, owner, repo, username)
+      
+      if (!forkExists) {
+        // 创建 fork
+        const forkResult = await createFork(token, owner, repo)
+        if (!forkResult) {
+          return { success: false, message: '无法创建 Fork' }
+        }
+        
+        // 等待 fork 准备就绪
+        const ready = await waitForFork(token, username, repo)
+        if (!ready) {
+          return { success: false, message: 'Fork 创建中，请稍后重试' }
+        }
+        forkExists = true
+      }
+
+      userForkRepo.value = `${username}/${repo}`
+      
+      // 在用户的 fork 中确保 backup 分支存在
+      const branchReady = await ensureBackupBranchInFork(username, repo, token)
+      if (!branchReady) {
+        return { success: false, message: '无法创建 backup 分支' }
+      }
+
+      return { success: true, forkOwner: username }
+    } catch (e: any) {
+      return { success: false, message: e.message || '准备 Fork 失败' }
+    }
+  }
+
+  /**
+   * 确保 fork 中的 backup 分支存在
+   */
+  const ensureBackupBranchInFork = async (
     owner: string,
     repo: string,
     token: string
@@ -189,7 +329,8 @@ export function useBackup() {
   }
   
   /**
-   * 备份 localStorage 到 GitHub backup 分支
+   * 备份 localStorage 到用户 Fork 的 GitHub backup 分支
+   * 不提交 PR 到上游仓库，仅保存在用户自己的 fork 中
    */
   const backupToGitHub = async (
     owner: string,
@@ -205,11 +346,13 @@ export function useBackup() {
     backupError.value = ''
     
     try {
-      // 确保 backup 分支存在
-      const branchReady = await ensureBackupBranch(owner, repo, token)
-      if (!branchReady) {
-        throw new Error('无法创建或访问 backup 分支')
+      // 确保用户有 fork 且 backup 分支存在
+      const forkResult = await ensureUserForkWithBackupBranch(token, owner, repo)
+      if (!forkResult.success || !forkResult.forkOwner) {
+        throw new Error(forkResult.message || '无法创建或访问 Fork')
       }
+      
+      const forkOwner = forkResult.forkOwner
       
       // 收集备份数据
       const backupData = collectBackupData()
@@ -222,16 +365,16 @@ export function useBackup() {
           author: authorName,
           timestamp: new Date().toISOString(),
           version: '1.0',
-          note: '此备份不包含 GitHub Token，恢复后需要重新设置'
+          note: '此备份存储在您的 Fork 仓库中，不包含 GitHub Token'
         },
         data: backupData
       }
       
       const content = JSON.stringify(fullBackupData, null, 2)
       
-      // 上传到 GitHub
+      // 上传到用户的 Fork 仓库
       const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+        `https://api.github.com/repos/${forkOwner}/${repo}/contents/${path}`,
         {
           method: 'PUT',
           headers: {
@@ -254,8 +397,9 @@ export function useBackup() {
       
       return {
         success: true,
-        message: '备份成功！注意：GitHub Token 未包含在备份中',
-        filename
+        message: `备份成功！已保存到您的 Fork: ${forkOwner}/${repo}`,
+        filename,
+        forkRepo: `${forkOwner}/${repo}`
       }
     } catch (e: any) {
       backupError.value = e.message
@@ -269,11 +413,15 @@ export function useBackup() {
   }
   
   /**
-   * 获取备份文件列表
+   * 获取用户 Fork 中的备份文件列表
+   * @param owner 上游仓库 owner（如 soft-zihan）
+   * @param repo 仓库名（如 soft-zihan.github.io）
+   * @param authorName 用户的 GitHub 用户名，用于直接定位 fork 仓库
    */
   const listBackups = async (
     owner: string,
-    repo: string
+    repo: string,
+    authorName?: string
   ): Promise<BackupFile[]> => {
     const token = await getToken()
     if (!token) {
@@ -281,8 +429,24 @@ export function useBackup() {
     }
     
     try {
+      // 优先使用传入的 authorName，否则通过 token 获取用户名
+      let username = authorName?.trim()
+      if (!username) {
+        username = await getUsername(token) || undefined
+      }
+      if (!username) {
+        return []
+      }
+
+      // 检查 fork 是否存在
+      const forkExists = await checkForkExists(token, owner, repo, username)
+      if (!forkExists) {
+        return [] // 用户没有 fork，没有云端备份
+      }
+      
+      // 从用户的 fork 获取备份列表
       const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/backups?ref=backup`,
+        `https://api.github.com/repos/${username}/${repo}/contents/backups?ref=backup`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -305,6 +469,8 @@ export function useBackup() {
       }
       
       // 过滤只保留 .json 文件，并按名称排序（时间降序）
+      // 记录 forkRepo 以便后续操作
+      userForkRepo.value = `${username}/${repo}`
       backupList.value = files
         .filter((f: any) => f.name.endsWith('.json'))
         .map((f: any) => ({
@@ -312,7 +478,8 @@ export function useBackup() {
           path: f.path,
           sha: f.sha,
           size: f.size,
-          download_url: f.download_url
+          download_url: f.download_url,
+          forkRepo: `${username}/${repo}`
         }))
         .sort((a: BackupFile, b: BackupFile) => b.name.localeCompare(a.name))
       
@@ -324,10 +491,19 @@ export function useBackup() {
   }
   
   /**
-   * 从 GitHub 恢复备份
+   * 获取云端备份的 URL（基于作者名推算）
+   */
+  const getCloudBackupUrl = (authorName: string, repo: string = 'soft-zihan.github.io'): string => {
+    if (!authorName.trim()) return ''
+    return `https://github.com/${authorName.trim()}/${repo}/tree/backup/backups`
+  }
+  
+  /**
+   * 从用户 Fork 的 GitHub 恢复备份
+   * @param authorName 用户的 GitHub 用户名（fork owner）
    */
   const restoreFromGitHub = async (
-    owner: string,
+    authorName: string,
     repo: string,
     filename: string
   ): Promise<BackupResult> => {
@@ -336,13 +512,19 @@ export function useBackup() {
       return { success: false, message: '请先设置 GitHub Token' }
     }
     
+    if (!authorName?.trim()) {
+      return { success: false, message: '请先设置作者名称（GitHub用户名）' }
+    }
+    
     isRestoring.value = true
     backupError.value = ''
     
     try {
-      // 获取备份文件内容
+      const username = authorName.trim()
+      
+      // 从用户的 fork 获取备份文件内容
       const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/backups/${filename}?ref=backup`,
+        `https://api.github.com/repos/${username}/${repo}/contents/backups/${filename}?ref=backup`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -401,10 +583,11 @@ export function useBackup() {
   }
   
   /**
-   * 删除指定的备份文件
+   * 删除用户 Fork 中的备份文件
+   * @param authorName 用户的 GitHub 用户名（fork owner）
    */
   const deleteBackup = async (
-    owner: string,
+    authorName: string,
     repo: string,
     filename: string,
     sha: string
@@ -414,9 +597,16 @@ export function useBackup() {
       return { success: false, message: '请先设置 GitHub Token' }
     }
     
+    if (!authorName?.trim()) {
+      return { success: false, message: '请先设置作者名称（GitHub用户名）' }
+    }
+    
     try {
+      const username = authorName.trim()
+      
+      // 从用户的 fork 删除备份文件
       const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/backups/${filename}`,
+        `https://api.github.com/repos/${username}/${repo}/contents/backups/${filename}`,
         {
           method: 'DELETE',
           headers: {
@@ -469,37 +659,19 @@ export function useBackup() {
   // ==================== 本地备份功能 ====================
   
   /**
-   * 获取本地备份列表
+   * 备份到本地（直接下载文件）
+   * 本地备份不需要作者名，直接备份现有数据
    */
-  const getLocalBackups = (): BackupFile[] => {
-    try {
-      const stored = localStorage.getItem(LOCAL_BACKUPS_KEY)
-      if (stored) {
-        const backups = JSON.parse(stored) as BackupFile[]
-        localBackupList.value = backups.sort((a, b) => b.name.localeCompare(a.name))
-        return localBackupList.value
-      }
-    } catch (e) {
-      console.warn('Failed to load local backups:', e)
-    }
-    localBackupList.value = []
-    return []
-  }
-
-  /**
-   * 备份到本地 (localStorage)
-   */
-  const backupToLocal = async (authorName: string): Promise<BackupResult> => {
+  const backupToLocal = async (): Promise<BackupResult> => {
     isBackingUp.value = true
     backupError.value = ''
     
     try {
       const backupData = collectBackupData()
-      const filename = generateBackupFilename(authorName)
+      const filename = generateBackupFilename()
       
       const fullBackupData = {
         _meta: {
-          author: authorName,
           timestamp: new Date().toISOString(),
           version: '1.0',
           note: '本地备份，不包含 GitHub Token'
@@ -507,135 +679,9 @@ export function useBackup() {
         data: backupData
       }
       
-      const content = JSON.stringify(fullBackupData)
+      const content = JSON.stringify(fullBackupData, null, 2)
       
-      // 获取现有本地备份
-      const existingBackups = getLocalBackups()
-      
-      // 添加新备份
-      const newBackup: BackupFile = {
-        name: filename,
-        path: `local/${filename}`,
-        sha: btoa(content).slice(0, 40), // 模拟 sha
-        size: content.length,
-        download_url: '',
-        isLocal: true
-      }
-      
-      // 保存备份内容
-      localStorage.setItem(`backup_content_${filename}`, content)
-      
-      // 更新备份列表（最多保留 10 个本地备份）
-      const updatedBackups = [newBackup, ...existingBackups].slice(0, 10)
-      localStorage.setItem(LOCAL_BACKUPS_KEY, JSON.stringify(updatedBackups))
-      localBackupList.value = updatedBackups
-      
-      return {
-        success: true,
-        message: '本地备份成功！',
-        filename
-      }
-    } catch (e: any) {
-      backupError.value = e.message
-      return {
-        success: false,
-        message: e.message || '本地备份失败'
-      }
-    } finally {
-      isBackingUp.value = false
-    }
-  }
-
-  /**
-   * 从本地备份恢复
-   */
-  const restoreFromLocal = async (filename: string): Promise<BackupResult> => {
-    isRestoring.value = true
-    backupError.value = ''
-    
-    try {
-      const content = localStorage.getItem(`backup_content_${filename}`)
-      if (!content) {
-        throw new Error('备份文件不存在')
-      }
-      
-      const backupData = JSON.parse(content)
-      
-      if (!backupData.data) {
-        throw new Error('备份文件格式不正确')
-      }
-      
-      // 恢复数据
-      const data = backupData.data
-      let restoredCount = 0
-      
-      for (const [key, value] of Object.entries(data)) {
-        if (!EXCLUDED_KEYS.includes(key)) {
-          try {
-            if (typeof value === 'string') {
-              localStorage.setItem(key, value)
-            } else {
-              localStorage.setItem(key, JSON.stringify(value))
-            }
-            restoredCount++
-          } catch (e) {
-            console.warn(`Failed to restore key: ${key}`, e)
-          }
-        }
-      }
-      
-      return {
-        success: true,
-        message: `恢复成功！已恢复 ${restoredCount} 项设置。刷新页面以应用更改。`,
-        filename
-      }
-    } catch (e: any) {
-      backupError.value = e.message
-      return {
-        success: false,
-        message: e.message || '恢复失败'
-      }
-    } finally {
-      isRestoring.value = false
-    }
-  }
-
-  /**
-   * 删除本地备份
-   */
-  const deleteLocalBackup = (filename: string): BackupResult => {
-    try {
-      // 删除备份内容
-      localStorage.removeItem(`backup_content_${filename}`)
-      
-      // 更新备份列表
-      const backups = getLocalBackups().filter(b => b.name !== filename)
-      localStorage.setItem(LOCAL_BACKUPS_KEY, JSON.stringify(backups))
-      localBackupList.value = backups
-      
-      return {
-        success: true,
-        message: '备份已删除'
-      }
-    } catch (e: any) {
-      return {
-        success: false,
-        message: e.message || '删除失败'
-      }
-    }
-  }
-
-  /**
-   * 导出本地备份为文件下载
-   */
-  const exportBackupToFile = (filename: string): BackupResult => {
-    try {
-      const content = localStorage.getItem(`backup_content_${filename}`)
-      if (!content) {
-        throw new Error('备份文件不存在')
-      }
-      
-      // 创建下载链接
+      // 直接下载文件
       const blob = new Blob([content], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -648,14 +694,17 @@ export function useBackup() {
       
       return {
         success: true,
-        message: '导出成功',
+        message: '备份文件已下载！',
         filename
       }
     } catch (e: any) {
+      backupError.value = e.message
       return {
         success: false,
-        message: e.message || '导出失败'
+        message: e.message || '本地备份失败'
       }
+    } finally {
+      isBackingUp.value = false
     }
   }
 
@@ -713,19 +762,16 @@ export function useBackup() {
     isRestoring,
     backupError,
     backupList,
-    localBackupList,
+    userForkRepo,
     backupToGitHub,
     listBackups,
     restoreFromGitHub,
     deleteBackup,
     parseBackupFilename,
     collectBackupData,
+    getCloudBackupUrl,
     // 本地备份
     backupToLocal,
-    getLocalBackups,
-    restoreFromLocal,
-    deleteLocalBackup,
-    exportBackupToFile,
     importBackupFromFile
   }
 }

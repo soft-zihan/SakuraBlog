@@ -277,7 +277,14 @@ export function useGitHubPublish() {
     const { owner, repo, branch, token } = options
     
     try {
-      // 首先尝试直接提交
+      // 先检查是否有写入权限，没有权限直接走 PR 流程
+      const hasAccess = await checkWriteAccess(options)
+      if (!hasAccess) {
+        console.log('No write access, using Fork + PR mode')
+        return await uploadFileViaPR(options, path, content, message)
+      }
+      
+      // 有权限，尝试直接提交
       let sha: string | undefined
       const getResponse = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
@@ -324,12 +331,8 @@ export function useGitHubPublish() {
       
       // 如果是 403/404 权限错误，尝试 Fork + PR 模式
       if (response.status === 403 || response.status === 404) {
-        const errorData = await response.json()
-        if (errorData.message?.includes('Resource not accessible') || 
-            errorData.message?.includes('Not Found') ||
-            errorData.message?.includes('permission')) {
-          return await uploadFileViaPR(options, path, content, message)
-        }
+        console.log('Direct commit failed, falling back to Fork + PR mode')
+        return await uploadFileViaPR(options, path, content, message)
       }
       
       const error = await response.json()
@@ -338,7 +341,9 @@ export function useGitHubPublish() {
       // 如果是权限相关错误，尝试 Fork + PR
       if (e.message?.includes('Resource not accessible') || 
           e.message?.includes('permission') ||
-          e.message?.includes('403')) {
+          e.message?.includes('403') ||
+          e.message?.includes('404') ||
+          e.message?.includes('Not Found')) {
         return await uploadFileViaPR(options, path, content, message)
       }
       return {

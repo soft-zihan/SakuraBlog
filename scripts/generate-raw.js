@@ -23,6 +23,9 @@ const FILES_TO_GENERATE = [
   'types.ts',
   'vite.config.ts',
   'index.tsx',
+  'index.html',
+  'package.json',
+  'tsconfig.json',
   
   // components 目录下的核心 Vue 文件
   'components/AppHeader.vue',
@@ -97,6 +100,15 @@ const FILES_TO_GENERATE = [
   'composables/useSearch.ts',
   'composables/useWallpapers.ts',
   'composables/index.ts',
+  'composables/useArticleMeta.ts',
+  'composables/useBackup.ts',
+  'composables/useCodeModal.ts',
+  'composables/useContentClick.ts',
+  'composables/useContentRenderer.ts',
+  'composables/useLightbox.ts',
+  'composables/useRawEditor.ts',
+  'composables/useSelectionMenu.ts',
+  'composables/useTokenSecurity.ts',
   
   // petal
   'components/petal/usePetals.ts',

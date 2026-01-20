@@ -188,18 +188,6 @@
       </div>
     </div>
 
-    <!-- Notes link -->
-    <div class="mt-8 p-4 rounded-2xl border border-gray-200 dark:border-gray-700">
-      <div class="text-xs font-bold text-gray-700 dark:text-gray-200 mb-2">{{ isZh ? '配套笔记' : 'Companion Notes' }}</div>
-      <div class="text-[11px] text-gray-600 dark:text-gray-300">
-        <a
-          href="/notes/VUE学习笔记/00-B-CSS基础与Tailwind.md"
-          class="text-pink-600 dark:text-pink-300 hover:underline"
-        >
-          {{ isZh ? '00-B CSS 基础与 Tailwind（本项目实战版）' : '00-B CSS & Tailwind (project-oriented)' }}
-        </a>
-      </div>
-    </div>
   </div>
 </template>
 

@@ -33,7 +33,7 @@
                 :class="hasToken ? 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'"
               >
                 <div class="w-2 h-2 rounded-full" :class="hasToken ? 'bg-green-500' : 'bg-yellow-500'"></div>
-                {{ hasToken ? (lang === 'zh' ? 'GitHub 已连接' : 'GitHub Connected') : (lang === 'zh' ? '请在设置中配置' : 'Configure in Settings') }}
+                {{ hasToken ? (lang === 'zh' ? 'GitHub 已连接' : 'GitHub Connected') : (lang === 'zh' ? '请在设置中配置Token' : 'Configure Token in Settings') }}
               </div>
               
               <button 
@@ -143,49 +143,33 @@
             </div>
             
             <div class="flex items-center gap-3">
-              <!-- 目录选择 - 带树状选择和新建功能 -->
-              <div class="relative">
-                <button 
-                  @click="showFolderPicker = !showFolderPicker"
-                  class="flex items-center gap-2 px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-sakura-400 dark:hover:border-sakura-500 transition-colors"
-                >
-                  <span>📁</span>
-                  <span class="text-gray-700 dark:text-gray-200 max-w-[200px] truncate">{{ targetFolder }}</span>
-                  <svg class="w-4 h-4 text-gray-400" :class="{ 'rotate-180': showFolderPicker }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
-                </button>
-                
-                <!-- 树状文件夹选择器 -->
-                <div v-if="showFolderPicker" class="absolute bottom-full mb-2 left-0 w-80 max-h-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
-                  <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <div class="flex items-center gap-2">
-                      <input
-                        v-model="newFolderName"
-                        type="text"
-                        :placeholder="lang === 'zh' ? '新建子目录名...' : 'New folder name...'"
-                        class="flex-1 px-2 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 outline-none focus:border-sakura-400"
-                        @keydown.enter="createNewFolder"
-                      />
-                      <button 
-                        @click="createNewFolder"
-                        :disabled="!newFolderName.trim()"
-                        class="px-2 py-1 text-xs bg-sakura-500 text-white rounded hover:bg-sakura-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                      >
-                        {{ lang === 'zh' ? '创建' : 'Create' }}
-                      </button>
-                    </div>
-                  </div>
-                  <div class="overflow-y-auto max-h-60 custom-scrollbar">
+              <!-- 简化的路径选择 - 固定前缀 + 子路径 -->
+              <div class="flex items-center gap-1 px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg">
+                <!-- 固定前缀 -->
+                <span class="text-gray-400 font-mono text-xs">notes/{{ lang }}/</span>
+                <!-- 子路径输入 -->
+                <div class="relative">
+                  <input
+                    v-model="pathSuffix"
+                    type="text"
+                    :placeholder="lang === 'zh' ? '子目录名(可留空)' : 'subfolder (optional)'"
+                    class="w-32 px-2 py-0.5 text-xs font-mono bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded outline-none focus:border-sakura-400 text-gray-700 dark:text-gray-200"
+                    @input="syncTargetFolder"
+                    @focus="showFolderSuggestions = true"
+                    @blur="hideFolderSuggestions"
+                  />
+                  <!-- 下拉建议 -->
+                  <div 
+                    v-if="showFolderSuggestions && folderSuggestions.length > 0"
+                    class="absolute bottom-full mb-1 left-0 w-48 max-h-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-y-auto z-50"
+                  >
                     <div
-                      v-for="folder in availableFolders"
-                      :key="folder"
-                      @click="selectFolder(folder)"
-                      class="px-3 py-2 text-sm cursor-pointer hover:bg-sakura-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
-                      :class="{ 'bg-sakura-100 dark:bg-sakura-900/30': targetFolder === folder }"
+                      v-for="suggestion in folderSuggestions"
+                      :key="suggestion"
+                      @mousedown.prevent="selectSuggestion(suggestion)"
+                      class="px-3 py-1.5 text-xs cursor-pointer hover:bg-sakura-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-mono"
                     >
-                      <span class="text-gray-400">{{ getFolderIcon(folder) }}</span>
-                      <span class="text-gray-700 dark:text-gray-200">{{ folder }}</span>
+                      {{ suggestion || '(根目录)' }}
                     </div>
                   </div>
                 </div>
@@ -450,6 +434,32 @@ const markdownFolderInput = ref<HTMLInputElement | null>(null)
 // 新增：文件夹选择器状态
 const showFolderPicker = ref(false)
 const newFolderName = ref('')
+const showFolderSuggestions = ref(false)
+
+// 文件夹建议列表（基于已有目录）
+const folderSuggestions = computed(() => {
+  const rootFolder = getRootFolder()
+  const input = pathSuffix.value.toLowerCase()
+  return availableFolders.value
+    .filter((f: string) => f.startsWith(rootFolder))
+    .map((f: string) => f.replace(rootFolder + '/', '').replace(/^\/+/, ''))
+    .filter((f: string) => f && f.toLowerCase().includes(input))
+    .slice(0, 8)
+})
+
+// 选择建议
+const selectSuggestion = (suggestion: string) => {
+  pathSuffix.value = suggestion
+  syncTargetFolder()
+  showFolderSuggestions.value = false
+}
+
+// 延迟隐藏建议
+const hideFolderSuggestions = () => {
+  setTimeout(() => {
+    showFolderSuggestions.value = false
+  }, 200)
+}
 
 // 新增：导入文件重命名映射
 const importFileRenames = ref(new Map<string, string>())
@@ -546,11 +556,10 @@ const createNewFolder = () => {
   // 基于当前选择的文件夹创建子文件夹
   const newPath = `${targetFolder.value}/${name}`.replace(/\/+/g, '/')
   
-  // 添加到自定义文件夹列表
+  // 添加到自定义文件夹列表（仅当前会话有效，不持久化）
   const langKey = props.lang as 'zh' | 'en'
   if (!customFoldersByLang.value[langKey].includes(newPath)) {
     customFoldersByLang.value[langKey].push(newPath)
-    localStorage.setItem(`custom_folders_${langKey}`, JSON.stringify(customFoldersByLang.value[langKey]))
   }
   
   // 选择新创建的文件夹
@@ -1664,16 +1673,7 @@ onMounted(() => {
     } catch {}
   }
   
-  // 加载自定义文件夹
-  (['zh', 'en'] as Array<'zh' | 'en'>).forEach((langKey: 'zh' | 'en') => {
-    const customFolders = localStorage.getItem(`custom_folders_${langKey}`)
-    if (customFolders) {
-      try {
-        const folders = JSON.parse(customFolders)
-        customFoldersByLang.value[langKey] = Array.isArray(folders) ? folders : []
-      } catch {}
-    }
-  })
+  // 不再从 localStorage 加载自定义文件夹（每次会话从头开始）
 
   const rootFolder = getRootFolder()
   if (!targetFolder.value.startsWith(rootFolder)) {

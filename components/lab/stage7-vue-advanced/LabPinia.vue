@@ -11,11 +11,6 @@
           {{ isZh ? '学习 Vue 3 官方状态管理库 — 以本站 Store 为例' : 'Learn Vue 3 official state management — using this site\'s stores' }}
         </p>
       </div>
-      <div class="ml-auto">
-        <span class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 px-3 py-1 rounded-full">
-          {{ isZh ? '📖 配套笔记: 06-A-Pinia状态管理' : '📖 Note: 06-A-Pinia-State' }}
-        </span>
-      </div>
     </div>
 
     <!-- Why Pinia -->

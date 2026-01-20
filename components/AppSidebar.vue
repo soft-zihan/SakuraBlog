@@ -55,18 +55,26 @@
       <!-- LAB MODE SIDEBAR -->
       <div v-else-if="viewMode === 'lab'" class="animate-fade-in pb-20">
           <div class="px-2 mb-4">
-            <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ t.lab_tools }}</h3>
-            
-            <!-- Unified Lab Dashboard Link -->
-            <div 
-              @click="$emit('select-tool', 'dashboard')"
-              class="p-3 rounded-xl border border-indigo-100 dark:border-indigo-900/30 cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all mb-2 flex items-center gap-3 bg-indigo-50/50 dark:bg-gray-800/30"
-              :class="{'ring-2 ring-indigo-300 dark:ring-indigo-700 bg-white dark:bg-gray-800': currentTool === 'dashboard'}"
-            >
-              <span class="text-xl">🎛️</span>
-              <div class="flex-1">
-                <div class="text-sm font-bold text-indigo-900 dark:text-indigo-300">{{ t.lab_dashboard }}</div>
-                <div class="text-[10px] text-indigo-500 dark:text-indigo-400">{{ t.lab_dashboard_desc }}</div>
+            <!-- Lab Stage Tabs (always visible) -->
+            <div v-if="labTabs && labTabs.length > 0" class="mb-4 space-y-1">
+              <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1 pl-1">
+                🎯 {{ lang === 'zh' ? '学习阶段' : 'Learning Stages' }}
+              </h3>
+              <div 
+                v-for="tab in labTabs" 
+                :key="tab.id"
+                @click="handleLabTabClick(tab.id)"
+                class="p-2 rounded-lg cursor-pointer transition-all hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm border flex items-center gap-2"
+                :class="activeLabTab === tab.id && currentTool === 'dashboard'
+                  ? 'bg-gradient-to-r from-sakura-50 to-purple-50 dark:from-sakura-900/30 dark:to-purple-900/20 border-sakura-200 dark:border-sakura-700/50' 
+                  : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700'"
+              >
+                <span class="text-lg">{{ tab.icon }}</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{{ tab.shortLabel }}</div>
+                  <div v-if="tab.noteNum" class="text-[10px] text-gray-400 dark:text-gray-500">{{ lang === 'zh' ? `笔记 ${tab.noteNum}` : `Note ${tab.noteNum}` }}</div>
+                </div>
+                <span v-if="activeLabTab === tab.id && currentTool === 'dashboard'" class="w-1.5 h-1.5 rounded-full bg-sakura-500"></span>
               </div>
             </div>
 
@@ -239,6 +247,8 @@ const props = defineProps<{
   labFolder: FileNode | null;
   resourceCategories: any[];
   currentTool: string | null;
+  labTabs?: any[]; // Lab dashboard tabs from parent
+  activeLabTab?: string; // Current active lab tab
 }>();
 
 // Compute files in labFolder (VUE学习笔记 or VUE Learning)
@@ -257,8 +267,15 @@ const emit = defineEmits([
   'toggle-folder',
   'select-file',
   'select-folder',
-  'open-search'
+  'open-search',
+  'update:activeLabTab' // For lab tab switching
 ]);
+
+// Handle lab tab click - select dashboard tool and switch tab
+const handleLabTabClick = (tabId: string) => {
+  emit('select-tool', 'dashboard');
+  emit('update:activeLabTab', tabId);
+};
 
 // Avatar Logic: Prefer external, fallback to local
 const avatarSrc = ref('https://picx.zhimg.com/80/v2-1e3a27439c019dff7f9f7a679005c950_720w.webp?source=1def8aca');

@@ -113,17 +113,27 @@ export function useSelectionMenu(showToast: (msg: string) => void) {
   const handleSelectionChange = () => {
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0) {
-      if (!selectionMenu.value.locked) selectionMenu.value.show = false
+      // 无选区时隐藏菜单
+      selectionMenu.value.show = false
+      selectionMenu.value.locked = false
       return
     }
     const range = sel.getRangeAt(0)
     const viewer = document.getElementById('markdown-viewer')
     if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) {
-      if (!selectionMenu.value.locked) selectionMenu.value.show = false
+      // 选区不在 viewer 中时隐藏菜单
+      selectionMenu.value.show = false
+      selectionMenu.value.locked = false
+      return
+    }
+    // 选区收缩（用户取消选择）时隐藏菜单
+    if (sel.isCollapsed) {
+      selectionMenu.value.show = false
+      selectionMenu.value.locked = false
       return
     }
     lastSelectionRange.value = range.cloneRange()
-    if (!sel.isCollapsed) handleSelection()
+    handleSelection()
   }
 
   /**

@@ -11,11 +11,6 @@
           {{ isZh ? '学习如何将逻辑抽离为可复用的组合式函数 — 以本站代码为例' : 'Learn to extract reusable logic as composables — using this site\'s code' }}
         </p>
       </div>
-      <div class="ml-auto">
-        <span class="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 px-3 py-1 rounded-full">
-          {{ isZh ? '📖 配套笔记: 05-B-Composables基础' : '📖 Note: 05-B-Composables-Basics' }}
-        </span>
-      </div>
     </div>
 
     <!-- Why Composables -->

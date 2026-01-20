@@ -1,53 +1,121 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
-    <!-- Notes Panel -->
+    <!-- Notes Panel - With collapsible folder tree -->
     <template v-if="type === 'notes'">
-      <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
+      <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center gap-2">
+        <!-- Toggle folder tree button (在左边，和源码查看器一致) -->
+        <button 
+          @click="showFolderTree = !showFolderTree"
+          class="p-1.5 rounded-lg transition-colors flex-shrink-0"
+          :class="showFolderTree 
+            ? 'bg-sakura-100 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-400' 
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'"
+          :title="showFolderTree ? (isZh ? '收起目录' : 'Collapse') : (isZh ? '展开目录' : 'Expand')"
+        >
+          <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': !showFolderTree }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
         <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <span>📚</span>
           {{ isZh ? 'VUE学习笔记' : 'VUE Learning Notes' }}
         </h4>
       </div>
-      <div class="flex flex-1 overflow-hidden">
-        <!-- Note List -->
-        <div class="w-48 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 overflow-y-auto custom-scrollbar bg-gray-50 dark:bg-gray-800/50">
-          <div 
-            v-for="note in notesList" 
-            :key="note.path"
-            @click="emit('select-note', note)"
-            class="p-2 cursor-pointer border-b border-gray-100 dark:border-gray-700 transition-colors"
-            :class="selectedNote?.path === note.path 
-              ? 'bg-sakura-100 dark:bg-sakura-900/30 text-sakura-700 dark:text-sakura-300' 
-              : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
-          >
-            <div class="text-xs font-medium truncate">{{ note.name.replace('.md', '') }}</div>
+      
+      <!-- Main content area with optional sidebar -->
+      <div class="flex-1 flex overflow-hidden">
+        <!-- Collapsible folder tree sidebar -->
+        <div 
+          v-if="showFolderTree"
+          class="w-48 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 overflow-y-auto custom-scrollbar"
+        >
+          <div class="p-2 space-y-0.5">
+            <div 
+              v-for="note in notesList" 
+              :key="note.path"
+              @click="emit('select-note', note)"
+              class="p-2 rounded-lg cursor-pointer transition-all text-xs hover:bg-white dark:hover:bg-gray-700 flex items-center gap-1.5"
+              :class="selectedNote?.path === note.path 
+                ? 'bg-sakura-50 dark:bg-sakura-900/20 text-sakura-700 dark:text-sakura-300 border-l-2 border-sakura-500' 
+                : 'text-gray-600 dark:text-gray-400'"
+            >
+              <span class="text-[10px]">📝</span>
+              <span class="truncate">{{ note.name.replace('.md', '') }}</span>
+            </div>
           </div>
         </div>
+        
         <!-- Note Content -->
         <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
           <div v-if="selectedNote && noteContent" v-html="renderedContent" class="markdown-body dark:text-gray-300 prose prose-sm max-w-none"></div>
-          <div v-else class="flex items-center justify-center h-full text-gray-400 text-sm">
-            {{ isZh ? '选择左侧笔记查看' : 'Select a note to view' }}
+          <div v-else class="flex items-center justify-center h-full text-gray-400 text-sm flex-col gap-4">
+            <span class="text-4xl">📚</span>
+            <span>{{ isZh ? '请点击左上角文件夹图标选择笔记' : 'Click folder icon to select note' }}</span>
           </div>
         </div>
       </div>
     </template>
 
-    <!-- Lab Panel -->
+    <!-- Lab Panel - With collapsible tab sidebar -->
     <template v-else-if="type === 'lab'">
-      <div class="h-full overflow-y-auto custom-scrollbar">
-        <LabDashboard 
-          :lang="lang" 
-          :initial-tab="labDashboardTab" 
-          @tab-change="emit('tab-change', $event)"
-        />
+      <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center gap-2">
+        <!-- Toggle sidebar button -->
+        <button 
+          @click="showLabSidebar = !showLabSidebar"
+          class="p-1.5 rounded-lg transition-colors flex-shrink-0"
+          :class="showLabSidebar 
+            ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' 
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'"
+          :title="showLabSidebar ? (isZh ? '收起目录' : 'Collapse') : (isZh ? '展开目录' : 'Expand')"
+        >
+          <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': !showLabSidebar }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+          <span>🧪</span>
+          {{ isZh ? '可视化实验室' : 'Visual Lab' }}
+        </h4>
+      </div>
+      
+      <!-- Main content area with optional sidebar -->
+      <div class="flex-1 flex overflow-hidden">
+        <!-- Collapsible lab tabs sidebar -->
+        <div 
+          v-if="showLabSidebar"
+          class="w-44 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 overflow-y-auto custom-scrollbar"
+        >
+          <div class="p-2 space-y-1">
+            <div 
+              v-for="tab in labTabs" 
+              :key="tab.id"
+              @click="selectedLabTab = tab.id; emit('tab-change', tab.id)"
+              class="p-2 rounded-lg cursor-pointer transition-all text-xs hover:bg-white dark:hover:bg-gray-700 flex items-center gap-1.5"
+              :class="selectedLabTab === tab.id 
+                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-l-2 border-purple-500' 
+                : 'text-gray-600 dark:text-gray-400'"
+            >
+              <span class="text-sm">{{ tab.icon }}</span>
+              <span class="truncate">{{ tab.shortLabel }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Lab Content -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+          <LabDashboard 
+            :lang="lang" 
+            :initial-tab="selectedLabTab" 
+            @tab-change="selectedLabTab = $event; emit('tab-change', $event)"
+          />
+        </div>
       </div>
     </template>
 
     <!-- Source Code Panel -->
     <template v-else-if="type === 'source'">
       <div class="h-full">
-        <SourceCodeViewer :lang="lang" />
+        <SourceCodeViewer :lang="lang" :compact="true" />
       </div>
     </template>
   </div>
@@ -75,6 +143,29 @@ const emit = defineEmits<{
 }>()
 
 const isZh = computed(() => props.lang === 'zh')
+
+// Show/hide folder tree sidebar
+const showFolderTree = ref(true)
+
+// Show/hide lab tabs sidebar
+const showLabSidebar = ref(true)
+
+// Lab tabs configuration
+const labTabs = computed(() => [
+  { id: 'note1-html-css', icon: '🎨', shortLabel: isZh.value ? 'HTML/CSS' : 'HTML/CSS' },
+  { id: 'note2-javascript', icon: '⚡', shortLabel: 'JavaScript' },
+  { id: 'note3-vue-basics', icon: '🥝', shortLabel: isZh.value ? 'Vue基础' : 'Vue Basics' },
+  { id: 'note4-vue-engineering', icon: '🚀', shortLabel: isZh.value ? '工程化' : 'Engineering' },
+  { id: 'challenge', icon: '🏆', shortLabel: isZh.value ? '挑战' : 'Challenge' },
+])
+
+// Selected lab tab
+const selectedLabTab = ref(props.labDashboardTab || 'note1-html-css')
+
+// Sync with props
+watch(() => props.labDashboardTab, (val) => {
+  if (val) selectedLabTab.value = val
+}, { immediate: true })
 
 // Notes list from labFolder
 const notesList = computed(() => {

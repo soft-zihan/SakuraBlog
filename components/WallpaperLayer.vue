@@ -90,7 +90,7 @@ const isTransitioning = ref(false)
 const bannerMode = computed(() => props.bannerMode || 'normal')
 
 const containerClass = computed(() =>
-  bannerMode.value === 'fullscreen' ? 'fixed inset-0 z-[-2]' : 'absolute inset-0 z-[-2]'
+  'fixed inset-0 z-[-2]'
 )
 
 const containerStyle = computed(() => {
