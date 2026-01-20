@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
+  "version": "2026.01.20",
   "lastUpdated": "2026-01-20",
   "intros": {
     "index.html": "🌐 HTML 入口文件。定义页面基础结构，引入 Tailwind CSS，设置 Vue 挂载点 #app。",
@@ -18,17 +18,46 @@
   },
   "notes": {
     "index.html": [
-      { "line": 6, "content": "💡 <meta charset=\"UTF-8\"> 声明字符编码为 UTF-8，确保中文等特殊字符正确显示。" },
-      { "line": 7, "content": "💡 viewport meta 标签是响应式设计的关键！width=device-width 让页面宽度适应设备屏幕。" }
+      {
+        "line": 6,
+        "content": "💡 <meta charset=\"UTF-8\"> 声明字符编码为 UTF-8，确保中文等特殊字符正确显示。\n\n---\n测试"
+      },
+      {
+        "line": 7,
+        "content": "💡 viewport meta 标签是响应式设计的关键！width=device-width 让页面宽度适应设备屏幕。"
+      },
+      {
+        "line": 8,
+        "content": "test"
+      },
+      {
+        "line": 9,
+        "content": "test2"
+      },
+      {
+        "line": 10,
+        "content": "111"
+      }
     ],
     "App.vue": [
-      { "line": 9, "content": "💡 <Teleport> 是 Vue 3 内置组件，可以将内容渲染到 DOM 的其他位置，常用于模态框、通知等需要脱离父组件层级的场景。" }
+      {
+        "line": 9,
+        "content": "💡 <Teleport> 是 Vue 3 内置组件，可以将内容渲染到 DOM 的其他位置，常用于模态框、通知等需要脱离父组件层级的场景。"
+      }
     ],
     "components/WriteEditor.vue": [
-      { "line": 49, "content": "💡 使用 useGitHubPublish composable 封装 GitHub API 逻辑，体现了 Vue 3 组合式 API 的优势。" }
+      {
+        "line": 49,
+        "content": "💡 使用 useGitHubPublish composable 封装 GitHub API 逻辑，体现了 Vue 3 组合式 API 的优势。"
+      }
     ],
     "composables/useGitHubPublish.ts": [
-      { "line": 19, "content": "💡 使用 async/await 处理异步操作，try/catch 捕获错误。这是现代 JavaScript 异步编程的标准写法。" }
-    ]
+      {
+        "line": 19,
+        "content": "💡 使用 async/await 处理异步操作，try/catch 捕获错误。这是现代 JavaScript 异步编程的标准写法。"
+      }
+    ],
+    "index.tsx": [],
+    "components/WallpaperLayer.vue": []
   }
 }
