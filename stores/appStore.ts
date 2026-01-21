@@ -36,7 +36,8 @@ export const useAppStore = defineStore('app', () => {
     petalSpeed: 'slow' as 'off' | 'slow' | 'fast',
     bannerMode: 'normal' as 'normal' | 'fullscreen' | 'background' | 'hide',
     petalLayer: 'back' as 'front' | 'back',
-    themeColor: 'sakura' as ThemeColorId
+    themeColor: 'sakura' as ThemeColorId,
+    articleStyle: 'classic' as 'classic' | 'clean' | 'compact' | 'lined' | 'grid'
   })
   
   // UI State

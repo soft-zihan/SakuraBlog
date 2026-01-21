@@ -5,6 +5,8 @@ export interface WallpaperItem {
   filename: string
   path: string
   name: string
+  id?: string
+  source?: 'preset' | 'custom' | 'api'
 }
 
 export interface WallpapersData {
@@ -16,10 +18,12 @@ export interface WallpapersData {
 const wallpapersData = ref<WallpapersData | null>(null)
 const isLoading = ref(false)
 const bingWallpapers = ref<WallpaperItem[]>([])
-const upx8Wallpapers = ref<WallpaperItem[]>([])
 const beautyWallpapers = ref<WallpaperItem[]>([])
 const animeWallpapers = ref<WallpaperItem[]>([])
+const searchWallpapers = ref<WallpaperItem[]>([])
 const isApiLoading = ref(false)
+let cachedWallpaperKey: string | null = null
+let wallpaperKeyPromise: Promise<string> | null = null
 
 export function useWallpapers() {
   const appStore = useAppStore()
@@ -58,7 +62,9 @@ export function useWallpapers() {
       .map(item => ({
         filename: item.url,
         path: item.url,
-        name: item.name
+        name: item.name,
+        id: item.id,
+        source: 'custom' as const
       }))
   })
 
@@ -72,7 +78,10 @@ export function useWallpapers() {
   const currentThemeWallpapers = computed(() => {
     if (!wallpapersData.value) return []
     const base = appStore.isDark ? wallpapersData.value.dark : wallpapersData.value.light
-    return [...base, ...customThemeWallpapers.value]
+    return [
+      ...base.map(item => ({ ...item, source: 'preset' as const })),
+      ...customThemeWallpapers.value
+    ]
   })
   
   // 当前选中的壁纸路径
@@ -107,17 +116,32 @@ export function useWallpapers() {
     return allWallpapers.find(w => w.filename === filename)
   }
   
-  const addCustomWallpaper = (payload: { name: string; url: string; theme: 'light' | 'dark' | 'auto'; source: 'url' | 'local' | 'api' }) => {
+  const addCustomWallpaper = (payload: { name: string; url: string; source: 'url' | 'local' | 'api' }) => {
     const id = `${payload.source}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-    appStore.customWallpapers.push({ id, ...payload })
+    appStore.customWallpapers.push({
+      id,
+      name: payload.name,
+      url: payload.url,
+      source: payload.source,
+      theme: appStore.isDark ? 'dark' : 'light'
+    })
     appStore.setWallpaper(payload.url)
   }
   
-  const removeCustomWallpaper = (url: string) => {
-    const index = appStore.customWallpapers.findIndex(item => item.url === url)
+  const removeCustomWallpaper = (id: string) => {
+    const index = appStore.customWallpapers.findIndex(item => item.id === id)
     if (index > -1) {
       appStore.customWallpapers.splice(index, 1)
     }
+  }
+
+  const downloadWallpaper = (url: string) => {
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `wallpaper-${Date.now()}.jpg`
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
   }
 
   const fetchBingWallpapers = async (country: string, count: number) => {
@@ -143,7 +167,6 @@ export function useWallpapers() {
   
   const updateBingDaily = async () => {
     const today = new Date().toISOString().slice(0, 10)
-    if (!appStore.wallpaperApiSettings.bingEnabled) return
     if (appStore.wallpaperApiSettings.bingLastDate === today && appStore.wallpaperApiSettings.bingLastUrl) {
       appStore.setWallpaper(appStore.wallpaperApiSettings.bingLastUrl)
       return
@@ -168,37 +191,29 @@ export function useWallpapers() {
     return url.includes('?') ? `${url}&${key}=${value}` : `${url}?${key}=${value}`
   }
 
-  const buildRandomItems = (baseUrl: string, count: number, label: string) => {
+  const buildRandomItems = (sources: string[], count: number, label: string) => {
     const stamp = Date.now()
-    return Array.from({ length: count }).map((_, idx) => {
-      const url = withQueryParam(baseUrl, 't', `${stamp}-${idx}`)
+    const total = Math.min(Math.max(count, 1), 10)
+    return Array.from({ length: total }).map((_, idx) => {
+      const source = sources[idx % sources.length]
+      const url = withQueryParam(source, 't', `${stamp}-${idx}`)
       return {
         filename: url,
         path: url,
-        name: `${label} ${idx + 1}`
+        name: `${label} ${idx + 1}`,
+        source: 'api' as const
       }
     })
-  }
-
-  const fetchUpx8Wallpaper = async (keyword?: string) => {
-    if (isApiLoading.value) return
-    isApiLoading.value = true
-    try {
-      const tag = keyword?.trim() || 'wallpaper'
-      const baseUrl = `https://source.unsplash.com/1600x900/?${encodeURIComponent(tag)}`
-      upx8Wallpapers.value = buildRandomItems(baseUrl, 6, 'Search')
-    } catch (e) {
-      console.warn('Failed to load UpX8 wallpaper:', e)
-    } finally {
-      isApiLoading.value = false
-    }
   }
 
   const fetchBeautyWallpapers = async (count: number) => {
     if (isApiLoading.value) return
     isApiLoading.value = true
     try {
-      beautyWallpapers.value = buildRandomItems('https://api.btstu.cn/sjbz/?lx=meizi', count, 'Beauty')
+      beautyWallpapers.value = buildRandomItems([
+        'https://cdn.seovx.com/?mom=3022',
+        'https://imgapi.cn/api.php?zd=pc&fl=meizi&gs=images'
+      ], count, 'Beauty')
     } catch (e) {
       console.warn('Failed to load beauty wallpapers:', e)
     } finally {
@@ -210,9 +225,70 @@ export function useWallpapers() {
     if (isApiLoading.value) return
     isApiLoading.value = true
     try {
-      animeWallpapers.value = buildRandomItems('https://api.btstu.cn/sjbz/?lx=dongman', count, 'Anime')
+      animeWallpapers.value = buildRandomItems([
+        'https://cdn.seovx.com/d/?mom=3022',
+        'https://www.dmoe.cc/random.php',
+        'https://api.mtyqx.cn/tapi/random.php',
+        'https://imgapi.cn/api.php?zd=pc&fl=dongman&gs=images'
+      ], count, 'Anime')
     } catch (e) {
       console.warn('Failed to load anime wallpapers:', e)
+    } finally {
+      isApiLoading.value = false
+    }
+  }
+
+  const getWallpaperKey = async () => {
+    if (cachedWallpaperKey) return cachedWallpaperKey
+    if (!wallpaperKeyPromise) {
+      wallpaperKeyPromise = fetch('./wallpaper.key')
+        .then(res => res.ok ? res.text() : '')
+        .then(text => text.trim())
+        .catch(() => '')
+    }
+    const key = await wallpaperKeyPromise
+    cachedWallpaperKey = key
+    return key
+  }
+
+  const fetchSearchWallpapers = async (keyword: string, limit: number) => {
+    if (isApiLoading.value) return
+    isApiLoading.value = true
+    try {
+      const key = await getWallpaperKey()
+      const target = Math.min(Math.max(limit || 1, 1), 10)
+      if (!key) {
+        searchWallpapers.value = []
+        return
+      }
+      const results: WallpaperItem[] = []
+      let page = 1
+      let attempts = 0
+      while (results.length < target && attempts < 4) {
+        const fetchLimit = Math.min(target * 2, 10)
+        const url = `https://cn.apihz.cn/api/img/apihzimgbaidu.php?id=10012344&key=${key}&words=${encodeURIComponent(keyword || '小姐姐')}&page=${page}&limit=${fetchLimit}&type=2`
+        const response = await fetch(url)
+        if (response.ok) {
+          const data = await response.json()
+          const list = Array.isArray(data?.res) ? data.res : []
+          for (const item of list) {
+            if (item && results.length < target) {
+              results.push({
+                filename: item,
+                path: item,
+                name: `${keyword || 'Search'} ${results.length + 1}`,
+                source: 'api' as const
+              })
+            }
+          }
+        }
+        page += 1
+        attempts += 1
+      }
+      searchWallpapers.value = results
+    } catch (e) {
+      console.warn('Failed to load search wallpapers:', e)
+      searchWallpapers.value = []
     } finally {
       isApiLoading.value = false
     }
@@ -233,9 +309,9 @@ export function useWallpapers() {
     currentThemeWallpapers,
     customThemeWallpapers,
     bingWallpapers,
-    upx8Wallpapers,
     beautyWallpapers,
     animeWallpapers,
+    searchWallpapers,
     isApiLoading,
     currentWallpaper,
     loadWallpapers,
@@ -243,10 +319,11 @@ export function useWallpapers() {
     getWallpaperInfo,
     addCustomWallpaper,
     removeCustomWallpaper,
+    downloadWallpaper,
     fetchBingWallpapers,
-    fetchUpx8Wallpaper,
     fetchBeautyWallpapers,
     fetchAnimeWallpapers,
+    fetchSearchWallpapers,
     updateBingDaily
   }
 }

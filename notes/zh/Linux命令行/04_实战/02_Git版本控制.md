@@ -151,6 +151,13 @@ Git 没有直接重命名远程分支的命令，必须通过“三步走”实�
 *   **原因**：Windows/macOS 默认对文件名大小写不敏感。
 *   **解决**：`git config core.ignorecase false`（开启敏感模式）。
 
+#### ❓ 痛点 5：已经提交的文件再写入.gitignore无法撤回
+*   **场景**：你不小心把一个重要文件提交了，后来才发现它不应该被提交。
+*   **解决**：
+    1.  `git rm --cached <file>` (从暂存区移除)。
+    2.  `git commit -m "Remove <file> from tracking"` (提交移除操作)。
+    3.  `git push` (同步到远程)。
+
 ---
 
 ### 🛡️ 职业开发者 Git 肌肉记忆总结

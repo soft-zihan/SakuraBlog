@@ -34,6 +34,16 @@
 
       <!-- Desktop Actions -->
       <div class="flex gap-2 shrink-0 items-center">
+        <button
+          @click="$emit('toggle-sidebar')"
+          class="p-2 rounded-lg border bg-white/70 dark:bg-gray-800/70 text-sakura-500 dark:text-sakura-400 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 transition-all shadow-sm"
+          :title="lang === 'zh' ? (sidebarOpen ? '收起边栏' : '展开边栏') : (sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar')"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path v-if="!sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
         <!-- File Actions (before search) -->
         <template v-if="currentFile">
           <button v-if="!currentFile.isSource && !isPdf" @click="$emit('update:isRawMode', !isRawMode)" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors" :title="isRawMode ? t.view_render : t.view_source">
@@ -46,11 +56,6 @@
             <span class="text-sm">DL</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
           </button>
-          <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs">
-            <span class="text-sm">📘</span>
-            <span class="font-semibold">{{ getArticleViews(currentFile.path) }}</span>
-          </div>
-          <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
         </template>
 
         <!-- Dual Column Mode Toggle (Lab Mode Only) -->
@@ -158,6 +163,16 @@
       <div class="flex items-center justify-between gap-1">
         <!-- Left: File Actions -->
         <div class="flex items-center gap-1">
+          <button
+            @click="$emit('toggle-sidebar')"
+            class="p-1.5 rounded-lg border bg-white/70 dark:bg-gray-800/70 text-sakura-500 dark:text-sakura-400 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 transition-all shadow-sm"
+            :title="lang === 'zh' ? (sidebarOpen ? '收起边栏' : '展开边栏') : (sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar')"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path v-if="!sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
           <template v-if="currentFile">
             <button v-if="!currentFile.isSource && !isPdf" @click="$emit('update:isRawMode', !isRawMode)" class="p-1.5 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">
               {{ isRawMode ? '👁️' : '🖊️' }}
@@ -235,6 +250,42 @@
               :class="appStore.userSettings.fontSize === 'large' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
               :style="appStore.userSettings.fontSize === 'large' ? primaryButtonStyle : undefined"
             >A++</button>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '文章样式' : 'Article Style' }}</div>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              @click="appStore.userSettings.articleStyle = 'classic'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'classic' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'classic' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '经典' : 'Classic' }}</button>
+            <button
+              @click="appStore.userSettings.articleStyle = 'clean'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'clean' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'clean' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '简洁' : 'Clean' }}</button>
+            <button
+              @click="appStore.userSettings.articleStyle = 'compact'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'compact' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'compact' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '紧凑' : 'Compact' }}</button>
+            <button
+              @click="appStore.userSettings.articleStyle = 'lined'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'lined' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'lined' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '横格' : 'Lined' }}</button>
+            <button
+              @click="appStore.userSettings.articleStyle = 'grid'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'grid' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'grid' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '方格' : 'Grid' }}</button>
           </div>
         </div>
 
@@ -515,6 +566,7 @@ const props = defineProps<{
   petalSpeed: 'off' | 'slow' | 'fast';
   headerHidden?: boolean;
   dualColumnMode?: boolean;
+  sidebarOpen?: boolean;
 }>();
 
 const emit = defineEmits([
@@ -530,6 +582,7 @@ const emit = defineEmits([
   'open-write',
   'open-download',
   'toggle-theme',
+  'toggle-sidebar',
   'update:petal-speed',
   'toggle-dual-column'
 ]);

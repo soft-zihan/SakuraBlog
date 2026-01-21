@@ -7,21 +7,6 @@
 
   <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-gradient-to-br from-white/70 via-sakura-50/50 to-purple-50/40 dark:from-gray-950/80 dark:via-gray-900/70 dark:to-sakura-900/40 backdrop-blur-[3px] border border-white/30 dark:border-gray-800/60 shadow-[0_12px_60px_rgba(15,23,42,0.12)] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
     
-    <!-- Mobile Menu Button (repositioned to avoid overlap) -->
-    <button 
-      @click="sidebarOpen = !sidebarOpen"
-      class="md:hidden fixed z-50 p-2 bg-white/90 dark:bg-gray-800/90 rounded-xl shadow-lg backdrop-blur-md border border-sakura-100 dark:border-gray-700 transition-all duration-300"
-      :class="[
-        sidebarOpen ? 'top-4 left-[calc(100%-3.5rem)]' : 'top-2 left-2',
-        headerHidden ? 'top-2' : ''
-      ]"
-    >
-      <svg class="w-5 h-5 text-sakura-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path v-if="!sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-      </svg>
-    </button>
-
     <!-- Mobile Overlay -->
     <div 
       v-if="sidebarOpen" 
@@ -32,7 +17,7 @@
     <!-- Left Sidebar: Navigation -->
     <AppSidebar 
       v-if="!readingMode"
-      :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0']"
+      :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full']"
       class="fixed md:relative z-40 transition-transform duration-300 ease-out"
       :lang="lang"
       :t="t"
@@ -89,6 +74,7 @@
         :is-dark="appStore.isDark"
         :petal-speed="appStore.userSettings.petalSpeed"
         :header-hidden="headerHidden"
+        :sidebar-open="sidebarOpen"
         :dual-column-mode="dualColumnMode"
         :get-article-views="getArticleViews"
         v-model:isRawMode="isRawMode"
@@ -103,6 +89,7 @@
         @open-download="showDownloadModal = true; if (isMobile) sidebarOpen = false"
         @toggle-theme="toggleTheme(!appStore.isDark)"
         @update:petal-speed="handlePetalSpeedChange"
+        @toggle-sidebar="sidebarOpen = !sidebarOpen"
         @toggle-dual-column="dualColumnMode = !dualColumnMode; if(dualColumnMode && !currentTool) currentTool = 'dashboard'"
       />
 
@@ -186,7 +173,7 @@
           <!-- Note Content View -->
           <div v-else-if="currentFile" 
              class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/85 dark:bg-gray-900/85 p-8 md:p-12 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
-             :class="fontSizeClass"
+             :class="[fontSizeClass, articleStyleClass]"
              :style="articleContainerStyle"
           >
              <div v-if="contentLoading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
@@ -400,9 +387,9 @@
         </div>
 
         <!-- Empty State / Home -->
-        <div v-else class="flex-1 flex flex-col items-center justify-center text-sakura-400 dark:text-gray-500 animate-fade-in p-6 text-center">
+        <div v-else class="flex-1 flex flex-col items-center justify-start pt-2 md:pt-6 text-sakura-400 dark:text-gray-500 animate-fade-in p-6 text-center">
             <div class="relative group cursor-default">
-               <div class="text-[12rem] mb-6 opacity-90 animate-float drop-shadow-2xl filter saturate-150 transform hover:scale-105 transition-transform duration-700">🌸</div>
+               <div class="text-[12rem] mb-4 opacity-90 animate-float drop-shadow-2xl filter saturate-150 transform hover:scale-105 transition-transform duration-700">🌸</div>
                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 h-8 bg-sakura-800/20 dark:bg-sakura-900/40 blur-2xl rounded-full group-hover:w-64 transition-all duration-500"></div>
             </div>
             <h2 class="text-5xl font-bold mb-4 tracking-tight drop-shadow-sm bg-gradient-to-r from-sakura-500 via-pink-500 to-purple-500 dark:from-sakura-300 dark:via-rose-300 dark:to-purple-300 text-transparent bg-clip-text">{{ t.welcome_title }}</h2>
@@ -410,41 +397,47 @@
               {{ t.welcome_desc }}<br>
               <span class="text-sm opacity-90 bg-white/70 dark:bg-gray-800/70 px-4 py-1.5 rounded-full mt-3 inline-block border border-white/70 dark:border-gray-700/70 shadow-sm backdrop-blur">{{ t.welcome_tags }}</span>
             </p>
-            <div class="mt-8 w-full max-w-2xl">
-              <div class="bg-white/80 dark:bg-gray-900/70 border border-white/70 dark:border-gray-700/70 rounded-3xl px-6 py-5 text-left shadow-[0_20px_50px_rgba(244,63,114,0.18)] backdrop-blur">
+            <div class="mt-4 w-full max-w-2xl">
+              <div class="bg-white/80 dark:bg-gray-900/70 border border-white/70 dark:border-gray-700/70 rounded-3xl px-6 py-6 text-center shadow-[0_20px_50px_rgba(244,63,114,0.18)] backdrop-blur">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                   <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
                     <span class="text-base">📜</span>
                     <span class="font-semibold text-sakura-600 dark:text-sakura-400">{{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}</span>
-                    <span v-if="welcomePoemAuthor">· {{ welcomePoemAuthor }}</span>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <button
-                      class="px-3 py-1.5 text-xs rounded-full border border-sakura-200/80 dark:border-gray-700 text-sakura-600 dark:text-sakura-300 hover:bg-sakura-50/80 dark:hover:bg-gray-800 transition-colors"
-                      :disabled="welcomePoemLoading"
-                      @click="loadRandomPoem"
-                    >
-                      {{ lang === 'zh' ? '换一首' : 'New' }}
-                    </button>
-                    <button
-                      v-if="welcomePoemHasMore"
-                      class="px-3 py-1.5 text-xs rounded-full border border-gray-200/80 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-sakura-600 dark:hover:text-sakura-300 transition-colors"
-                      @click="toggleWelcomePoemExpand"
-                    >
-                      {{ welcomePoemExpanded ? (lang === 'zh' ? '收起' : 'Collapse') : (lang === 'zh' ? '了解诗文' : 'Learn More') }}
-                    </button>
+                  <button
+                    class="px-3 py-1.5 text-xs rounded-full border border-sakura-200/80 dark:border-gray-700 text-sakura-600 dark:text-sakura-300 hover:bg-sakura-50/80 dark:hover:bg-gray-800 transition-colors"
+                    :disabled="welcomePoemLoading"
+                    @click="loadRandomPoem"
+                  >
+                    {{ lang === 'zh' ? '换一首' : 'New' }}
+                  </button>
+                </div>
+                <div v-if="welcomePoemLoading" class="mt-4 text-sm text-gray-400">{{ lang === 'zh' ? '加载中...' : 'Loading...' }}</div>
+                <div v-else-if="welcomePoemError" class="mt-4 text-sm text-amber-500">{{ welcomePoemError }}</div>
+                <div v-else class="mt-4 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                  <div class="text-center">
+                    <div class="text-2xl md:text-3xl font-bold tracking-wide text-sakura-600 dark:text-sakura-300 poem-font">
+                      {{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}
+                    </div>
+                    <div v-if="welcomePoemAuthorLine" class="mt-2 text-base text-gray-500 dark:text-gray-400 poem-font">
+                      {{ welcomePoemAuthorLine }}
+                    </div>
+                  </div>
+                  <div v-if="welcomePoemLines.length" class="mt-5 space-y-2 text-xl md:text-2xl leading-relaxed text-sakura-600 dark:text-sakura-200 poem-font poem-page">
+                    <div v-for="(line, idx) in welcomePoemLines" :key="idx" class="poem-line" :style="{ animationDelay: `${idx * 120}ms` }">
+                      {{ line }}
+                    </div>
+                  </div>
+                  <div v-if="welcomePoemDetails.length" class="mt-6 space-y-3 text-sm text-gray-600 dark:text-gray-300 text-left">
+                    <div v-for="detail in welcomePoemDetails" :key="detail.label" class="bg-white/70 dark:bg-gray-900/50 rounded-xl border border-white/60 dark:border-gray-700 px-4 py-3 shadow-sm">
+                      <div class="text-xs font-semibold text-sakura-500 dark:text-sakura-300 mb-1">{{ detail.label }}</div>
+                      <div class="whitespace-pre-line leading-relaxed">{{ detail.value }}</div>
+                    </div>
                   </div>
                 </div>
-                <div v-if="welcomePoemLoading" class="mt-3 text-sm text-gray-400">{{ lang === 'zh' ? '加载中...' : 'Loading...' }}</div>
-                <div v-else-if="welcomePoemError" class="mt-3 text-sm text-amber-500">{{ welcomePoemError }}</div>
-                <div v-else-if="welcomePoemDisplay" class="mt-3 text-sm leading-relaxed text-sakura-600 dark:text-sakura-200 whitespace-pre-line">
-                  {{ welcomePoemDisplay }}
-                </div>
-                <div v-if="welcomePoemExpanded && welcomePoemDetails.length" class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                  <div v-for="detail in welcomePoemDetails" :key="detail.label" class="bg-white/70 dark:bg-gray-900/50 rounded-xl border border-white/60 dark:border-gray-700 px-4 py-3 shadow-sm">
-                    <div class="text-xs font-semibold text-sakura-500 dark:text-sakura-300 mb-1">{{ detail.label }}</div>
-                    <div class="whitespace-pre-line leading-relaxed">{{ detail.value }}</div>
-                  </div>
+                <div v-if="welcomePoemNeedsScroll" class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+                  <span class="animate-bounce">⬇️</span>
+                  <span>{{ lang === 'zh' ? '下滑查看更多' : 'Scroll for more' }}</span>
                 </div>
               </div>
             </div>
@@ -693,7 +686,7 @@ const showSettings = ref(false);
 const showDownloadModal = ref(false);
 const showSearch = searchModalOpen;
 const showWriteEditor = ref(false);
-const sidebarOpen = ref(false);
+const sidebarOpen = ref(true);
 
 // Dual Column Mode
 const dualColumnMode = ref(false);
@@ -721,7 +714,6 @@ type GuwenItem = {
 const welcomePoem = ref<GuwenItem | null>(null);
 const welcomePoemLoading = ref(false);
 const welcomePoemError = ref('');
-const welcomePoemExpanded = ref(false);
 const guwenUrls = Object.values(import.meta.glob('./gushiwen/guwen/*.json', { as: 'url', eager: true })) as string[];
 
 const parseGuwenItems = (raw: string) => {
@@ -755,7 +747,6 @@ const loadRandomPoem = async () => {
     const items = parseGuwenItems(raw);
     if (!items.length) throw new Error('Empty data');
     welcomePoem.value = items[Math.floor(Math.random() * items.length)];
-    welcomePoemExpanded.value = false;
   } catch (e) {
     welcomePoemError.value = lang.value === 'zh' ? '诗文加载失败' : 'Failed to load poem';
   } finally {
@@ -811,6 +802,11 @@ const articleContainerStyle = computed(() => {
     style.backgroundColor = currentMeta.value.backgroundColor;
   }
   return style;
+});
+
+const articleStyleClass = computed(() => {
+  const style = appStore.userSettings.articleStyle;
+  return style ? `article-style-${style}` : '';
 });
 
 const loadingTextStyle = computed(() => ({
@@ -892,8 +888,12 @@ const welcomePoemLines = computed(() => {
   return content.split(/\n+/).map(line => line.trim()).filter(Boolean);
 });
 
-const welcomePoemAuthor = computed(() => {
-  return welcomePoem.value?.writer || (lang.value === 'zh' ? '佚名' : 'Unknown');
+const welcomePoemAuthorLine = computed(() => {
+  const dynasty = welcomePoem.value?.dynasty?.trim();
+  const writer = welcomePoem.value?.writer?.trim();
+  if (!dynasty && !writer) return '';
+  const dynastyText = dynasty ? `【${dynasty}】` : '';
+  return `${dynastyText}${writer || ''}`;
 });
 
 const welcomePoemDetails = computed(() => {
@@ -914,26 +914,9 @@ const welcomePoemDetails = computed(() => {
   return items;
 });
 
-const welcomePoemDisplay = computed(() => {
-  const lines = welcomePoemLines.value;
-  if (!lines.length) return '';
-  const slice = welcomePoemExpanded.value ? lines : lines.slice(0, 4);
-  return slice.join('\n');
+const welcomePoemNeedsScroll = computed(() => {
+  return welcomePoemLines.value.length > 6 || welcomePoemDetails.value.length > 0;
 });
-
-const welcomePoemHasMore = computed(() => welcomePoemLines.value.length > 4 || welcomePoemDetails.value.length > 0);
-
-const toggleWelcomePoemExpand = async () => {
-  const next = !welcomePoemExpanded.value;
-  welcomePoemExpanded.value = next;
-  if (next) {
-    await nextTick();
-    const scrollEl = document.getElementById('scroll-container');
-    if (scrollEl) {
-      scrollEl.scrollTo({ top: scrollEl.scrollTop + 140, behavior: 'smooth' });
-    }
-  }
-};
 
 const currentPath = computed(() => currentFile.value?.path || currentFolder.value?.path || '');
 
@@ -1490,7 +1473,13 @@ watch(currentFile, async () => {
 onMounted(async () => {
   // Check mobile
   const checkMobile = () => {
-    isMobile.value = window.innerWidth < 768;
+    const mobile = window.innerWidth < 768;
+    if (mobile !== isMobile.value) {
+      isMobile.value = mobile;
+      sidebarOpen.value = !mobile;
+      return;
+    }
+    isMobile.value = mobile;
   };
   checkMobile();
   window.addEventListener('resize', checkMobile);
@@ -1616,6 +1605,126 @@ body {
 
 .dark #markdown-viewer ::selection {
   background: var(--primary-900-30);
+}
+
+.article-style-clean {
+  box-shadow: none;
+  border-width: 1px;
+}
+
+.article-style-compact {
+  padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .article-style-compact {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .article-style-compact {
+    padding: 2.5rem;
+  }
+}
+
+.article-style-compact #markdown-viewer p,
+.article-style-compact #markdown-viewer ul,
+.article-style-compact #markdown-viewer ol {
+  margin-top: 0.6em;
+  margin-bottom: 0.6em;
+}
+
+.article-style-compact #markdown-viewer h1,
+.article-style-compact #markdown-viewer h2,
+.article-style-compact #markdown-viewer h3,
+.article-style-compact #markdown-viewer h4 {
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+}
+
+.article-style-lined {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2.05rem,
+    var(--primary-100) 2.05rem,
+    var(--primary-100) 2.1rem
+  );
+  background-size: 100% 2.1rem;
+}
+
+.dark .article-style-lined {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2.05rem,
+    var(--primary-900-30) 2.05rem,
+    var(--primary-900-30) 2.1rem
+  );
+}
+
+.article-style-grid {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2.05rem,
+      var(--primary-100) 2.05rem,
+      var(--primary-100) 2.1rem
+    ),
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent 2.05rem,
+      var(--primary-100) 2.05rem,
+      var(--primary-100) 2.1rem
+    );
+}
+
+.dark .article-style-grid {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2.05rem,
+      var(--primary-900-30) 2.05rem,
+      var(--primary-900-30) 2.1rem
+    ),
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent 2.05rem,
+      var(--primary-900-30) 2.05rem,
+      var(--primary-900-30) 2.1rem
+    );
+}
+
+.poem-font {
+  font-family: "KaiTi", "STKaiti", "KaiTi_GB2312", "STSong", serif;
+}
+
+.poem-page {
+  perspective: 900px;
+}
+
+.poem-line {
+  opacity: 0;
+  transform: rotateX(-18deg) translateY(10px) scale(0.98);
+  transform-origin: top;
+  transform-style: preserve-3d;
+  animation: poem-turn 0.6s ease forwards;
+}
+
+@keyframes poem-turn {
+  0% {
+    opacity: 0;
+    transform: rotateX(-18deg) translateY(10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0) scale(1);
+  }
 }
 
 input,
