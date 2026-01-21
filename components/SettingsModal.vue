@@ -1,7 +1,10 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl max-w-lg w-full animate-fade-in border border-white/50 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
-      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6">{{ t.settings_title }}</h3>
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl max-w-lg w-full animate-fade-in border border-white/50 dark:border-gray-700 max-h-[90vh] overflow-y-auto relative">
+      <button @click="$emit('close')" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 pr-8">{{ t.settings_title }}</h3>
 
       <!-- GitHub Configuration -->
       <div class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-6">

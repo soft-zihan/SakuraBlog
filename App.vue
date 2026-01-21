@@ -49,16 +49,6 @@
       @toggle-sidebar="sidebarOpen = !sidebarOpen"
       @update:activeLabTab="handleLabTabChange"
     />
-    <button
-      v-if="!readingMode && !sidebarOpen"
-      @click="sidebarOpen = true"
-      class="fixed top-4 left-4 z-50 w-9 h-9 rounded-lg border bg-white/80 dark:bg-gray-900/80 text-[var(--primary-500)] dark:text-[var(--primary-400)] shadow-md backdrop-blur transition-all hover:bg-white dark:hover:bg-gray-800"
-      :title="lang === 'zh' ? '展开边栏' : 'Expand Sidebar'"
-    >
-      <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-      </svg>
-    </button>
 
     <!-- Main Content Wrapper -->
     <main class="flex-1 flex flex-col h-full overflow-hidden relative isolate">
@@ -103,6 +93,8 @@
         @toggle-theme="toggleTheme(!appStore.isDark)"
         @update:petal-speed="handlePetalSpeedChange"
         @toggle-dual-column="dualColumnMode = !dualColumnMode; if(dualColumnMode && !currentTool) currentTool = 'dashboard'"
+        @toggle-sidebar="sidebarOpen = !sidebarOpen"
+        @toggle-toolbar="toolBarOpen = !toolBarOpen"
       />
 
       <!-- Content Area -->
@@ -728,6 +720,7 @@ const headerHidden = ref(false);
 const themePanelOpen = ref(false);
 const lastScrollY = ref(0);
 const isMobile = ref(false);
+const mounted = ref(false);
 
 // Wallpaper URLs
 const wallpaperLightUrl = '/image/wallpaper-light.jpg';
@@ -1734,6 +1727,7 @@ body {
   line-height: var(--line-h) !important;
   background-image: linear-gradient(to bottom, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)) !important;
   background-size: 100% var(--line-h) !important;
+  background-position: 0 0.4rem; /* 稍微下移，让线条出现在文字下方 */
   background-attachment: local;
 }
 

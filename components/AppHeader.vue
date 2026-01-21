@@ -137,11 +137,18 @@
       </div>
     </div>
 
-    <!-- Mobile Layout (Keep as is mostly, but buttons are desktop specific as per request usually) -->
-    <!-- ... Mobile layout code ... -->
-    <div v-else class="flex flex-col gap-2">
-      <!-- Row 1: Breadcrumbs (scrollable) -->
-      <div class="flex items-center text-xs overflow-x-auto no-scrollbar whitespace-nowrap py-1">
+    <!-- Mobile Layout -->
+    <div v-else class="flex items-center h-full px-3 gap-2">
+      <!-- Left Sidebar Toggle Button -->
+      <button 
+        @click="$emit('toggle-sidebar')" 
+        class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 active:scale-95 transition-transform"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg>
+      </button>
+
+      <!-- Breadcrumbs (Scrollable) -->
+      <div class="flex-1 flex items-center text-xs overflow-x-auto no-scrollbar whitespace-nowrap mask-linear px-2">
         <span class="text-[var(--primary-300)] dark:text-[var(--primary-500)] mr-1 shrink-0 cursor-pointer" @click="$emit('reset')">🏠</span>
         <span class="text-[var(--primary-200)] dark:text-gray-700 mx-1">/</span>
         <span class="font-bold text-[var(--primary-500)] dark:text-[var(--primary-400)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 px-1.5 py-0.5 rounded text-[10px]">{{ lang }}</span>
@@ -150,47 +157,25 @@
            <span class="mx-1 text-[var(--primary-300)] dark:text-gray-600">›</span>
            <span class="text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/30 px-1.5 py-0.5 rounded text-[10px]">{{ t.tab_lab }}</span>
         </template>
-        <template v-else v-for="(item, index) in breadcrumbs.slice(-2)" :key="item.path">
+        <template v-else v-for="(item, index) in breadcrumbs" :key="item.path">
           <span class="mx-1 text-[var(--primary-300)] dark:text-gray-600">›</span>
           <span 
             @click="$emit('navigate', item.path)"
             class="cursor-pointer px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-400 truncate max-w-[100px]"
-            :class="index === breadcrumbs.slice(-2).length - 1 ? 'font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)]' : ''"
+            :class="index === breadcrumbs.length - 1 ? 'font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)]' : ''"
           >
             {{ item.name }}
           </span>
         </template>
       </div>
 
-      <!-- Row 2: Actions -->
-      <div class="flex items-center justify-between gap-1">
-        <!-- Left: File Actions -->
-        <div class="flex items-center gap-1">
-          <template v-if="currentFile">
-            <button v-if="!currentFile.isSource && !isPdf" @click="$emit('update:isRawMode', !isRawMode)" class="p-1.5 text-[var(--primary-400)] hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">
-              {{ isRawMode ? '👁️' : '🖊️' }}
-            </button>
-            <button @click="$emit('copy-link')" class="p-1.5 text-[var(--primary-400)] hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">🔗</button>
-            <div class="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px]">
-              <span class="text-xs">📘</span>
-              <span class="font-semibold">{{ getArticleViews(currentFile.path) }}</span>
-            </div>
-          </template>
-        </div>
-
-        <!-- Right: Main Actions -->
-        <div class="flex items-center gap-1">
-          <button @click="$emit('open-search')" class="p-1.5 bg-gray-100 dark:bg-gray-800 rounded text-gray-500 text-sm">🔍</button>
-          <button @click="$emit('open-music')" class="p-1.5 hover:bg-[var(--primary-50)] dark:hover:bg-gray-700 rounded transition-colors text-sm relative">
-            🎵
-            <span v-if="musicStore.isPlaying" class="absolute top-0 right-0 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-          </button>
-          <button @click="$emit('toggle-theme')" class="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">{{ isDark ? '🌙' : '🌞' }}</button>
-          <button @click="$emit('open-settings')" class="p-1.5 text-gray-400 hover:text-[var(--primary-600)] rounded transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </button>
-        </div>
-      </div>
+      <!-- Right Toolbar Toggle Button -->
+      <button 
+        @click="$emit('toggle-toolbar')" 
+        class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 active:scale-95 transition-transform"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      </button>
     </div>
 
     <Teleport to="body">
@@ -735,7 +720,9 @@ const emit = defineEmits([
   'toggle-theme',
   'update:petal-speed',
   'toggle-dual-column',
-  'open-theme-panel'
+  'open-theme-panel',
+  'toggle-sidebar',
+  'toggle-toolbar'
 ]);
 
 // Mobile detection

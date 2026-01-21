@@ -30,7 +30,7 @@
         </div>
         
         <!-- Recursive Children -->
-        <div v-show="isOpen(node.path)" class="border-l border-sakura-200 ml-2.5 pl-0.5">
+        <div v-show="isOpen(node.path)" class="border-l border-sakura-200 ml-2.5 pl-0.5 mt-0.5">
           <FileTree 
             v-if="node.children" 
             :nodes="node.children" 
