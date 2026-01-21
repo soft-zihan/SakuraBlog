@@ -1698,11 +1698,21 @@ body {
 }
 
 /* Dynamic Title Colors */
-.markdown-body h1 {
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
   color: var(--primary-600);
 }
 
-.dark .markdown-body h1 {
+.dark .markdown-body h1,
+.dark .markdown-body h2,
+.dark .markdown-body h3,
+.dark .markdown-body h4,
+.dark .markdown-body h5,
+.dark .markdown-body h6 {
   color: var(--primary-300);
 }
 

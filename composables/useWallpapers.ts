@@ -41,7 +41,14 @@ export function useWallpapers() {
   const validateImage = (url: string): Promise<boolean> => {
     return new Promise((resolve) => {
       const img = new Image()
-      img.onload = () => resolve(true)
+      img.onload = () => {
+        // Check for valid dimensions to avoid broken/small images
+        if (img.naturalWidth < 200 || img.naturalHeight < 200) {
+           resolve(false)
+        } else {
+           resolve(true)
+        }
+      }
       img.onerror = () => resolve(false)
       img.src = url
     })
