@@ -47,7 +47,7 @@
         
         <button 
           @click="saveGitHubConfig"
-          class="w-full py-2 border rounded-xl text-sm transition-colors border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400 hover:bg-sakura-100 dark:hover:bg-sakura-900/30"
+          class="w-full py-2 border rounded-xl text-sm transition-colors border-[var(--primary-500)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 text-[var(--primary-600)] dark:text-[var(--primary-400)] hover:bg-[var(--primary-100)] dark:hover:bg-[var(--primary-900)]/30"
         >
           {{ t.save_config || '保存配置' }}
         </button>
@@ -62,14 +62,14 @@
           <button 
             @click="backupTarget = 'local'" 
             class="flex-1 py-2 border rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
-            :class="backupTarget === 'local' ? 'border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+            :class="backupTarget === 'local' ? 'border-[var(--primary-500)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 text-[var(--primary-600)] dark:text-[var(--primary-400)]' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
           >
             <span>💾</span> {{ t.backup_local || '本地下载' }}
           </button>
           <button 
             @click="backupTarget = 'cloud'" 
             class="flex-1 py-2 border rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
-            :class="backupTarget === 'cloud' ? 'border-sakura-500 bg-sakura-50 dark:bg-sakura-900/20 text-sakura-600 dark:text-sakura-400' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+            :class="backupTarget === 'cloud' ? 'border-[var(--primary-500)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 text-[var(--primary-600)] dark:text-[var(--primary-400)]' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
           >
             <span>☁️</span> {{ t.backup_cloud || '云端 (Fork)' }}
           </button>
@@ -231,7 +231,7 @@
         </div>
       </div>
 
-      <button @click="$emit('close')" class="w-full py-3 bg-sakura-500 hover:bg-sakura-600 text-white rounded-xl font-bold shadow-lg transition-colors">{{ t.done }}</button>
+      <button @click="$emit('close')" class="w-full py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-bold shadow-lg transition-colors">{{ t.done }}</button>
     </div>
   </div>
 </template>

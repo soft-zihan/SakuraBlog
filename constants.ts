@@ -21,11 +21,13 @@ export const THEME_COLORS = {
     palette: {
       50: '#fff0f5',
       100: '#ffe4e9',
+      200: '#fecdd7',
       300: '#fda4b8',
       400: '#fc7096',
       500: '#f43f72',
       600: '#e11d59',
       700: '#be1245',
+      800: '#9f123f',
       900: '#88133b'
     }
   },
@@ -35,11 +37,13 @@ export const THEME_COLORS = {
     palette: {
       50: '#f5f3ff',
       100: '#ede9fe',
+      200: '#ddd6fe',
       300: '#c4b5fd',
       400: '#a78bfa',
       500: '#8b5cf6',
       600: '#7c3aed',
       700: '#6d28d9',
+      800: '#5b21b6',
       900: '#4c1d95'
     }
   },
@@ -49,11 +53,13 @@ export const THEME_COLORS = {
     palette: {
       50: '#ecfeff',
       100: '#cffafe',
+      200: '#a5f3fc',
       300: '#67e8f9',
       400: '#22d3ee',
       500: '#06b6d4',
       600: '#0891b2',
       700: '#0e7490',
+      800: '#155e75',
       900: '#164e63'
     }
   },
@@ -63,12 +69,60 @@ export const THEME_COLORS = {
     palette: {
       50: '#fffbeb',
       100: '#fef3c7',
+      200: '#fde68a',
       300: '#fcd34d',
       400: '#fbbf24',
       500: '#f59e0b',
       600: '#d97706',
       700: '#b45309',
+      800: '#92400e',
       900: '#78350f'
+    }
+  },
+  blue: {
+    id: 'blue',
+    preview: '#3b82f6',
+    palette: {
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a'
+    }
+  },
+  green: {
+    id: 'green',
+    preview: '#22c55e',
+    palette: {
+      50: '#f0fdf4',
+      100: '#dcfce7',
+      200: '#bbf7d0',
+      300: '#86efac',
+      400: '#4ade80',
+      500: '#22c55e',
+      600: '#16a34a',
+      700: '#15803d',
+      800: '#166534',
+      900: '#14532d'
+    }
+  },
+  red: {
+    id: 'red',
+    preview: '#ef4444',
+    palette: {
+      50: '#fef2f2',
+      100: '#fee2e2',
+      300: '#fca5a5',
+      400: '#f87171',
+      500: '#ef4444',
+      600: '#dc2626',
+      700: '#b91c1c',
+      900: '#7f1d1d'
     }
   }
 } as const
@@ -370,6 +424,8 @@ export const I18N = {
     menu_highlight: "Highlight",
     menu_underline: "Underline",
     selection_error: "Selection cannot cross paragraphs.",
+    download_failed: "Download failed",
+    added_to_list: "Added to wallpaper list",
     
     // Lab Components content
     lab_reactivity_title: "Reactivity System: Track & Trigger",
@@ -681,6 +737,8 @@ export const I18N = {
     menu_highlight: "高亮",
     menu_underline: "波浪线",
     selection_error: "无法跨段落标注",
+    download_failed: "下载失败",
+    added_to_list: "已添加到壁纸列表",
     
     // Lab Components content
     lab_reactivity_title: "响应式系统: 依赖收集与触发",

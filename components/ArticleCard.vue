@@ -21,12 +21,12 @@
     <!-- Meta Info Row -->
     <div class="flex flex-wrap items-center gap-2 relative z-10">
       <!-- Date -->
-      <span class="text-[10px] px-2 py-0.5 rounded-md whitespace-nowrap font-medium" :style="dateBadgeStyle">
+      <span class="text-[10px] px-2 py-0.5 rounded-md whitespace-nowrap font-medium" :style="primaryBadgeStyle">
         {{ formatDate(file.lastModified) }}
       </span>
       
       <!-- Word Count -->
-      <span v-if="wordCount > 0" class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-md flex items-center gap-1">
+      <span v-if="wordCount > 0" class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
@@ -41,12 +41,12 @@
         {{ likeCount }}
       </span>
 
-      <span v-if="typeof viewCount === 'number'" class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-md flex items-center gap-1">
+      <span v-if="typeof viewCount === 'number'" class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
         <span class="text-[10px]">🧑‍🎓</span>
         {{ formatNumber(viewCount) }}
       </span>
 
-      <span v-if="typeof commentCount === 'number'" class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-md flex items-center gap-1">
+      <span v-if="typeof commentCount === 'number'" class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 8l-4-4V4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H7z"/>
         </svg>
@@ -109,9 +109,14 @@ const titleStyle = computed(() => ({
   color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-700)'
 }))
 
-const dateBadgeStyle = computed(() => ({
+const primaryBadgeStyle = computed(() => ({
   backgroundColor: appStore.isDark ? 'var(--primary-900-30)' : 'var(--primary-50)',
   color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-600)'
+}))
+
+const secondaryBadgeStyle = computed(() => ({
+  backgroundColor: appStore.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+  color: appStore.isDark ? 'var(--primary-400)' : 'var(--primary-500)'
 }))
 
 // Calculate word count from content

@@ -61,8 +61,8 @@
           </div>
 
           <!-- Sakura Notes Example -->
-          <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
-            <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '本站代码示例' : 'From This Site' }}</p>
+          <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
+            <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '本站代码示例' : 'From This Site' }}</p>
             <p class="text-xs text-gray-600 dark:text-gray-400">
               {{ isZh 
                 ? '在 App.vue 中，我们用 const 定义状态，因为 ref 对象本身不应被重新赋值：' 
@@ -151,8 +151,8 @@ activeTab.value = 'files';
           </div>
 
           <!-- Sakura Notes Example -->
-          <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
-            <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '本站代码示例' : 'From This Site' }}</p>
+          <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
+            <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '本站代码示例' : 'From This Site' }}</p>
             <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
               {{ isZh 
                 ? '在 composables 中，箭头函数是最常用的写法：' 
@@ -214,8 +214,8 @@ export function useSearch() {
           </div>
 
           <!-- Destructuring -->
-          <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
-            <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '解构赋值 - 本站示例' : 'Destructuring - From This Site' }}</p>
+          <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
+            <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '解构赋值 - 本站示例' : 'Destructuring - From This Site' }}</p>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto">// stores/appStore.ts
 const { isDark, lang, fontSize } = storeToRefs(appStore);
 
@@ -271,8 +271,8 @@ const [first, ...rest] = files;</pre>
           </div>
 
           <!-- Vue Example -->
-          <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
-            <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '在 Vue 模板中的应用' : 'In Vue Templates' }}</p>
+          <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
+            <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '在 Vue 模板中的应用' : 'In Vue Templates' }}</p>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- 三元运算符在 :class 中 -->
 &lt;button :class="isDark ? 'bg-gray-800' : 'bg-white'"&gt;
   {{ isDark ? '🌙 夜间' : '☀️ 日间' }}

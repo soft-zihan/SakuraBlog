@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-6 md:p-8 border border-sakura-100 dark:border-gray-700 shadow-xl">
+    <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-6 md:p-8 border border-[var(--primary-100)] dark:border-gray-700 shadow-xl">
       <div class="flex items-start gap-4">
         <div class="text-4xl">🧭</div>
         <div class="flex-1">
@@ -20,7 +20,7 @@
       <div
         v-for="section in sections"
         :key="section.id"
-        class="bg-white/80 dark:bg-gray-900/80 rounded-2xl p-6 border border-sakura-100/60 dark:border-gray-700 shadow-lg"
+        class="bg-white/80 dark:bg-gray-900/80 rounded-2xl p-6 border border-[var(--primary-100)]/60 dark:border-gray-700 shadow-lg"
       >
         <div class="flex items-center gap-3 mb-3">
           <span class="text-2xl">{{ section.icon }}</span>
@@ -41,7 +41,7 @@
               <div class="text-[11px] text-gray-500 dark:text-gray-400">{{ item.note }}</div>
             </div>
             <button
-              class="shrink-0 text-xs bg-sakura-500 hover:bg-sakura-600 text-white px-3 py-1.5 rounded-lg transition-all"
+              class="shrink-0 text-xs bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white px-3 py-1.5 rounded-lg transition-all"
               @click="openCode(item.path, item.range)"
             >
               {{ lang === 'zh' ? '打开代码' : 'Open Code' }}
@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <div class="bg-gradient-to-r from-sakura-50 to-purple-50 dark:from-sakura-900/20 dark:to-purple-900/20 rounded-2xl p-5 border border-sakura-100 dark:border-sakura-800/30 text-sm text-gray-600 dark:text-gray-300">
+    <div class="bg-gradient-to-r from-[var(--primary-50)] to-purple-50 dark:from-[var(--primary-900)]/20 dark:to-purple-900/20 rounded-2xl p-5 border border-[var(--primary-100)] dark:border-[var(--primary-800)]/30 text-sm text-gray-600 dark:text-gray-300">
       <div class="flex items-center gap-2 font-bold text-gray-800 dark:text-gray-100 mb-2">
         <span>📌</span>
         <span>{{ lang === 'zh' ? '学习建议' : 'Learning Tips' }}</span>

@@ -53,7 +53,7 @@
           <button 
             @click="showNotes = !showNotes"
             class="text-xs px-2 py-1 rounded transition-colors flex items-center gap-1"
-            :class="showNotes ? 'bg-sakura-500 text-white' : (isDark ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300')"
+            :class="showNotes ? 'bg-[var(--primary-500)] text-white' : (isDark ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300')"
           >
             <span>📝</span>
             {{ isZh ? '用户笔记' : 'User Notes' }}
@@ -97,7 +97,7 @@
               <!-- Drop indicator line -->
               <div 
                 v-if="showNotes && dragOverLine === idx + 1 && draggingNoteLine !== idx + 1"
-                class="h-1 mx-4 bg-sakura-400 rounded-full animate-pulse"
+                class="h-1 mx-4 bg-[var(--primary-400)] rounded-full animate-pulse"
               ></div>
               
               <!-- Code Line -->
@@ -105,7 +105,7 @@
                 class="flex group relative"
                 :class="[
                   isDark ? 'hover:bg-[#2a2d2e]' : 'hover:bg-gray-100',
-                  { 'bg-sakura-900/20 dark:bg-sakura-900/20': hasNonEmptyUserNoteAtLine(idx + 1) && !isLineCollapsed(idx + 1) }
+                  { 'bg-[var(--primary-900)]/20 dark:bg-[var(--primary-900)]/20': hasNonEmptyUserNoteAtLine(idx + 1) && !isLineCollapsed(idx + 1) }
                 ]"
                 @dragover.prevent="onDragOver($event, idx + 1)"
                 @dragleave="onDragLeave"
@@ -145,9 +145,9 @@
                 @dragend="onDragEnd"
               >
                 <div class="w-14"></div>
-                <div class="flex-1 bg-gradient-to-r from-sakura-50 to-amber-50 dark:from-sakura-900/30 dark:to-amber-900/20 rounded-lg p-3 border border-sakura-200 dark:border-sakura-700/50 shadow-sm group relative">
+                <div class="flex-1 bg-gradient-to-r from-[var(--primary-50)] to-amber-50 dark:from-[var(--primary-900)]/30 dark:to-amber-900/20 rounded-lg p-3 border border-[var(--primary-200)] dark:border-[var(--primary-700)]/50 shadow-sm group relative">
                   <!-- Drag Handle -->
-                  <div class="absolute -left-6 top-1/2 -translate-y-1/2 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-sakura-400">
+                  <div class="absolute -left-6 top-1/2 -translate-y-1/2 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-[var(--primary-400)]">
                     ⋮⋮
                   </div>
                   <div class="flex items-end justify-end gap-2 mb-1">
@@ -172,7 +172,7 @@
             <!-- Drop indicator at the end -->
             <div 
               v-if="showNotes && dragOverLine === fileLines.length + 1"
-              class="h-1 mx-4 bg-sakura-400 rounded-full animate-pulse"
+              class="h-1 mx-4 bg-[var(--primary-400)] rounded-full animate-pulse"
             ></div>
           </div>
           <div v-else class="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
@@ -221,7 +221,7 @@
             {{ isZh ? '预置笔记' : 'Preset' }}
           </span>
           <span class="flex items-center gap-1">
-            <span class="w-3 h-3 rounded bg-sakura-400/50"></span>
+            <span class="w-3 h-3 rounded bg-[var(--primary-400)]/50"></span>
             {{ isZh ? '我的笔记' : 'My Notes' }}
           </span>
         </div>
@@ -925,7 +925,7 @@ const startMinimapDrag = (e: MouseEvent) => {
 
 const getMinimapLineClass = (line: number) => {
   if (hasNonEmptyNoteAtLine(line)) {
-    return 'bg-sakura-500/30'
+    return 'bg-[var(--primary-500)]/30'
   }
   return ''
 }
@@ -1072,7 +1072,7 @@ const getLineNumberClass = (line: number) => {
     } else if (hasPreset) {
       return 'text-cyan-400 font-bold bg-cyan-900/20'
     } else {
-      return 'text-sakura-400 font-bold bg-sakura-900/20'
+      return 'text-[var(--primary-400)] font-bold bg-[var(--primary-900)]/20'
     }
   }
   return 'text-gray-600 hover:text-gray-400'
@@ -1355,7 +1355,7 @@ const exportNotes = () => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'sakura-source-notes.json'
+  a.download = 'source-notes.json'
   a.click()
   URL.revokeObjectURL(url)
 }

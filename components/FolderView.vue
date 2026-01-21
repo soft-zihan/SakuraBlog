@@ -1,10 +1,10 @@
 <template>
   <div class="w-full max-w-6xl mx-auto">
      <div class="flex items-center gap-4 mb-8 p-8 bg-white/60 dark:bg-gray-800/60 rounded-[2rem] border border-white dark:border-gray-700 shadow-xl backdrop-blur-md">
-       <span class="text-5xl bg-sakura-100 dark:bg-sakura-900/50 p-4 rounded-2xl shadow-inner text-sakura-500">📁</span>
+       <span class="text-5xl bg-[var(--primary-100)] dark:bg-[var(--primary-900)]/50 p-4 rounded-2xl shadow-inner text-[var(--primary-500)]">📁</span>
        <div>
-         <h2 class="text-3xl font-bold text-sakura-900 dark:text-sakura-100">{{ currentFolder.name }}</h2>
-         <p class="text-sakura-500 dark:text-sakura-400 mt-1 font-medium">{{ currentFolder.children?.length || 0 }} items inside</p>
+         <h2 class="text-3xl font-bold text-[var(--primary-900)] dark:text-[var(--primary-100)]">{{ currentFolder.name }}</h2>
+         <p class="text-[var(--primary-500)] dark:text-[var(--primary-400)] mt-1 font-medium">{{ currentFolder.children?.length || 0 }} items inside</p>
        </div>
      </div>
      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
@@ -13,19 +13,19 @@
           :key="child.path"
           @click="handleSingleClick(child)"
           @dblclick="handleDoubleClick(child)"
-          class="folder-card bg-white/60 dark:bg-gray-800/60 p-6 rounded-2xl shadow-md border border-white/70 dark:border-gray-700 hover:shadow-xl hover:shadow-sakura-100/30 dark:hover:shadow-black/40 hover:bg-white dark:hover:bg-gray-800 hover:border-sakura-200 dark:hover:border-sakura-800 cursor-pointer transition-all duration-300 flex flex-col h-48 backdrop-blur-sm group relative overflow-hidden select-none"
-          :class="{ 'ring-2 ring-sakura-300 dark:ring-sakura-600': selectedItem === child.path }"
+          class="folder-card bg-white/60 dark:bg-gray-800/60 p-6 rounded-2xl shadow-md border border-white/70 dark:border-gray-700 hover:shadow-xl hover:shadow-[var(--primary-100)]/30 dark:hover:shadow-black/40 hover:bg-white dark:hover:bg-gray-800 hover:border-[var(--primary-200)] dark:hover:border-[var(--primary-800)] cursor-pointer transition-all duration-300 flex flex-col h-48 backdrop-blur-sm group relative overflow-hidden select-none"
+          :class="{ 'ring-2 ring-[var(--primary-300)] dark:ring-[var(--primary-600)]': selectedItem === child.path }"
        >
-         <div class="absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br from-sakura-50 to-transparent dark:from-sakura-900/30 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+         <div class="absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br from-[var(--primary-50)] to-transparent dark:from-[var(--primary-900)]/30 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
          <div class="flex items-start justify-between mb-4 relative z-10">
            <span class="text-5xl group-hover:scale-110 transition-transform drop-shadow-sm">{{ getNodeIcon(child) }}</span>
            <div class="flex flex-col items-end gap-1">
-             <span v-if="child.type === 'file'" class="text-[10px] text-sakura-500 dark:text-sakura-400 bg-sakura-50 dark:bg-gray-900 px-2 py-1 rounded-full font-bold">{{ formatDate(child.lastModified) }}</span>
+             <span v-if="child.type === 'file'" class="text-[10px] text-[var(--primary-500)] dark:text-[var(--primary-400)] bg-[var(--primary-50)] dark:bg-gray-900 px-2 py-1 rounded-full font-bold">{{ formatDate(child.lastModified) }}</span>
              <span v-if="child.type === 'directory'" class="text-[10px] text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full">{{ lang === 'zh' ? '双击打开' : 'Double-click' }}</span>
            </div>
          </div>
          <div class="mt-auto relative z-10">
-           <h3 class="font-bold text-gray-700 dark:text-gray-200 truncate text-lg group-hover:text-sakura-600 dark:group-hover:text-sakura-400 transition-colors" :title="child.name">{{ getDisplayName(child.name) }}</h3>
+           <h3 class="font-bold text-gray-700 dark:text-gray-200 truncate text-lg group-hover:text-[var(--primary-600)] dark:group-hover:text-[var(--primary-400)] transition-colors" :title="child.name">{{ getDisplayName(child.name) }}</h3>
            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate font-medium">
              {{ child.type === 'directory' ? `${child.children?.length || 0} items` : getFileLabel(child) }}
            </p>

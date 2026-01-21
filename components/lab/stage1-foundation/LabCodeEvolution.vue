@@ -2,7 +2,7 @@
   <div class="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-900 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-gray-700 shadow-2xl relative overflow-hidden">
     
     <!-- Background Decoration -->
-    <div class="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-sakura-200/30 to-blue-200/30 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-[var(--primary-200)]/30 to-blue-200/30 rounded-full blur-3xl pointer-events-none"></div>
     
     <!-- Header -->
     <div class="text-center mb-8 relative z-10">
@@ -191,7 +191,7 @@
 
     <!-- Learning Path Summary -->
     <div class="mt-6 text-center">
-      <div class="inline-flex items-center gap-2 bg-gradient-to-r from-sakura-100 to-blue-100 dark:from-sakura-900/30 dark:to-blue-900/30 px-6 py-3 rounded-full text-sm flex-wrap justify-center">
+      <div class="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--primary-100)] to-blue-100 dark:from-[var(--primary-900)]/30 dark:to-blue-900/30 px-6 py-3 rounded-full text-sm flex-wrap justify-center">
         <span class="font-bold text-gray-700 dark:text-gray-300">{{ t.evo_summary }}:</span>
         <span class="text-orange-600 dark:text-orange-400">HTML</span>
         <span class="text-gray-400">→</span>
@@ -201,7 +201,7 @@
         <span class="text-gray-400">→</span>
         <span class="text-emerald-600 dark:text-emerald-400">Vue</span>
         <span class="text-gray-400">=</span>
-        <span class="font-bold text-sakura-600 dark:text-sakura-400">🚀 Modern Web App</span>
+        <span class="font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)]">🚀 Modern Web App</span>
       </div>
     </div>
   </div>

@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useWallpapers } from '../composables/useWallpapers'
+import { useAppStore } from '../stores/appStore'
 
 const props = defineProps<{ 
   isDark: boolean
@@ -82,6 +83,7 @@ const props = defineProps<{
   showWaves?: boolean
 }>()
 
+const appStore = useAppStore()
 // Use wallpaper composable
 const { currentWallpaper } = useWallpapers()
 
@@ -103,10 +105,15 @@ const containerStyle = computed(() => {
   return {}
 })
 
+const bgSize = computed(() => {
+  const fill = appStore.userSettings.wallpaperFill
+  return fill === 'fill' ? '100% 100%' : fill
+})
+
 const currentBgStyle = computed(() => {
   return {
     backgroundImage: `url(${currentWallpaper.value})`,
-    backgroundSize: 'cover',
+    backgroundSize: bgSize.value,
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     filter: props.isDark ? 'saturate(80%) brightness(0.8)' : 'saturate(120%) brightness(1.0)'
@@ -116,7 +123,7 @@ const currentBgStyle = computed(() => {
 const nextBgStyle = computed(() => {
   return {
     backgroundImage: `url(${currentWallpaper.value})`,
-    backgroundSize: 'cover',
+    backgroundSize: bgSize.value,
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     filter: props.isDark ? 'saturate(80%) brightness(0.8)' : 'saturate(120%) brightness(1.0)'

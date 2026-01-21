@@ -5,7 +5,7 @@
   <!-- Global Audio Player -->
   <GlobalAudio />
 
-  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-gradient-to-br from-white/70 via-sakura-50/50 to-purple-50/40 dark:from-gray-950/80 dark:via-gray-900/70 dark:to-sakura-900/40 backdrop-blur-[3px] border border-white/30 dark:border-gray-800/60 shadow-[0_12px_60px_rgba(15,23,42,0.12)] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
+  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-gradient-to-br from-white/70 via-[var(--primary-50)]/50 to-purple-50/40 dark:from-gray-950/80 dark:via-gray-900/70 dark:to-[var(--primary-900)]/40 backdrop-blur-[3px] border border-white/30 dark:border-gray-800/60 shadow-[0_12px_60px_rgba(15,23,42,0.12)] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
     
     <!-- Mobile Overlay -->
     <div 
@@ -52,7 +52,7 @@
     <button
       v-if="!readingMode && !sidebarOpen"
       @click="sidebarOpen = true"
-      class="fixed top-4 left-4 z-50 w-9 h-9 rounded-lg border bg-white/80 dark:bg-gray-900/80 text-sakura-500 dark:text-sakura-400 shadow-md backdrop-blur transition-all hover:bg-white dark:hover:bg-gray-800"
+      class="fixed top-4 left-4 z-50 w-9 h-9 rounded-lg border bg-white/80 dark:bg-gray-900/80 text-[var(--primary-500)] dark:text-[var(--primary-400)] shadow-md backdrop-blur transition-all hover:bg-white dark:hover:bg-gray-800"
       :title="lang === 'zh' ? '展开边栏' : 'Expand Sidebar'"
     >
       <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,8 +70,8 @@
 
       <!-- Decorative Background Elements -->
       <div v-if="!readingMode" class="absolute inset-0 z-[-1] overflow-hidden pointer-events-none">
-        <div class="absolute -top-[20%] -right-[10%] w-[800px] h-[800px] rounded-full bg-gradient-to-br from-sakura-100/40 to-purple-100/30 dark:from-sakura-900/10 dark:to-purple-900/10 blur-3xl animate-float opacity-60"></div>
-        <div class="absolute top-[30%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-sakura-200/30 to-sakura-50/20 dark:from-sakura-800/10 dark:to-sakura-900/5 blur-3xl animate-pulse-fast opacity-50" style="animation-duration: 8s;"></div>
+        <div class="absolute -top-[20%] -right-[10%] w-[800px] h-[800px] rounded-full bg-gradient-to-br from-[var(--primary-100)]/40 to-purple-100/30 dark:from-[var(--primary-900)]/10 dark:to-purple-900/10 blur-3xl animate-float opacity-60"></div>
+        <div class="absolute top-[30%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[var(--primary-200)]/30 to-[var(--primary-50)]/20 dark:from-[var(--primary-800)]/10 dark:to-[var(--primary-900)]/5 blur-3xl animate-pulse-fast opacity-50" style="animation-duration: 8s;"></div>
         <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style="background-image: radial-gradient(#9f123f 1px, transparent 1px); background-size: 32px 32px;"></div>
       </div>
 
@@ -133,7 +133,7 @@
           
           <!-- Underline Styles -->
           <button @click="applyFormatHandler('underline-wavy')" class="p-2 hover:bg-white/20 rounded-xl text-xs font-bold flex items-center gap-1 transition-all" title="Wavy Underline">
-             <span class="underline decoration-wavy decoration-sakura-400 underline-offset-2">〰</span>
+             <span class="underline decoration-wavy decoration-[var(--primary-400)] underline-offset-2">〰</span>
           </button>
           <button @click="applyFormatHandler('underline-double')" class="p-2 hover:bg-white/20 rounded-xl text-xs font-bold flex items-center gap-1 transition-all" title="Double Underline">
              <span class="underline decoration-double decoration-blue-400 underline-offset-2">≡</span>
@@ -234,6 +234,22 @@
                      <span>{{ articleStore.isFavorite(currentFile.path) ? '⭐' : '☆' }}</span>
                      <span>{{ t.favorite }}</span>
                    </button>
+                   
+                   <div class="flex items-center gap-2 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-full border border-gray-100 dark:border-gray-700">
+                      <input 
+                        type="color" 
+                        v-model="appStore.userSettings.articleBackgroundColor"
+                        class="w-5 h-5 rounded-full overflow-hidden cursor-pointer border-0 p-0 bg-transparent"
+                        :title="lang === 'zh' ? '文章背景色' : 'Article Background Color'"
+                      />
+                      <button 
+                        v-if="appStore.userSettings.articleBackgroundColor"
+                        @click="appStore.userSettings.articleBackgroundColor = ''"
+                        class="text-xs text-gray-400 hover:text-red-500"
+                        title="Reset"
+                      >✕</button>
+                   </div>
+
                   <span class="text-xs text-gray-400 flex items-center gap-1">
                     <span class="text-sm">🧑‍🎓</span>
                     {{ getArticleViews(currentFile.path) }} {{ lang === 'zh' ? '人阅读' : 'views' }}
@@ -291,8 +307,8 @@
                    <button
                      v-if="!rawEditor.isEditingRaw.value && !currentFile.isSource"
                      @click="rawEditor.startEditingRaw()"
-                     class="text-xs px-3 py-1.5 bg-sakura-500 hover:bg-sakura-600 text-white rounded transition-colors"
-                   >
+                   class="text-xs px-3 py-1.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded transition-colors"
+                 >
                      {{ lang === 'zh' ? '编辑' : 'Edit' }}
                    </button>
                    <template v-if="rawEditor.isEditingRaw.value">
@@ -338,7 +354,7 @@
                  <textarea
                    v-if="!rawEditor.isPreviewMode.value"
                    v-model="rawEditor.editedRawContent.value"
-                   class="w-full h-[60vh] font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-b-xl border border-gray-700 resize-none outline-none focus:ring-2 focus:ring-sakura-500/50"
+                   class="w-full h-[60vh] font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-b-xl border border-gray-700 resize-none outline-none focus:ring-2 focus:ring-[var(--primary-500)]/50"
                    spellcheck="false"
                  ></textarea>
                  <!-- Preview Mode -->
@@ -400,20 +416,20 @@
 
         <!-- Empty State / Home -->
         <div v-else id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-6">
-          <div class="mx-auto w-full max-w-4xl flex flex-col items-center text-center text-sakura-400 dark:text-gray-500 animate-fade-in pt-2 md:pt-4 pb-12">
+          <div class="mx-auto w-full max-w-4xl flex flex-col items-center text-center text-[var(--primary-400)] dark:text-gray-500 animate-fade-in pt-2 md:pt-4 pb-12">
             <div class="relative group cursor-default">
               <div class="text-[12rem] mb-4 opacity-90 animate-float drop-shadow-2xl filter saturate-150 transform hover:scale-105 transition-transform duration-700">🌸</div>
-              <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 h-8 bg-sakura-800/20 dark:bg-sakura-900/40 blur-2xl rounded-full group-hover:w-64 transition-all duration-500"></div>
+              <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 h-8 bg-[var(--primary-800)]/20 dark:bg-[var(--primary-900)]/40 blur-2xl rounded-full group-hover:w-64 transition-all duration-500"></div>
             </div>
-            <h2 class="text-5xl font-bold mb-4 tracking-tight drop-shadow-sm bg-gradient-to-r from-sakura-500 via-pink-500 to-purple-500 dark:from-sakura-300 dark:via-rose-300 dark:to-purple-300 text-transparent bg-clip-text">{{ t.welcome_title }}</h2>
-            <p class="text-sakura-500/80 dark:text-gray-300 max-w-lg mx-auto leading-relaxed text-lg">
+            <h2 class="text-5xl font-bold mb-4 tracking-tight drop-shadow-sm bg-gradient-to-r from-[var(--primary-500)] via-[var(--primary-400)] to-[var(--primary-600)] dark:from-[var(--primary-300)] dark:via-[var(--primary-200)] dark:to-[var(--primary-400)] text-transparent bg-clip-text">{{ t.welcome_title }}</h2>
+            <p class="text-[var(--primary-500)]/80 dark:text-gray-300 max-w-lg mx-auto leading-relaxed text-lg">
               {{ t.welcome_desc }}<br>
               <span class="text-sm opacity-90 bg-white/70 dark:bg-gray-800/70 px-4 py-1.5 rounded-full mt-3 inline-block border border-white/70 dark:border-gray-700/70 shadow-sm backdrop-blur">{{ t.welcome_tags }}</span>
             </p>
             <div class="mt-10 w-full max-w-3xl">
               <div class="flex flex-wrap items-center justify-center gap-3">
                 <button
-                  class="px-3 py-1.5 text-xs rounded-full border border-sakura-200/80 dark:border-gray-700 text-sakura-600 dark:text-sakura-300 hover:bg-sakura-50/80 dark:hover:bg-gray-800 transition-colors"
+                  class="px-3 py-1.5 text-xs rounded-full border border-[var(--primary-200)]/80 dark:border-gray-700 text-[var(--primary-600)] dark:text-[var(--primary-300)] hover:bg-[var(--primary-50)]/80 dark:hover:bg-gray-800 transition-colors"
                   :disabled="welcomePoemLoading"
                   @click="loadRandomPoem"
                 >
@@ -424,21 +440,21 @@
               <div v-else-if="welcomePoemError" class="mt-4 text-sm text-amber-500">{{ welcomePoemError }}</div>
               <div v-else class="mt-6">
                 <div class="text-center">
-                  <div class="text-2xl md:text-3xl font-bold tracking-wide text-sakura-600 dark:text-sakura-300 poem-font">
+                  <div class="text-2xl md:text-3xl font-bold tracking-wide text-[var(--primary-600)] dark:text-[var(--primary-300)] poem-font">
                     {{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}
                   </div>
                   <div v-if="welcomePoemAuthorLine" class="mt-2 text-base text-gray-500 dark:text-gray-400 poem-font">
                     {{ welcomePoemAuthorLine }}
                   </div>
                 </div>
-                <div v-if="welcomePoemLines.length" class="mt-6 space-y-2 text-xl md:text-2xl leading-relaxed text-sakura-600 dark:text-sakura-200 poem-font poem-page">
+                <div v-if="welcomePoemLines.length" class="mt-6 space-y-2 text-xl md:text-2xl leading-relaxed text-[var(--primary-600)] dark:text-[var(--primary-200)] poem-font poem-page">
                   <div v-for="(line, idx) in welcomePoemLines" :key="idx" class="poem-line" :style="{ animationDelay: `${idx * 120}ms` }">
                     {{ line }}
                   </div>
                 </div>
                 <div v-if="welcomePoemDetails.length" class="mt-8 w-full text-left space-y-6 text-sm text-gray-600 dark:text-gray-300">
                   <div v-for="detail in welcomePoemDetails" :key="detail.label" class="pt-4 border-t border-white/60 dark:border-gray-700/60">
-                    <div class="text-xs font-semibold text-sakura-500 dark:text-sakura-300 mb-2">{{ detail.label }}</div>
+                    <div class="text-xs font-semibold text-[var(--primary-500)] dark:text-[var(--primary-300)] mb-2">{{ detail.label }}</div>
                     <div class="whitespace-pre-line leading-relaxed">{{ detail.value }}</div>
                   </div>
                 </div>
@@ -555,11 +571,13 @@
     </div>
 
     <!-- Toast Notification -->
-    <div v-if="appStore.toastMessage" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[200] animate-fade-in">
-       <div class="bg-sakura-500/90 dark:bg-sakura-400/90 text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl backdrop-blur font-medium text-sm flex items-center gap-2 border border-sakura-200/60 dark:border-sakura-300/40">
-         <span>🌸</span> {{ appStore.toastMessage }}
-       </div>
-    </div>
+    <Teleport to="body">
+      <div v-if="appStore.toastMessage" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[9999] animate-fade-in pointer-events-none">
+         <div class="bg-[var(--primary-500)]/90 dark:bg-[var(--primary-400)]/90 text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl backdrop-blur font-medium text-sm flex items-center gap-2 border border-[var(--primary-200)]/60 dark:border-[var(--primary-300)]/40">
+           <span>🌸</span> {{ appStore.toastMessage }}
+         </div>
+      </div>
+    </Teleport>
 
     <!-- Settings Modal (New Component) -->
     <SettingsModal 
@@ -610,7 +628,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
-import { I18N } from './constants';
+import { I18N, THEME_COLORS } from './constants';
 import { NodeType } from './types';
 import type { FileNode, BreadcrumbItem, TocItem } from './types';
 
@@ -674,9 +692,12 @@ const t = computed(() => I18N[lang.value]);
 const fileSystem = ref<FileNode[]>([]);
 const currentFile = ref<FileNode | null>(null);
 const currentFolder = ref<FileNode | null>(null);
-const viewMode = ref<'latest' | 'files' | 'lab'>('latest');
-const expandedFolders = ref<string[]>([]);
+const viewMode = computed({
+  get: () => appStore.viewMode,
+  set: (val) => appStore.viewMode = val
+});
 const loading = ref(true);
+const expandedFolders = computed(() => appStore.expandedFolders);
 const contentLoading = ref(false);
 const currentTool = ref<'dashboard' | 'event-handling' | 'slot' | 'source-code' | null>(null);
 const isRawMode = ref(false);
@@ -820,6 +841,8 @@ const articleContainerStyle = computed(() => {
   };
   if (currentMeta.value.backgroundColor) {
     style.backgroundColor = currentMeta.value.backgroundColor;
+  } else if (appStore.userSettings.articleBackgroundColor) {
+    style.backgroundColor = appStore.userSettings.articleBackgroundColor;
   }
   return style;
 });
@@ -1205,9 +1228,9 @@ const navigateToBreadcrumb = (path: string) => {
 };
 
 const toggleFolder = (path: string) => {
-  const idx = expandedFolders.value.indexOf(path);
-  if (idx === -1) expandedFolders.value.push(path);
-  else expandedFolders.value.splice(idx, 1);
+  const idx = appStore.expandedFolders.indexOf(path);
+  if (idx === -1) appStore.expandedFolders.push(path);
+  else appStore.expandedFolders.splice(idx, 1);
 };
 
 const resetToHome = () => {
@@ -1475,6 +1498,30 @@ const handleKeydown = (e: KeyboardEvent) => {
 // =====================
 // Watchers
 // =====================
+const updateThemeColor = () => {
+  const colorId = appStore.userSettings.themeColor || 'sakura';
+  const theme = THEME_COLORS[colorId] || THEME_COLORS.sakura;
+  const root = document.documentElement;
+  
+  Object.entries(theme.palette).forEach(([key, value]) => {
+    root.style.setProperty(`--primary-${key}`, value);
+  });
+  
+  // Set main primary color for other uses
+  root.style.setProperty('--primary-color', theme.preview);
+};
+
+watch(() => appStore.userSettings.themeColor, updateThemeColor, { immediate: true });
+
+let wallpaperInterval: any = null
+watch(() => appStore.userSettings.autoChangeMode, (mode) => {
+  if (wallpaperInterval) clearInterval(wallpaperInterval)
+  if (mode !== 'off') {
+    autoChangeWallpaper()
+    wallpaperInterval = setInterval(autoChangeWallpaper, 60000 * 5)
+  }
+}, { immediate: true })
+
 watch(currentFile, async () => {
   if (!currentFile.value?.isSource) {
     await updateRenderedContent();
@@ -1530,6 +1577,7 @@ onMounted(async () => {
   window.addEventListener('sakura-open-code', handleOpenCodeEvent as EventListener);
 
   if (appStore.isDark) document.documentElement.classList.add('dark');
+  appStore.applyThemeColor(appStore.userSettings.themeColor);
 
   // Setup marked renderer
   setupMarkedRenderer();
@@ -1626,11 +1674,6 @@ body {
   background: var(--primary-900-30);
 }
 
-.article-style-clean {
-  box-shadow: none;
-  border-width: 1px;
-}
-
 .article-style-compact {
   padding: 1.5rem;
 }
@@ -1654,6 +1697,19 @@ body {
   margin-bottom: 0.6em;
 }
 
+/* Dynamic Title Colors */
+.markdown-body h1 {
+  color: var(--primary-600);
+}
+
+.dark .markdown-body h1 {
+  color: var(--primary-300);
+}
+
+.font-kaiti {
+  font-family: "KaiTi", "STKaiti", "楷体", "Microsoft YaHei", serif;
+}
+
 .article-style-compact #markdown-viewer h1,
 .article-style-compact #markdown-viewer h2,
 .article-style-compact #markdown-viewer h3,
@@ -1663,60 +1719,59 @@ body {
 }
 
 .article-style-lined {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 2.05rem,
-    var(--primary-100) 2.05rem,
-    var(--primary-100) 2.1rem
-  );
-  background-size: 100% 2.1rem;
+  --line-h: 2rem;
+  --line-color: var(--primary-100);
+  line-height: var(--line-h) !important;
+  background-image: linear-gradient(to bottom, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)) !important;
+  background-size: 100% var(--line-h) !important;
+  background-attachment: local;
+}
+
+.article-style-lined #markdown-viewer p,
+.article-style-lined #markdown-viewer ul,
+.article-style-lined #markdown-viewer ol,
+.article-style-lined #markdown-viewer li,
+.article-style-lined #markdown-viewer h1,
+.article-style-lined #markdown-viewer h2,
+.article-style-lined #markdown-viewer h3,
+.article-style-lined #markdown-viewer h4,
+.article-style-lined #markdown-viewer blockquote {
+  line-height: var(--line-h) !important;
+  margin-bottom: var(--line-h) !important;
+  margin-top: 0 !important;
 }
 
 .dark .article-style-lined {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 2.05rem,
-    var(--primary-900-30) 2.05rem,
-    var(--primary-900-30) 2.1rem
-  );
+  --line-color: var(--primary-900-30);
 }
 
 .article-style-grid {
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent 2.05rem,
-      var(--primary-100) 2.05rem,
-      var(--primary-100) 2.1rem
-    ),
-    repeating-linear-gradient(
-      to right,
-      transparent 0,
-      transparent 2.05rem,
-      var(--primary-100) 2.05rem,
-      var(--primary-100) 2.1rem
-    );
+  --line-h: 2rem;
+  --line-color: var(--primary-100);
+  line-height: var(--line-h) !important;
+  background-image: 
+    linear-gradient(to right, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)),
+    linear-gradient(to bottom, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)) !important;
+  background-size: var(--line-h) var(--line-h) !important;
+  background-attachment: local;
+}
+
+.article-style-grid #markdown-viewer p,
+.article-style-grid #markdown-viewer ul,
+.article-style-grid #markdown-viewer ol,
+.article-style-grid #markdown-viewer li,
+.article-style-grid #markdown-viewer h1,
+.article-style-grid #markdown-viewer h2,
+.article-style-grid #markdown-viewer h3,
+.article-style-grid #markdown-viewer h4,
+.article-style-grid #markdown-viewer blockquote {
+  line-height: var(--line-h) !important;
+  margin-bottom: var(--line-h) !important;
+  margin-top: 0 !important;
 }
 
 .dark .article-style-grid {
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent 2.05rem,
-      var(--primary-900-30) 2.05rem,
-      var(--primary-900-30) 2.1rem
-    ),
-    repeating-linear-gradient(
-      to right,
-      transparent 0,
-      transparent 2.05rem,
-      var(--primary-900-30) 2.05rem,
-      var(--primary-900-30) 2.1rem
-    );
+  --line-color: var(--primary-900-30);
 }
 
 .poem-font {
@@ -1752,6 +1807,13 @@ textarea,
 pre,
 code {
   user-select: text;
+}
+
+#markdown-viewer h1 {
+  color: var(--primary-600);
+}
+.dark #markdown-viewer h1 {
+  color: var(--primary-400);
 }
 
 .sakura-block-highlight {

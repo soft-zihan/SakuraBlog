@@ -39,7 +39,7 @@
                <span>🔥</span> {{ t.quiz_streak }}: {{ streak }}
             </div>
          </div>
-         <div class="font-mono font-bold text-sakura-600 dark:text-sakura-400">{{ t.quiz_score }}: {{ totalScore }}</div>
+         <div class="font-mono font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)]">{{ t.quiz_score }}: {{ totalScore }}</div>
       </div>
 
       <!-- Timer Bar -->

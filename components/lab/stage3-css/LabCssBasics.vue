@@ -92,14 +92,14 @@
           </div>
 
           <!-- Sakura Notes Example -->
-          <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
-            <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '本站 Tailwind 对应' : 'Tailwind Equivalent' }}</p>
+          <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
+            <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '本站 Tailwind 对应' : 'Tailwind Equivalent' }}</p>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- CSS 写法 -->
 .btn { padding: 1rem; }
 .btn:hover { background: pink; }
 
 <!-- Tailwind 写法 -->
-&lt;button class="p-4 hover:bg-sakura-300"&gt;
+&lt;button class="p-4 hover:bg-[var(--primary-300)]"&gt;
   Click me
 &lt;/button&gt;</pre>
           </div>
@@ -199,10 +199,10 @@
             <pre>{{ boxCode }}</pre>
           </div>
 
-          <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
-            <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '本站样式示例' : 'From This Site' }}</p>
+          <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
+            <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '本站样式示例' : 'From This Site' }}</p>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- AppHeader.vue -->
-&lt;header class="p-4 m-2 border border-sakura-200"&gt;
+&lt;header class="p-4 m-2 border border-[var(--primary-200)]"&gt;
   <!-- p-4 = padding: 1rem (16px) -->
   <!-- m-2 = margin: 0.5rem (8px) -->
   <!-- border = border-width: 1px -->
@@ -302,19 +302,19 @@
             <div class="space-y-2 text-xs font-mono">
               <div class="flex justify-between">
                 <span class="text-gray-500">HEX:</span>
-                <span class="text-sakura-500">#f472b6</span>
+                <span class="text-[var(--primary-500)]">#f472b6</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">RGB:</span>
-                <span class="text-sakura-500">rgb(244, 114, 182)</span>
+                <span class="text-[var(--primary-500)]">rgb(244, 114, 182)</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">HSL:</span>
-                <span class="text-sakura-500">hsl(330, 86%, 70%)</span>
+                <span class="text-[var(--primary-500)]">hsl(330, 86%, 70%)</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">Tailwind:</span>
-                <span class="text-sakura-500">text-sakura-400</span>
+                <span class="text-[var(--primary-500)]">text-[var(--primary-400)]</span>
               </div>
             </div>
           </div>
@@ -354,7 +354,7 @@
               <div class="absolute top-2 left-2 text-[10px] text-gray-400">parent (relative)</div>
               
               <div 
-                class="w-16 h-16 bg-sakura-400 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg transition-all duration-300"
+                class="w-16 h-16 bg-[var(--primary-400)] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg transition-all duration-300"
                 :class="positionDemoClass"
               >
                 child
@@ -372,8 +372,8 @@
           </div>
 
           <!-- z-index explanation -->
-          <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
-            <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '本站定位示例' : 'From This Site' }}</p>
+          <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
+            <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '本站定位示例' : 'From This Site' }}</p>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- SearchModal.vue - 模态框 -->
 &lt;div class="fixed inset-0 z-50"&gt;
   <!-- fixed: 相对视口定位 -->
@@ -497,9 +497,9 @@ div {
 }
 
 /* Tailwind 写法 */
-/* hover:bg-sakura-300 */
+/* hover:bg-[var(--primary-300)] */
 /* active:scale-95 */
-/* focus:outline-sakura-500 */`,
+/* focus:outline-[var(--primary-500)] */`,
     child: `/* 组合选择器 */
 
 /* 后代选择器 (所有后代) */
@@ -577,7 +577,7 @@ const fontWeights = [
 
 const textColors = [
   { value: 'gray', hex: '#6b7280' },
-  { value: 'sakura', hex: '#f472b6' },
+  { value: 'primary', hex: 'var(--primary-500)' },
   { value: 'blue', hex: '#3b82f6' },
   { value: 'green', hex: '#22c55e' }
 ];
@@ -597,7 +597,7 @@ const textTailwindClass = computed(() => {
   };
   const colorMap: Record<string, string> = {
     gray: 'text-gray-500',
-    sakura: 'text-sakura-400',
+    primary: 'text-[var(--primary-400)]',
     blue: 'text-blue-500',
     green: 'text-green-500'
   };
@@ -615,8 +615,8 @@ font-weight: 400;       /* Tailwind: font-normal */
 font-weight: 700;       /* Tailwind: font-bold */
 
 /* 颜色 */
-color: #f472b6;         /* Tailwind: text-sakura-400 */
-background: #fdf2f8;    /* Tailwind: bg-sakura-50 */
+color: var(--primary-400); /* Tailwind: text-[var(--primary-400)] */
+background: var(--primary-50); /* Tailwind: bg-[var(--primary-50)] */
 
 /* 文本对齐 */
 text-align: center;     /* Tailwind: text-center */
@@ -627,11 +627,11 @@ line-height: 1.5;       /* Tailwind: leading-normal */
 line-height: 2;         /* Tailwind: leading-loose */
 
 /* 本站颜色系统 (index.html) */
-/* sakura: {
-  50: '#fdf2f8',
-  100: '#fce7f3',
+/* primary: {
+  50: 'var(--primary-50)',
+  100: 'var(--primary-100)',
   ...
-  500: '#f472b6',  // 主色调
+  500: 'var(--primary-500)',  // 主色调
   ...
 } */`);
 

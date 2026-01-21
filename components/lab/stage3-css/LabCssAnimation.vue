@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-6 md:p-8 border border-sakura-100 dark:border-gray-700 shadow-xl">
+  <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-6 md:p-8 border border-[var(--primary-100)] dark:border-gray-700 shadow-xl">
     <!-- Header -->
     <div class="text-center mb-8">
-      <div class="inline-flex items-center gap-2 px-4 py-2 bg-pink-100 dark:bg-pink-900/30 rounded-full text-pink-700 dark:text-pink-300 text-sm mb-4">
+      <div class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--primary-100)] dark:bg-[var(--primary-900)]/30 rounded-full text-[var(--primary-700)] dark:text-[var(--primary-300)] text-sm mb-4">
         <span>🌸</span>
         <span>{{ isZh ? 'CSS 动画' : 'CSS Animation' }}</span>
       </div>
@@ -22,7 +22,7 @@
           :key="tab.id"
           @click="activeTab = tab.id"
           class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          :class="activeTab === tab.id ? 'bg-white dark:bg-gray-600 text-pink-600 dark:text-pink-300 shadow' : 'text-gray-500 hover:text-gray-700'"
+          :class="activeTab === tab.id ? 'bg-white dark:bg-gray-600 text-[var(--primary-600)] dark:text-[var(--primary-300)] shadow' : 'text-gray-500 hover:text-gray-700'"
         >
           {{ tab.icon }} {{ tab.label }}
         </button>
@@ -95,7 +95,7 @@
 
       <!-- Keyframes -->
       <div v-else-if="activeTab === 'keyframes'" class="space-y-6 animate-fade-in">
-        <div class="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded-2xl p-6">
+        <div class="bg-gradient-to-r from-[var(--primary-50)] to-purple-50 dark:from-[var(--primary-900)]/20 dark:to-purple-900/20 rounded-2xl p-6">
           <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-4">
             {{ isZh ? '🎬 @keyframes 动画' : '🎬 @keyframes Animation' }}
           </h3>
@@ -125,7 +125,7 @@
             <h4 class="font-bold text-sm mb-3">{{ isZh ? '自定义动画' : 'Custom Animation' }}</h4>
             <div class="flex items-center gap-4 mb-4">
               <div 
-                class="w-16 h-16 bg-sakura-400 rounded-xl flex items-center justify-center text-2xl"
+                class="w-16 h-16 bg-[var(--primary-400)] rounded-xl flex items-center justify-center text-2xl"
                 :style="{ animation: `${customAnimation.name} ${customAnimation.duration}s ${customAnimation.timing} infinite` }"
               >
                 🌸
@@ -154,7 +154,7 @@
 
       <!-- Petal Effect -->
       <div v-else-if="activeTab === 'petal'" class="space-y-6 animate-fade-in">
-        <div class="bg-gradient-to-r from-sakura-50 to-pink-50 dark:from-sakura-900/20 dark:to-pink-900/20 rounded-2xl p-6">
+        <div class="bg-gradient-to-r from-[var(--primary-50)] to-[var(--primary-50)] dark:from-[var(--primary-900)]/20 dark:to-[var(--primary-900)]/20 rounded-2xl p-6">
           <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-4">
             {{ isZh ? '🌸 Sakura Notes 花瓣效果解析' : '🌸 Sakura Notes Petal Effect Analysis' }}
           </h3>
@@ -182,13 +182,13 @@
           <div class="flex justify-center gap-3">
             <button 
               @click="togglePetalAnimation"
-              class="px-4 py-2 bg-sakura-500 hover:bg-sakura-600 text-white rounded-lg text-sm transition-all"
+              class="px-4 py-2 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-lg text-sm transition-all"
             >
               {{ petalAnimating ? (isZh ? '暂停' : 'Pause') : (isZh ? '开始' : 'Start') }}
             </button>
             <button 
               @click="addPetal"
-              class="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg text-sm transition-all"
+              class="px-4 py-2 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-lg text-sm transition-all"
             >
               {{ isZh ? '添加花瓣' : 'Add Petal' }}
             </button>
@@ -298,7 +298,7 @@ const transitionDemo = reactive({
   radius: 16,
   duration: 0.3,
   timing: 'ease',
-  color: '#f472b6'
+  color: 'var(--primary-500)'
 })
 
 const transitionCode = computed(() => `.element {

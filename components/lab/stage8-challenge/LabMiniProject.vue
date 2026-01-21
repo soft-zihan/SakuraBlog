@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-6 md:p-8 border border-sakura-100 dark:border-gray-700 shadow-xl">
+  <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-6 md:p-8 border border-[var(--primary-100)] dark:border-gray-700 shadow-xl">
     <!-- Header -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-full text-orange-700 dark:text-orange-300 text-sm mb-4">
@@ -22,7 +22,7 @@
         @click="selectChallenge(challenge.id)"
         class="p-4 rounded-xl border-2 transition-all text-left"
         :class="selectedChallenge === challenge.id 
-          ? 'border-sakura-400 bg-sakura-50 dark:bg-sakura-900/20' 
+          ? 'border-[var(--primary-400)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20' 
           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
       >
         <div class="text-2xl mb-2">{{ challenge.icon }}</div>
@@ -85,7 +85,7 @@
       <div class="flex items-center gap-4">
         <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3">
           <div 
-            class="bg-gradient-to-r from-sakura-400 to-orange-400 h-3 rounded-full transition-all duration-500"
+            class="bg-gradient-to-r from-[var(--primary-400)] to-orange-400 h-3 rounded-full transition-all duration-500"
             :style="{ width: `${progressPercent}%` }"
           ></div>
         </div>

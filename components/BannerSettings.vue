@@ -28,7 +28,7 @@
             @click="setMode(mode.value)"
             class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
             :class="currentMode === mode.value 
-              ? 'bg-sakura-50 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-400' 
+              ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)]' 
               : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'"
           >
             <span class="text-lg">{{ mode.icon }}</span>
@@ -38,7 +38,7 @@
             </div>
             <svg 
               v-if="currentMode === mode.value" 
-              class="w-4 h-4 ml-auto text-sakura-500"
+              class="w-4 h-4 ml-auto text-[var(--primary-500)]"
               fill="currentColor" 
               viewBox="0 0 24 24"
             >
@@ -60,12 +60,12 @@
               @click="selectWallpaper(wp.filename)"
               class="aspect-square rounded-lg overflow-hidden border-2 transition-all relative group"
               :class="appStore.currentWallpaperFilename === wp.filename 
-                ? 'border-sakura-500 shadow-lg ring-2 ring-sakura-200 dark:ring-sakura-800' 
+                ? 'border-[var(--primary-500)] shadow-lg ring-2 ring-[var(--primary-200)] dark:ring-[var(--primary-800)]' 
                 : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'"
               :title="wp.name"
             >
               <img :src="wp.path" class="w-full h-full object-cover" :alt="wp.name" />
-              <div v-if="appStore.currentWallpaperFilename === wp.filename" class="absolute inset-0 bg-sakura-500/20 flex items-center justify-center">
+              <div v-if="appStore.currentWallpaperFilename === wp.filename" class="absolute inset-0 bg-[var(--primary-500)]/20 flex items-center justify-center">
                 <svg class="w-6 h-6 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>

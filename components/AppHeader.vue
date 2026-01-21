@@ -10,22 +10,22 @@
     <div v-if="!isMobile" class="h-full flex items-center justify-between">
       <!-- Breadcrumbs -->
       <div class="flex items-center text-sm overflow-x-auto no-scrollbar whitespace-nowrap mask-linear flex-1 mr-4 py-2">
-        <span class="text-sakura-300 dark:text-sakura-500 mr-2 shrink-0 text-lg cursor-pointer hover:scale-110 transition-transform" @click="$emit('reset')">🏠</span>
-        <span class="text-sakura-200 dark:text-gray-700 mx-1">/</span>
-        <span class="font-bold text-sakura-500 dark:text-sakura-400 bg-sakura-50 dark:bg-sakura-900/20 px-2 py-0.5 rounded mr-2">{{ lang }}</span>
+        <span class="text-[var(--primary-300)] dark:text-[var(--primary-500)] mr-2 shrink-0 text-lg cursor-pointer hover:scale-110 transition-transform" @click="$emit('reset')">🏠</span>
+        <span class="text-[var(--primary-200)] dark:text-gray-700 mx-1">/</span>
+        <span class="font-bold text-[var(--primary-500)] dark:text-[var(--primary-400)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 px-2 py-0.5 rounded mr-2">{{ lang }}</span>
         
         <template v-if="viewMode === 'lab' && currentTool">
-           <span class="mx-2 text-sakura-300 dark:text-gray-600">›</span>
+           <span class="mx-2 text-[var(--primary-300)] dark:text-gray-600">›</span>
            <span class="text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded-md">{{ t.tab_lab }}</span>
-           <span class="mx-2 text-sakura-300 dark:text-gray-600">›</span>
+           <span class="mx-2 text-[var(--primary-300)] dark:text-gray-600">›</span>
            <span class="text-gray-500 dark:text-gray-400">{{ t.lab_dashboard }}</span>
         </template>
         <template v-else v-for="(item, index) in breadcrumbs" :key="item.path">
-          <span v-if="index > 0" class="mx-2 text-sakura-300 dark:text-gray-600">›</span>
+          <span v-if="index > 0" class="mx-2 text-[var(--primary-300)] dark:text-gray-600">›</span>
           <span 
             @click="$emit('navigate', item.path)"
             class="cursor-pointer transition-colors px-2 py-1 rounded-md"
-            :class="index === breadcrumbs.length - 1 ? 'font-bold text-sakura-600 dark:text-sakura-400 bg-sakura-50/50 dark:bg-sakura-900/30' : 'text-gray-500 dark:text-gray-400 hover:text-sakura-500 hover:bg-sakura-50/50 dark:hover:bg-gray-800'"
+            :class="index === breadcrumbs.length - 1 ? 'font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/30' : 'text-gray-500 dark:text-gray-400 hover:text-[var(--primary-500)] hover:bg-[var(--primary-50)]/50 dark:hover:bg-gray-800'"
           >
             {{ item.name }}
           </span>
@@ -36,13 +36,13 @@
       <div class="flex gap-2 shrink-0 items-center">
         <!-- File Actions (before search) -->
         <template v-if="currentFile">
-          <button v-if="!currentFile.isSource && !isPdf" @click="$emit('update:isRawMode', !isRawMode)" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors" :title="isRawMode ? t.view_render : t.view_source">
+          <button v-if="!currentFile.isSource && !isPdf" @click="$emit('update:isRawMode', !isRawMode)" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="isRawMode ? t.view_render : t.view_source">
             <span class="text-lg">{{ isRawMode ? '👁️' : '🖊️' }}</span>
           </button>
-          <button @click="$emit('copy-link')" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors" :title="t.copy_link">
+          <button @click="$emit('copy-link')" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="t.copy_link">
             <span class="text-lg">🔗</span>
           </button>
-          <button @click="$emit('download')" class="p-2 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 hover:text-sakura-600 rounded-lg transition-colors flex items-center gap-1" :title="t.download">
+          <button @click="$emit('download')" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400 flex items-center gap-1" :title="t.download">
             <span class="text-sm">DL</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
           </button>
@@ -54,8 +54,8 @@
           @click="$emit('toggle-dual-column')"
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-sm"
           :class="dualColumnMode 
-            ? 'bg-sakura-500 text-white' 
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 hover:text-sakura-600'"
+            ? 'bg-[var(--primary-500)] text-white' 
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-[var(--primary-50)] dark:hover:bg-[var(--primary-900)]/30 hover:text-[var(--primary-600)]'"
           :title="lang === 'zh' ? '双栏阅读' : 'Dual Column'"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -67,7 +67,7 @@
         <!-- Search Button -->
         <button 
           @click="$emit('open-search')" 
-          class="p-2 bg-white/70 dark:bg-gray-800/70 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 hover:text-sakura-600 transition-all text-sm shadow-sm"
+          class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
           title="Search (⌘K)"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -75,10 +75,21 @@
 
         <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
+        <!-- Wallpaper Actions -->
+        <button @click="changeWallpaper" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="lang === 'zh' ? '更换壁纸' : 'Next Wallpaper'">
+          <span class="text-lg">🎲</span>
+        </button>
+        <button @click="addCurrentToList" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="lang === 'zh' ? '收藏壁纸' : 'Save Wallpaper'">
+          <span class="text-lg">❤️</span>
+        </button>
+        <button @click="downloadCurrentWallpaper" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="lang === 'zh' ? '下载壁纸' : 'Download Wallpaper'">
+          <span class="text-lg">⬇️</span>
+        </button>
+
         <!-- Music Button -->
         <button 
           @click="$emit('open-music')" 
-          class="p-2 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 rounded-lg transition-colors relative"
+          class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors relative text-gray-500 dark:text-gray-400"
           :title="t.music_player"
         >
           <span class="text-lg">🎵</span>
@@ -88,7 +99,7 @@
         <!-- Write Button -->
         <button 
           @click="$emit('open-write')" 
-          class="p-2 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 rounded-lg transition-colors"
+          class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
           :title="t.write_title"
         >
           <span class="text-lg">✏️</span>
@@ -98,7 +109,7 @@
           <button
             @click.stop="toggleThemePanel"
             ref="themeButtonRef"
-            class="p-2 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-lg transition-colors"
+            class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
             :title="lang === 'zh' ? '主题' : 'Theme'"
           >
             <span class="text-lg">🎨</span>
@@ -109,7 +120,7 @@
 
         <button 
           @click="$emit('open-download')" 
-          class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+          class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
           :title="lang === 'zh' ? '批量下载' : 'Batch Download'"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -119,30 +130,31 @@
           </svg>
         </button>
 
-        <button @click="$emit('open-settings')" class="p-2 text-gray-400 hover:text-sakura-600 dark:hover:text-sakura-400 hover:rotate-90 transition-all duration-500" :title="t.settings_title">
+        <button @click="$emit('open-settings')" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400 hover:rotate-90 transition-all duration-500" :title="t.settings_title">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
       </div>
     </div>
 
-    <!-- Mobile Layout (Two-row) -->
+    <!-- Mobile Layout (Keep as is mostly, but buttons are desktop specific as per request usually) -->
+    <!-- ... Mobile layout code ... -->
     <div v-else class="flex flex-col gap-2">
       <!-- Row 1: Breadcrumbs (scrollable) -->
       <div class="flex items-center text-xs overflow-x-auto no-scrollbar whitespace-nowrap py-1">
-        <span class="text-sakura-300 dark:text-sakura-500 mr-1 shrink-0 cursor-pointer" @click="$emit('reset')">🏠</span>
-        <span class="text-sakura-200 dark:text-gray-700 mx-1">/</span>
-        <span class="font-bold text-sakura-500 dark:text-sakura-400 bg-sakura-50 dark:bg-sakura-900/20 px-1.5 py-0.5 rounded text-[10px]">{{ lang }}</span>
+        <span class="text-[var(--primary-300)] dark:text-[var(--primary-500)] mr-1 shrink-0 cursor-pointer" @click="$emit('reset')">🏠</span>
+        <span class="text-[var(--primary-200)] dark:text-gray-700 mx-1">/</span>
+        <span class="font-bold text-[var(--primary-500)] dark:text-[var(--primary-400)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 px-1.5 py-0.5 rounded text-[10px]">{{ lang }}</span>
         
         <template v-if="viewMode === 'lab' && currentTool">
-           <span class="mx-1 text-sakura-300 dark:text-gray-600">›</span>
+           <span class="mx-1 text-[var(--primary-300)] dark:text-gray-600">›</span>
            <span class="text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/30 px-1.5 py-0.5 rounded text-[10px]">{{ t.tab_lab }}</span>
         </template>
         <template v-else v-for="(item, index) in breadcrumbs.slice(-2)" :key="item.path">
-          <span class="mx-1 text-sakura-300 dark:text-gray-600">›</span>
+          <span class="mx-1 text-[var(--primary-300)] dark:text-gray-600">›</span>
           <span 
             @click="$emit('navigate', item.path)"
             class="cursor-pointer px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-400 truncate max-w-[100px]"
-            :class="index === breadcrumbs.slice(-2).length - 1 ? 'font-bold text-sakura-600 dark:text-sakura-400' : ''"
+            :class="index === breadcrumbs.slice(-2).length - 1 ? 'font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)]' : ''"
           >
             {{ item.name }}
           </span>
@@ -154,10 +166,10 @@
         <!-- Left: File Actions -->
         <div class="flex items-center gap-1">
           <template v-if="currentFile">
-            <button v-if="!currentFile.isSource && !isPdf" @click="$emit('update:isRawMode', !isRawMode)" class="p-1.5 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">
+            <button v-if="!currentFile.isSource && !isPdf" @click="$emit('update:isRawMode', !isRawMode)" class="p-1.5 text-[var(--primary-400)] hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">
               {{ isRawMode ? '👁️' : '🖊️' }}
             </button>
-            <button @click="$emit('copy-link')" class="p-1.5 text-sakura-400 hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">🔗</button>
+            <button @click="$emit('copy-link')" class="p-1.5 text-[var(--primary-400)] hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">🔗</button>
             <div class="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px]">
               <span class="text-xs">📘</span>
               <span class="font-semibold">{{ getArticleViews(currentFile.path) }}</span>
@@ -168,12 +180,12 @@
         <!-- Right: Main Actions -->
         <div class="flex items-center gap-1">
           <button @click="$emit('open-search')" class="p-1.5 bg-gray-100 dark:bg-gray-800 rounded text-gray-500 text-sm">🔍</button>
-          <button @click="$emit('open-music')" class="p-1.5 hover:bg-sakura-50 dark:hover:bg-gray-700 rounded transition-colors text-sm relative">
+          <button @click="$emit('open-music')" class="p-1.5 hover:bg-[var(--primary-50)] dark:hover:bg-gray-700 rounded transition-colors text-sm relative">
             🎵
             <span v-if="musicStore.isPlaying" class="absolute top-0 right-0 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
           </button>
           <button @click="$emit('toggle-theme')" class="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded transition-colors text-sm">{{ isDark ? '🌙' : '🌞' }}</button>
-          <button @click="$emit('open-settings')" class="p-1.5 text-gray-400 hover:text-sakura-600 rounded transition-colors">
+          <button @click="$emit('open-settings')" class="p-1.5 text-gray-400 hover:text-[var(--primary-600)] rounded transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
         </div>
@@ -192,9 +204,10 @@
         >
         <div class="flex items-center justify-between mb-3">
           <div class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ lang === 'zh' ? '主题' : 'Theme' }}</div>
-          <button @click="setThemePanelOpen(false)" class="text-gray-400 hover:text-sakura-500">✕</button>
+          <button @click="setThemePanelOpen(false)" class="text-gray-400 hover:text-[var(--primary-500)]">✕</button>
         </div>
 
+        <!-- 1. Typography -->
         <div class="mb-4">
           <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '字体' : 'Typography' }}</div>
           <div class="flex gap-2 mb-2">
@@ -210,6 +223,13 @@
               :class="appStore.userSettings.fontFamily === 'serif' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
               :style="appStore.userSettings.fontFamily === 'serif' ? primaryButtonStyle : undefined"
             >Serif</button>
+            <button
+              @click="appStore.userSettings.fontFamily = 'kaiti'"
+              class="flex-1 py-2 border rounded-xl text-sm transition-colors"
+              style="font-family: KaiTi, STKaiti, serif"
+              :class="appStore.userSettings.fontFamily === 'kaiti' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.fontFamily === 'kaiti' ? primaryButtonStyle : undefined"
+            >楷体</button>
           </div>
           <div class="flex gap-2">
             <button
@@ -233,42 +253,7 @@
           </div>
         </div>
 
-        <div class="mb-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '文章样式' : 'Article Style' }}</div>
-          <div class="grid grid-cols-3 gap-2">
-            <button
-              @click="appStore.userSettings.articleStyle = 'classic'"
-              class="py-2 border rounded-xl text-xs transition-colors"
-              :class="appStore.userSettings.articleStyle === 'classic' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
-              :style="appStore.userSettings.articleStyle === 'classic' ? primaryButtonStyle : undefined"
-            >{{ lang === 'zh' ? '默认' : 'Default' }}</button>
-            <button
-              @click="appStore.userSettings.articleStyle = 'clean'"
-              class="py-2 border rounded-xl text-xs transition-colors"
-              :class="appStore.userSettings.articleStyle === 'clean' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
-              :style="appStore.userSettings.articleStyle === 'clean' ? primaryButtonStyle : undefined"
-            >{{ lang === 'zh' ? '简洁' : 'Clean' }}</button>
-            <button
-              @click="appStore.userSettings.articleStyle = 'compact'"
-              class="py-2 border rounded-xl text-xs transition-colors"
-              :class="appStore.userSettings.articleStyle === 'compact' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
-              :style="appStore.userSettings.articleStyle === 'compact' ? primaryButtonStyle : undefined"
-            >{{ lang === 'zh' ? '紧凑' : 'Compact' }}</button>
-            <button
-              @click="appStore.userSettings.articleStyle = 'lined'"
-              class="py-2 border rounded-xl text-xs transition-colors"
-              :class="appStore.userSettings.articleStyle === 'lined' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
-              :style="appStore.userSettings.articleStyle === 'lined' ? primaryButtonStyle : undefined"
-            >{{ lang === 'zh' ? '横格' : 'Lined' }}</button>
-            <button
-              @click="appStore.userSettings.articleStyle = 'grid'"
-              class="py-2 border rounded-xl text-xs transition-colors"
-              :class="appStore.userSettings.articleStyle === 'grid' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
-              :style="appStore.userSettings.articleStyle === 'grid' ? primaryButtonStyle : undefined"
-            >{{ lang === 'zh' ? '方格' : 'Grid' }}</button>
-          </div>
-        </div>
-
+        <!-- 2. Theme Color & Mode -->
         <div class="mb-4">
           <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '主题模式' : 'Mode' }}</div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -307,6 +292,38 @@
           </div>
         </div>
 
+        <!-- 3. Article Style -->
+        <div class="mb-4">
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '文章样式' : 'Article Style' }}</div>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              @click="appStore.userSettings.articleStyle = 'classic'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'classic' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'classic' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '经典' : 'Classic' }}</button>
+            <button
+              @click="appStore.userSettings.articleStyle = 'compact'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'compact' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'compact' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '紧凑' : 'Compact' }}</button>
+            <button
+              @click="appStore.userSettings.articleStyle = 'lined'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'lined' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'lined' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '横格' : 'Lined' }}</button>
+            <button
+              @click="appStore.userSettings.articleStyle = 'grid'"
+              class="py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.articleStyle === 'grid' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.articleStyle === 'grid' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '方格' : 'Grid' }}</button>
+          </div>
+        </div>
+
+        <!-- 4. Petal Layer -->
         <div class="mb-4">
           <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '樱花层级' : 'Petal Layer' }}</div>
           <div class="flex gap-2">
@@ -325,52 +342,117 @@
           </div>
         </div>
 
-        <div class="mb-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '壁纸' : 'Wallpapers' }}</div>
+        <!-- 5. Wallpaper Settings -->
+        <div class="mb-4 border-t border-gray-100 dark:border-gray-800 pt-4">
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '壁纸设置' : 'Wallpaper Settings' }}</div>
+          
+          <div class="flex flex-col gap-2 mb-3 bg-gray-50 dark:bg-gray-800 p-2 rounded-xl">
+             <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">{{ lang === 'zh' ? '填充方式' : 'Fill Mode' }}</span>
+                <div class="flex gap-1">
+                   <button 
+                     @click="appStore.userSettings.wallpaperFill = 'cover'" 
+                     class="px-2 py-1 text-[10px] rounded border transition-colors"
+                     :class="appStore.userSettings.wallpaperFill === 'cover' ? 'bg-white dark:bg-gray-700 border-[var(--primary-300)] text-[var(--primary-500)]' : 'border-transparent text-gray-400 hover:text-gray-600'"
+                 >Cover</button>
+                 <button 
+                   @click="appStore.userSettings.wallpaperFill = 'contain'" 
+                   class="px-2 py-1 text-[10px] rounded border transition-colors"
+                   :class="appStore.userSettings.wallpaperFill === 'contain' ? 'bg-white dark:bg-gray-700 border-[var(--primary-300)] text-[var(--primary-500)]' : 'border-transparent text-gray-400 hover:text-gray-600'"
+                 >Contain</button>
+                 <button 
+                   @click="appStore.userSettings.wallpaperFill = 'fill'" 
+                   class="px-2 py-1 text-[10px] rounded border transition-colors"
+                   :class="appStore.userSettings.wallpaperFill === 'fill' ? 'bg-white dark:bg-gray-700 border-[var(--primary-300)] text-[var(--primary-500)]' : 'border-transparent text-gray-400 hover:text-gray-600'"
+                 >Stretch</button>
+              </div>
+           </div>
+           <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">{{ lang === 'zh' ? '自动更换' : 'Auto Change' }}</span>
+              <select v-model="appStore.userSettings.autoChangeMode" class="px-2 py-1 text-[10px] border rounded bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 outline-none focus:border-[var(--primary-300)]">
+                   <option value="off">{{ lang === 'zh' ? '关闭' : 'Off' }}</option>
+                   <option value="custom">{{ lang === 'zh' ? '自定义列表' : 'Custom List' }}</option>
+                   <option value="preset">{{ lang === 'zh' ? '预置壁纸' : 'Preset' }}</option>
+                   <option value="anime">{{ lang === 'zh' ? '动漫' : 'Anime' }}</option>
+                   <option value="beauty">{{ lang === 'zh' ? '美女' : 'Beauty' }}</option>
+                   <option value="search">{{ lang === 'zh' ? '搜索结果' : 'Search' }}</option>
+                </select>
+             </div>
+             <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">{{ lang === 'zh' ? '自动更换间隔(秒)' : 'Auto Change Interval (s)' }}</span>
+                <input type="number" v-model.number="appStore.userSettings.autoChangeTimer" class="w-16 px-2 py-1 text-[10px] border rounded bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 outline-none focus:border-[var(--primary-300)]" min="0" placeholder="0=Off" />
+             </div>
+             <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">{{ lang === 'zh' ? '百度搜索数量限制' : 'Baidu Search Limit' }}</span>
+                <input type="number" v-model.number="appStore.wallpaperApiSettings.baiduLimit" class="w-16 px-2 py-1 text-[10px] border rounded bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 outline-none focus:border-[var(--primary-300)]" min="1" max="20" />
+             </div>
+          </div>
+
           <div class="grid grid-cols-3 gap-2">
             <button
               @click="appStore.userSettings.bannerMode = 'hide'"
               class="relative rounded-xl overflow-hidden border transition-all h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
               :class="appStore.userSettings.bannerMode === 'hide' ? 'ring-2' : 'border-gray-200 dark:border-gray-700'"
               :style="appStore.userSettings.bannerMode === 'hide' ? primaryRingStyle : undefined"
+              :title="lang === 'zh' ? '隐藏壁纸' : 'Hide Wallpaper'"
             >
               <span class="text-2xl text-gray-400">❌</span>
             </button>
-            <button
-              v-for="wp in currentThemeWallpapers"
-              :key="wp.filename"
-              @click="setWallpaperWithMode(wp.filename)"
-              class="relative rounded-xl overflow-hidden border transition-all"
+            <div
+              v-for="wp in customThemeWallpapers"
+              :key="wp.id || wp.filename"
+              class="relative group rounded-xl overflow-hidden border transition-all h-16"
               :class="wp.filename === appStore.currentWallpaperFilename && appStore.userSettings.bannerMode !== 'hide' ? 'ring-2' : 'border-gray-200 dark:border-gray-700'"
               :style="wp.filename === appStore.currentWallpaperFilename && appStore.userSettings.bannerMode !== 'hide' ? primaryRingStyle : undefined"
             >
-              <img :src="wp.path" :alt="wp.name" class="w-full h-16 object-cover" />
-              <div class="absolute inset-0 bg-black/10"></div>
-            </button>
+              <img :src="wp.path || wp.url" :alt="wp.name" class="w-full h-full object-cover" />
+              <div @click="setWallpaperWithMode(wp.filename)" class="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"></div>
+              
+              <button 
+                v-if="wp.id"
+                @click.stop="removeCustomWallpaper(wp.id)"
+                class="absolute top-1 right-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-100 transition-opacity text-xs hover:bg-red-500"
+              >✕</button>
+
+              <button 
+                @click.stop="downloadWallpaper(wp)"
+                class="absolute bottom-1 right-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-[10px] hover:bg-[var(--primary-500)]"
+              >⬇</button>
+            </div>
           </div>
           <div class="mt-3 flex gap-2">
             <input v-model="customWallpaperUrl" type="text" :placeholder="lang === 'zh' ? '壁纸链接' : 'Wallpaper URL'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-            <select v-model="customWallpaperTheme" class="px-2 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200">
-              <option value="auto">{{ lang === 'zh' ? '自适应' : 'Auto' }}</option>
-              <option value="light">{{ lang === 'zh' ? '亮色' : 'Light' }}</option>
-              <option value="dark">{{ lang === 'zh' ? '暗色' : 'Dark' }}</option>
-            </select>
-            <button @click="addWallpaperFromUrl" class="px-3 py-2 text-xs rounded-xl border border-sakura-400 text-sakura-600 dark:text-sakura-400 hover:bg-sakura-50 dark:hover:bg-sakura-900/20">+</button>
+            <button @click="addWallpaperFromUrl" class="px-3 py-2 text-xs rounded-xl border border-[var(--primary-400)] text-[var(--primary-600)] dark:text-[var(--primary-400)] hover:bg-[var(--primary-50)] dark:hover:bg-[var(--primary-900)]/20">+</button>
           </div>
           <div class="mt-2 flex gap-2">
-            <button @click="triggerWallpaperUpload" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-gray-200 dark:border-gray-700 text-gray-500 hover:text-sakura-600">{{ lang === 'zh' ? '本地上传' : 'Local Upload' }}</button>
-            <button @click="clearCustomWallpapers" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-gray-200 dark:border-gray-700 text-gray-500 hover:text-red-500">{{ lang === 'zh' ? '清空自定义' : 'Clear Custom' }}</button>
+            <button @click="triggerWallpaperUpload" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)]">{{ lang === 'zh' ? '本地上传' : 'Local Upload' }}</button>
+            <input ref="wallpaperFileInput" type="file" accept="image/*" class="hidden" @change="handleWallpaperFile" />
           </div>
-          <input ref="wallpaperFileInput" type="file" accept="image/*" class="hidden" @change="handleWallpaperFile" />
-        </div>
+          
+          <div class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '预置壁纸' : 'Preset Wallpapers' }}</div>
+          <div class="grid grid-cols-3 gap-2">
+            <div
+              v-for="wp in presetThemeWallpapers"
+              :key="wp.filename"
+              class="relative group rounded-xl overflow-hidden border transition-all h-16"
+              :class="wp.filename === appStore.currentWallpaperFilename && appStore.userSettings.bannerMode !== 'hide' ? 'ring-2' : 'border-gray-200 dark:border-gray-700'"
+              :style="wp.filename === appStore.currentWallpaperFilename && appStore.userSettings.bannerMode !== 'hide' ? primaryRingStyle : undefined"
+            >
+              <img :src="wp.path || wp.url" :alt="wp.name" class="w-full h-full object-cover" />
+              <div @click="setWallpaperWithMode(wp.filename)" class="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"></div>
+              
+              <button 
+                @click.stop="downloadWallpaper(wp)"
+                class="absolute bottom-1 right-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-[10px] hover:bg-[var(--primary-500)]"
+              >⬇</button>
+            </div>
+          </div>
 
-        <div class="mb-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Bing</div>
+          <div class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Bing</div>
           <div class="flex items-center gap-2 mb-2">
-            <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <input type="checkbox" v-model="appStore.wallpaperApiSettings.bingEnabled" @change="handleBingToggle" />
-              {{ lang === 'zh' ? '每日自动更换' : 'Daily Auto' }}
-            </label>
+            <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+              {{ lang === 'zh' ? '每日自动更新' : 'Auto Update' }}
+            </span>
             <select v-model="appStore.wallpaperApiSettings.bingCountry" @change="refreshBing" :disabled="isApiLoading" class="ml-auto px-2 py-1 text-xs border rounded-lg bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
               <option value="cn">CN</option>
               <option value="jp">JP</option>
@@ -390,88 +472,111 @@
               <option :value="8">8</option>
               <option :value="12">12</option>
             </select>
-            <button @click="refreshBing" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-sakura-600 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button @click="refreshBing" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)] disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isApiLoading ? (lang === 'zh' ? '加载中' : 'Loading') : (lang === 'zh' ? '刷新' : 'Refresh') }}
             </button>
           </div>
           <div v-if="bingWallpapers.length" class="grid grid-cols-3 gap-2">
-            <button
+            <div
               v-for="wp in bingWallpapers"
               :key="wp.filename"
-              @click="setWallpaperWithMode(wp.filename)"
-              class="relative rounded-xl overflow-hidden border transition-all"
+              class="relative group rounded-xl overflow-hidden border transition-all h-16"
             >
-              <img :src="wp.path" :alt="wp.name" class="w-full h-16 object-cover" />
-              <div class="absolute inset-0 bg-black/10"></div>
-            </button>
+              <img :src="wp.path" :alt="wp.name" class="w-full h-full object-cover" />
+              <div @click="setWallpaperWithMode(wp.filename)" class="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"></div>
+              <button 
+                @click.stop="addToWallpaperList(wp)"
+                class="absolute top-1 left-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-xs hover:bg-[var(--primary-500)]"
+              >+</button>
+              <button 
+                @click.stop="downloadWallpaper(wp)"
+                class="absolute bottom-1 right-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-[10px] hover:bg-[var(--primary-500)]"
+              >⬇</button>
+            </div>
           </div>
           <div v-else class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无壁纸' : 'No wallpapers' }}</div>
-        </div>
 
-        <div class="mb-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">UPX8</div>
+          <div class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">BAIDU</div>
           <div class="flex gap-2 mb-2">
-            <input v-model="appStore.wallpaperApiSettings.upx8Keyword" type="text" :placeholder="lang === 'zh' ? '关键词（可为空）' : 'Keyword (optional)'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-            <button @click="searchUpx8" :disabled="isApiLoading" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-sakura-600 disabled:opacity-50 disabled:cursor-not-allowed">
+            <input v-model="appStore.wallpaperApiSettings.baiduKeyword" type="text" :placeholder="lang === 'zh' ? '关键词（可为空）' : 'Keyword (optional)'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
+            <button @click="searchBaidu" :disabled="isApiLoading" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)] disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isApiLoading ? (lang === 'zh' ? '搜索中' : 'Searching') : (lang === 'zh' ? '搜索' : 'Search') }}
             </button>
           </div>
-          <div v-if="upx8Wallpapers.length" class="grid grid-cols-3 gap-2">
-            <button
-              v-for="wp in upx8Wallpapers"
+          <div v-if="baiduWallpapers.length" class="grid grid-cols-3 gap-2">
+            <div
+              v-for="wp in baiduWallpapers"
               :key="wp.filename"
-              @click="setWallpaperWithMode(wp.filename)"
-              class="relative rounded-xl overflow-hidden border transition-all"
+              class="relative group rounded-xl overflow-hidden border transition-all h-16"
             >
-              <img :src="wp.path" :alt="wp.name" class="w-full h-16 object-cover" />
-              <div class="absolute inset-0 bg-black/10"></div>
-            </button>
+              <img :src="wp.path" :alt="wp.name" class="w-full h-full object-cover" />
+              <div @click="setWallpaperWithMode(wp.filename)" class="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"></div>
+              <button 
+                @click.stop="addToWallpaperList(wp)"
+                class="absolute top-1 left-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-xs hover:bg-[var(--primary-500)]"
+              >+</button>
+              <button 
+                @click.stop="downloadWallpaper(wp)"
+                class="absolute bottom-1 right-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-[10px] hover:bg-[var(--primary-500)]"
+              >⬇</button>
+            </div>
           </div>
           <div v-else class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无结果' : 'No results' }}</div>
-        </div>
 
-        <div class="mb-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '美女' : 'Beauty' }}</div>
+          <div class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '美女' : 'Beauty' }}</div>
           <div class="flex items-center gap-2 mb-2">
-            <button @click="refreshBeauty" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-sakura-600 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button @click="refreshBeauty" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)] disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isApiLoading ? (lang === 'zh' ? '加载中' : 'Loading') : (lang === 'zh' ? '刷新' : 'Refresh') }}
             </button>
           </div>
           <div v-if="beautyWallpapers.length" class="grid grid-cols-3 gap-2">
-            <button
+            <div
               v-for="wp in beautyWallpapers"
               :key="wp.filename"
-              @click="setWallpaperWithMode(wp.filename)"
-              class="relative rounded-xl overflow-hidden border transition-all"
+              class="relative group rounded-xl overflow-hidden border transition-all h-16"
             >
-              <img :src="wp.path" :alt="wp.name" class="w-full h-16 object-cover" />
-              <div class="absolute inset-0 bg-black/10"></div>
-            </button>
+              <img :src="wp.path" :alt="wp.name" class="w-full h-full object-cover" />
+              <div @click="setWallpaperWithMode(wp.filename)" class="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"></div>
+              <button 
+                @click.stop="addToWallpaperList(wp)"
+                class="absolute top-1 left-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-xs hover:bg-[var(--primary-500)]"
+              >+</button>
+              <button 
+                @click.stop="downloadWallpaper(wp)"
+                class="absolute bottom-1 right-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-[10px] hover:bg-[var(--primary-500)]"
+              >⬇</button>
+            </div>
           </div>
           <div v-else class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无结果' : 'No results' }}</div>
-        </div>
 
-        <div class="mb-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '动漫' : 'Anime' }}</div>
+          <div class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '动漫' : 'Anime' }}</div>
           <div class="flex items-center gap-2 mb-2">
-            <button @click="refreshAnime" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-sakura-600 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button @click="refreshAnime" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)] disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isApiLoading ? (lang === 'zh' ? '加载中' : 'Loading') : (lang === 'zh' ? '刷新' : 'Refresh') }}
             </button>
           </div>
           <div v-if="animeWallpapers.length" class="grid grid-cols-3 gap-2">
-            <button
+            <div
               v-for="wp in animeWallpapers"
               :key="wp.filename"
-              @click="setWallpaperWithMode(wp.filename)"
-              class="relative rounded-xl overflow-hidden border transition-all"
+              class="relative group rounded-xl overflow-hidden border transition-all h-16"
             >
-              <img :src="wp.path" :alt="wp.name" class="w-full h-16 object-cover" />
-              <div class="absolute inset-0 bg-black/10"></div>
-            </button>
+              <img :src="wp.path" :alt="wp.name" class="w-full h-full object-cover" />
+              <div @click="setWallpaperWithMode(wp.filename)" class="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"></div>
+              <button 
+                @click.stop="addToWallpaperList(wp)"
+                class="absolute top-1 left-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-xs hover:bg-[var(--primary-500)]"
+              >+</button>
+              <button 
+                @click.stop="downloadWallpaper(wp)"
+                class="absolute bottom-1 right-1 w-5 h-5 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-[10px] hover:bg-[var(--primary-500)]"
+              >⬇</button>
+            </div>
           </div>
           <div v-else class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无结果' : 'No results' }}</div>
         </div>
 
+        <!-- 6. Custom Music -->
         <div class="mb-2">
           <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '自定义音乐' : 'Custom Music' }}</div>
           <div class="flex gap-2 mb-2">
@@ -480,14 +585,14 @@
           </div>
           <div class="flex gap-2 mb-2">
             <input v-model="customMusicUrl" type="text" :placeholder="lang === 'zh' ? '音乐链接' : 'Music URL'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-            <button @click="triggerMusicUpload" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-sakura-600">{{ lang === 'zh' ? '本地音频' : 'Local Audio' }}</button>
+            <button @click="triggerMusicUpload" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)]">{{ lang === 'zh' ? '本地音频' : 'Local Audio' }}</button>
           </div>
           <div class="flex gap-2 mb-2">
             <input v-model="customMusicCover" type="text" :placeholder="lang === 'zh' ? '封面链接（可选）' : 'Cover URL (optional)'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-            <button @click="triggerCoverUpload" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-sakura-600">{{ lang === 'zh' ? '本地封面' : 'Local Cover' }}</button>
+            <button @click="triggerCoverUpload" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)]">{{ lang === 'zh' ? '本地封面' : 'Local Cover' }}</button>
           </div>
           <div class="flex gap-2">
-            <button @click="addCustomMusic" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-sakura-400 text-sakura-600 dark:text-sakura-400 hover:bg-sakura-50 dark:hover:bg-sakura-900/20">{{ lang === 'zh' ? '添加音乐' : 'Add Track' }}</button>
+            <button @click="addCustomMusic" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-[var(--primary-400)] text-[var(--primary-600)] dark:text-[var(--primary-400)] hover:bg-[var(--primary-50)] dark:hover:bg-[var(--primary-900)]/20">{{ lang === 'zh' ? '添加音乐' : 'Add Track' }}</button>
             <button @click="clearCustomMusic" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-gray-200 dark:border-gray-700 text-gray-500 hover:text-red-500">{{ lang === 'zh' ? '清空自定义' : 'Clear Custom' }}</button>
           </div>
           <input ref="musicFileInput" type="file" accept="audio/*" class="hidden" @change="handleMusicFile" />
@@ -518,19 +623,82 @@ const musicStore = useMusicStore();
 const appStore = useAppStore();
 const {
   currentThemeWallpapers,
+  presetThemeWallpapers,
+  customThemeWallpapers,
   bingWallpapers,
-  upx8Wallpapers,
+  baiduWallpapers,
   beautyWallpapers,
   animeWallpapers,
   isApiLoading,
   addCustomWallpaper,
   fetchBingWallpapers,
-  fetchUpx8Wallpaper,
+  fetchBaiduWallpaper,
   fetchBeautyWallpapers,
   fetchAnimeWallpapers,
   updateBingDaily,
-  setWallpaper
+  setWallpaper,
+  autoChangeWallpaper,
+  currentWallpaper
 } = useWallpapers();
+
+const changeWallpaper = () => {
+  autoChangeWallpaper(true);
+};
+
+const addCurrentToList = () => {
+  const wp = {
+    name: 'Saved Wallpaper',
+    url: currentWallpaper.value,
+    theme: appStore.isDark ? 'dark' : 'light',
+    source: 'api'
+  };
+  addToWallpaperList(wp);
+};
+
+const downloadCurrentWallpaper = () => {
+  const url = currentWallpaper.value;
+  if (!url) return;
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `wallpaper-${Date.now()}.jpg`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const downloadWallpaper = async (wp: any) => {
+  try {
+    const url = wp.path || wp.url;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = wp.name ? `${wp.name}.jpg` : 'wallpaper.jpg';
+    a.click();
+    URL.revokeObjectURL(blobUrl);
+  } catch (e) {
+    console.error('Download failed', e);
+    // showToast(t.value.download_failed);
+  }
+};
+
+const addToWallpaperList = (wp: any) => {
+  addCustomWallpaper({
+    name: wp.name || 'Wallpaper',
+    url: wp.path || wp.url,
+    theme: appStore.isDark ? 'dark' : 'light',
+    source: 'api'
+  });
+  // showToast(t.value.added_to_list);
+};
+
+const removeCustomWallpaper = (id: string) => {
+  const idx = appStore.customWallpapers.findIndex(w => w.id === id);
+  if (idx !== -1) {
+    appStore.customWallpapers.splice(idx, 1);
+  }
+};
 
 const props = defineProps<{
   lang: string;
@@ -672,9 +840,9 @@ const refreshBing = () => {
   fetchBingWallpapers(appStore.wallpaperApiSettings.bingCountry, appStore.wallpaperApiSettings.bingCount);
 };
 
-const searchUpx8 = () => {
-  const kw = appStore.wallpaperApiSettings.upx8Keyword || undefined;
-  fetchUpx8Wallpaper(kw);
+const searchBaidu = () => {
+  const kw = appStore.wallpaperApiSettings.baiduKeyword || undefined;
+  fetchBaiduWallpaper(kw);
 };
 
 const refreshBeauty = () => {
@@ -771,7 +939,7 @@ onMounted(() => {
   window.addEventListener('resize', checkMobile);
   document.addEventListener('click', handleDocumentClick);
   refreshBing();
-  searchUpx8();
+  searchBaidu();
 });
 
 onUnmounted(() => {

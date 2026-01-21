@@ -1,6 +1,6 @@
 <template>
   <div class="lab-html-basics p-6 max-w-5xl mx-auto">
-    <h1 class="text-3xl font-bold text-sakura-600 dark:text-sakura-400 mb-4">
+    <h1 class="text-3xl font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)] mb-4">
       🌐 HTML基础 - 网页骨架
     </h1>
     
@@ -26,7 +26,7 @@
         @click="activeTab = tab.id"
         class="px-4 py-2 font-medium transition-colors rounded-t"
         :class="activeTab === tab.id 
-          ? 'bg-sakura-100 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-400 border-b-2 border-sakura-500' 
+          ? 'bg-[var(--primary-100)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)] border-b-2 border-[var(--primary-500)]' 
           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
       >
         {{ tab.label }}
@@ -80,7 +80,7 @@
         
         <div class="grid md:grid-cols-2 gap-4">
           <div class="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-            <h3 class="font-bold text-sakura-600 dark:text-sakura-400 mb-2">文本类</h3>
+            <h3 class="font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)] mb-2">文本类</h3>
             <ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
               <li><code>&lt;h1&gt; ~ &lt;h6&gt;</code> - 标题（1最大，6最小）</li>
               <li><code>&lt;p&gt;</code> - 段落</li>
@@ -91,7 +91,7 @@
           </div>
           
           <div class="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-            <h3 class="font-bold text-sakura-600 dark:text-sakura-400 mb-2">链接与媒体</h3>
+            <h3 class="font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)] mb-2">链接与媒体</h3>
             <ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
               <li><code>&lt;a href="url"&gt;</code> - 超链接</li>
               <li><code>&lt;img src="url"&gt;</code> - 图片</li>

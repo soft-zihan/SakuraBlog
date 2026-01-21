@@ -20,24 +20,37 @@ export const useAppStore = defineStore('app', () => {
     theme: 'light' | 'dark' | 'auto'
     source: 'url' | 'local' | 'api'
   }>>([])
+  // Persisted API wallpapers list
+  const apiWallpapers = ref<Array<{
+    filename: string
+    path: string
+    name: string
+    source: 'api'
+  }>>([])
+  
   const wallpaperApiSettings = ref({
     bingEnabled: false,
     bingCountry: 'cn',
     bingCount: 8,
     bingLastDate: '',
     bingLastUrl: '',
-    upx8Keyword: ''
+    baiduKeyword: '',
+    baiduLimit: 8
   })
   
   // User Settings
   const userSettings = ref({
     fontSize: 'normal' as 'small' | 'normal' | 'large',
-    fontFamily: 'sans' as 'sans' | 'serif',
+    fontFamily: 'sans' as 'sans' | 'serif' | 'kaiti',
     petalSpeed: 'slow' as 'off' | 'slow' | 'fast',
     bannerMode: 'normal' as 'normal' | 'fullscreen' | 'background' | 'hide',
     petalLayer: 'back' as 'front' | 'back',
     themeColor: 'sakura' as ThemeColorId,
-    articleStyle: 'classic' as 'classic' | 'clean' | 'compact' | 'lined' | 'grid'
+    articleStyle: 'classic' as 'classic' | 'clean' | 'compact' | 'lined' | 'grid',
+    articleBackgroundColor: '',
+    wallpaperFill: 'cover' as 'cover' | 'contain' | 'fill',
+    autoChangeMode: 'off' as 'off' | 'custom' | 'preset' | 'anime' | 'beauty' | 'search',
+    autoChangeTimer: 0 // 0 means off, >0 means seconds
   })
   
   // UI State
@@ -46,6 +59,8 @@ export const useAppStore = defineStore('app', () => {
   const sidebarOpen = ref(true) // For mobile
   const toastMessage = ref('')
   const readingMode = ref(false)
+  const viewMode = ref<'latest' | 'files' | 'lab'>('latest')
+  const expandedFolders = ref<string[]>([])
   
   // Actions
   function toggleLang() {
@@ -104,17 +119,23 @@ export const useAppStore = defineStore('app', () => {
   function setWallpaper(filename: string) {
     currentWallpaperFilename.value = filename
   }
+
+  function setApiWallpapers(wallpapers: Array<{ filename: string; path: string; name: string; source: 'api' }>) {
+    apiWallpapers.value = wallpapers
+  }
   
   function applyThemeColor(color: ThemeColorId) {
     const p = THEME_COLORS[color].palette
     const root = document.documentElement
     root.style.setProperty('--primary-50', p[50])
     root.style.setProperty('--primary-100', p[100])
+    root.style.setProperty('--primary-200', p[200])
     root.style.setProperty('--primary-300', p[300])
     root.style.setProperty('--primary-400', p[400])
     root.style.setProperty('--primary-500', p[500])
     root.style.setProperty('--primary-600', p[600])
     root.style.setProperty('--primary-700', p[700])
+    root.style.setProperty('--primary-800', p[800])
     root.style.setProperty('--primary-900', p[900])
     const hexToRgba = (hex: string, alpha: number) => {
       const h = hex.replace('#', '')
@@ -149,6 +170,7 @@ export const useAppStore = defineStore('app', () => {
     isDark,
     currentWallpaperFilename,
     customWallpapers,
+    apiWallpapers,
     wallpaperApiSettings,
     userSettings,
     showParticles,
@@ -156,6 +178,8 @@ export const useAppStore = defineStore('app', () => {
     sidebarOpen,
     toastMessage,
     readingMode,
+    viewMode,
+    expandedFolders,
     // Actions
     toggleLang,
     toggleTheme,
@@ -163,11 +187,11 @@ export const useAppStore = defineStore('app', () => {
     setLang,
     setDark,
     setWallpaper,
+    setApiWallpapers,
     showToast,
     updateSettings,
     toggleSidebar,
     toggleReadingMode,
-    setReadingMode,
     applyThemeColor,
     setThemeColor,
     // Computed
@@ -175,6 +199,6 @@ export const useAppStore = defineStore('app', () => {
   }
 }, {
   persist: {
-    pick: ['lang', 'isDark', 'currentWallpaperFilename', 'customWallpapers', 'wallpaperApiSettings', 'userSettings', 'showParticles', 'readingMode']
+    pick: ['lang', 'isDark', 'currentWallpaperFilename', 'customWallpapers', 'apiWallpapers', 'wallpaperApiSettings', 'userSettings', 'showParticles', 'readingMode', 'expandedFolders', 'viewMode']
   }
 })

@@ -2,7 +2,7 @@
   <div class="space-y-8">
     <!-- Stage Info Banner (simplified, no header/tabs) -->
     <div class="max-w-4xl mx-auto px-4">
-      <div class="bg-gradient-to-r from-sakura-50 to-purple-50 dark:from-sakura-900/20 dark:to-purple-900/20 rounded-2xl p-4 md:p-6 border border-sakura-100 dark:border-sakura-800/30">
+      <div class="bg-gradient-to-r from-[var(--primary-50)] to-purple-50 dark:from-[var(--primary-900)]/20 dark:to-purple-900/20 rounded-2xl p-4 md:p-6 border border-[var(--primary-100)] dark:border-[var(--primary-800)]/30">
         <div class="flex items-start gap-4">
           <div class="text-4xl">{{ activeTabInfo?.icon }}</div>
           <div class="flex-1">
@@ -10,7 +10,7 @@
               {{ activeTabInfo?.noteNum ? (isZh ? `笔记${activeTabInfo?.noteNum}：` : `Note ${activeTabInfo?.noteNum}: `) : '' }}
               {{ activeTabInfo?.label }}
             </h3>
-            <p class="text-sm text-sakura-600 dark:text-sakura-400 mt-1">
+            <p class="text-sm text-[var(--primary-600)] dark:text-[var(--primary-400)] mt-1">
               🎯 {{ activeTabInfo?.goal }}
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -52,7 +52,7 @@
         </section>
 
         <section class="max-w-4xl mx-auto">
-          <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-8 border border-sakura-100 dark:border-gray-700 shadow-xl relative overflow-hidden">
+          <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-8 border border-[var(--primary-100)] dark:border-gray-700 shadow-xl relative overflow-hidden">
              <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 dark:bg-blue-900/30 rounded-full blur-3xl opacity-50"></div>
              
              <div class="text-center mb-8">
@@ -61,8 +61,8 @@
              </div>
 
              <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
-                <div class="w-48 h-64 bg-gray-50 dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center relative transition-all duration-500" :class="{'border-sakura-400 dark:border-sakura-500 shadow-lg shadow-sakura-500/20': standards.css}">
-                    <div v-if="standards.css" class="absolute inset-2 bg-gradient-to-br from-sakura-100 to-purple-100 dark:from-sakura-900/50 dark:to-purple-900/50 rounded-xl transition-all duration-500 animate-fade-in"></div>
+                <div class="w-48 h-64 bg-gray-50 dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center relative transition-all duration-500" :class="{'border-[var(--primary-400)] dark:border-[var(--primary-500)] shadow-lg shadow-[var(--primary-500)]/20': standards.css}">
+                    <div v-if="standards.css" class="absolute inset-2 bg-gradient-to-br from-[var(--primary-100)] to-purple-100 dark:from-[var(--primary-900)]/50 dark:to-purple-900/50 rounded-xl transition-all duration-500 animate-fade-in"></div>
                     <div v-if="standards.html" class="relative z-10 text-6xl transition-all duration-500" :class="{'animate-bounce': standards.js}">
                        <span v-if="!standards.css">🦴</span>
                        <span v-else>🤵</span>
@@ -606,7 +606,7 @@ const NextStageGuide = {
         <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">{{ nextText }}</p>
         <button 
           @click="$emit('next')"
-          class="px-6 py-3 bg-sakura-500 hover:bg-sakura-600 text-white rounded-xl font-bold transition-all hover:scale-105"
+          class="px-6 py-3 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded-xl font-bold transition-all hover:scale-105"
         >
           {{ buttonText || (isZh ? '进入下一阶段 →' : 'Next Stage →') }}
         </button>

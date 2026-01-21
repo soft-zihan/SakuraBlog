@@ -71,7 +71,7 @@ const props = defineProps<{ lang: 'en' | 'zh' }>()
 const isZh = computed(() => props.lang === 'zh')
 
 const colors = [
-  { id: 'sakura', label: 'Sakura', btn: 'bg-sakura-500 text-white' },
+  { id: 'primary', label: 'Primary', btn: 'bg-[var(--primary-500)] text-white' },
   { id: 'cyan', label: 'Cyan', btn: 'bg-cyan-500 text-white' },
   { id: 'violet', label: 'Violet', btn: 'bg-violet-500 text-white' }
 ]
