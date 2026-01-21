@@ -13,8 +13,6 @@
         <span class="text-[var(--primary-300)] dark:text-[var(--primary-500)] mr-2 shrink-0 cursor-pointer hover:scale-110 transition-transform" @click="$emit('reset')">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </span>
-        <span class="text-[var(--primary-200)] dark:text-gray-700 mx-1">/</span>
-        <span class="font-bold text-[var(--primary-500)] dark:text-[var(--primary-400)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 px-2 py-0.5 rounded mr-2">{{ lang }}</span>
         
         <template v-if="viewMode === 'lab' && currentTool">
            <span class="mx-2 text-[var(--primary-300)] dark:text-gray-600">›</span>
@@ -642,11 +640,12 @@ const {
   updateBingDaily,
   setWallpaper,
   autoChangeWallpaper,
+  changeWallpaperSameSeries,
   currentWallpaper
 } = useWallpapers();
 
 const changeWallpaper = () => {
-  autoChangeWallpaper(true);
+  changeWallpaperSameSeries();
 };
 
 const addCurrentToList = () => {

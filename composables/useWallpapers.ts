@@ -221,31 +221,72 @@ export function useWallpapers() {
     return url.includes('?') ? `${url}&${key}=${value}` : `${url}?${key}=${value}`
   }
 
+  // Shuffle Helper
+  const shuffleArray = <T>(array: T[]): T[] => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   const buildRandomItems = (sources: string[], count: number, label: string) => {
     const stamp = Date.now()
-    const total = Math.min(Math.max(count, 1), 10)
-    return Array.from({ length: total }).map((_, idx) => {
-      const source = sources[idx % sources.length]
-      const url = withQueryParam(source, 't', `${stamp}-${idx}`)
-      return {
-        filename: url,
-        path: url,
-        name: `${label} ${idx + 1}`,
-        source: 'api' as const
-      }
-    })
+    // Shuffle sources to ensure diversity and avoid single point of failure
+    const shuffledSources = shuffleArray(sources)
+    
+    const items: WallpaperItem[] = []
+    // Round robin distribution
+    for (let i = 0; i < count; i++) {
+        const source = shuffledSources[i % shuffledSources.length]
+        const url = withQueryParam(source, 't', `${stamp}-${i}`)
+        items.push({
+            filename: url,
+            path: url,
+            name: `${label} ${i + 1}`,
+            source: 'api' as const
+        })
+    }
+    return items
+  }
+
+  // Fetch and validate wrapper
+  const fetchAndValidateRandom = async (sources: string[], count: number, label: string): Promise<WallpaperItem[]> => {
+    const validItems: WallpaperItem[] = []
+    const maxAttempts = 3
+    let attempts = 0
+    
+    // We try to get 'count' valid items.
+    while (validItems.length < count && attempts < maxAttempts) {
+        // Generate candidates. +1 buffer to improve hit rate
+        const needed = count - validItems.length
+        const candidates = buildRandomItems(sources, needed + 1, label)
+        
+        for (const item of candidates) {
+            if (validItems.length >= count) break
+            if (await validateImage(item.filename)) {
+                // Ensure uniqueness
+                if (!validItems.some(v => v.filename === item.filename)) {
+                    validItems.push(item)
+                }
+            }
+        }
+        attempts++
+    }
+    return validItems
   }
 
   const fetchBeautyWallpapers = async (count: number) => {
-    if (beautyWallpapers.value.length > 0 && !isApiLoading.value) return
-    
     if (isApiLoading.value) return
     isApiLoading.value = true
     try {
-      beautyWallpapers.value = buildRandomItems([
+      // Crawl twice each time (fetch at least 2 candidates)
+      const targetCount = Math.max(count, 2)
+      beautyWallpapers.value = await fetchAndValidateRandom([
         'https://cdn.seovx.com/?mom=3022',
         'https://imgapi.cn/api.php?zd=pc&fl=meizi&gs=images'
-      ], count, 'Beauty')
+      ], targetCount, 'Beauty')
     } catch (e) {
       console.warn('Failed to load beauty wallpapers:', e)
     } finally {
@@ -254,17 +295,17 @@ export function useWallpapers() {
   }
 
   const fetchAnimeWallpapers = async (count: number) => {
-    if (animeWallpapers.value.length > 0 && !isApiLoading.value) return
-
     if (isApiLoading.value) return
     isApiLoading.value = true
     try {
-      animeWallpapers.value = buildRandomItems([
+      // Crawl twice each time (fetch at least 2 candidates)
+      const targetCount = Math.max(count, 2)
+      animeWallpapers.value = await fetchAndValidateRandom([
         'https://cdn.seovx.com/d/?mom=3022',
         'https://www.dmoe.cc/random.php',
         'https://api.mtyqx.cn/tapi/random.php',
         'https://imgapi.cn/api.php?zd=pc&fl=dongman&gs=images'
-      ], count, 'Anime')
+      ], targetCount, 'Anime')
     } catch (e) {
       console.warn('Failed to load anime wallpapers:', e)
     } finally {
@@ -290,23 +331,16 @@ export function useWallpapers() {
     isApiLoading.value = true
     try {
       const key = await getWallpaperKey()
-      // Use user setting limit if available, otherwise default
       const userLimit = appStore.wallpaperApiSettings.baiduLimit || limit || 8
       const target = Math.min(Math.max(userLimit, 1), 20)
       
-      // If no key, maybe skip? But original code checked key.
-      if (!key) {
-        // searchWallpapers.value = [] // Do not clear existing on fail if we want persistence
-        return
-      }
+      if (!key) return
       
-      // Fetch 2x limit to account for failures
       const fetchLimit = Math.min(target * 2, 30) 
       const results: WallpaperItem[] = []
       let page = 1
       let attempts = 0
       
-      // Fetch loop
       while (results.length < target && attempts < 5) {
         const url = `https://cn.apihz.cn/api/img/apihzimgbaidu.php?id=10012344&key=${key}&words=${encodeURIComponent(keyword || '小姐姐')}&page=${page}&limit=${fetchLimit}&type=2`
         
@@ -316,7 +350,6 @@ export function useWallpapers() {
             const data = await response.json()
             const list = Array.isArray(data?.res) ? data.res : []
             
-            // Validate images in parallel
             const validationResults = await Promise.all(
               list.map(async (item: string) => {
                 if (!item) return null
@@ -327,7 +360,6 @@ export function useWallpapers() {
             
             for (const item of validationResults) {
               if (item && results.length < target) {
-                // Avoid duplicates
                 if (!results.some(r => r.filename === item)) {
                   results.push({
                     filename: item,
@@ -348,11 +380,7 @@ export function useWallpapers() {
         attempts += 1
       }
       
-      // Update store (persistence)
       if (results.length > 0) {
-        // If we want to append or replace? 
-        // User said "User used wallpapers and API wallpaper list... persisted".
-        // Usually search replaces the list.
         appStore.setApiWallpapers(results)
       }
       
@@ -367,13 +395,51 @@ export function useWallpapers() {
     await fetchSearchWallpapers(keyword || appStore.wallpaperApiSettings.baiduKeyword || '二次元', limit)
   }
   
-  const autoChangeWallpaper = async (forceRefresh = false) => {
-    const mode = appStore.userSettings.autoChangeMode
-    if (mode === 'off') return
+  // Detect current wallpaper mode/series
+  const detectCurrentMode = (): string => {
+    const current = currentWallpaper.value
+    
+    // Check Bing
+    if (bingWallpapers.value.some(w => w.filename === current) || current.includes('peapix.com') || current.includes('bing.com')) {
+      return 'bing'
+    }
+    
+    // Check Preset
+    if (presetThemeWallpapers.value.some(w => w.filename === current || w.path === current)) {
+      return 'preset'
+    }
+    
+    // Check Custom
+    if (customThemeWallpapers.value.some(w => w.filename === current || w.path === current)) {
+      return 'custom'
+    }
+
+    // Check Search
+    if (searchWallpapers.value.some(w => w.filename === current || w.path === current)) {
+      return 'search'
+    }
+    
+    // Check Anime (by URL pattern)
+    if (current.includes('seovx.com/d/') || current.includes('dmoe.cc') || current.includes('mtyqx.cn') || (current.includes('imgapi.cn') && current.includes('fl=dongman'))) {
+      return 'anime'
+    }
+    
+    // Check Beauty (by URL pattern)
+    if (current.includes('seovx.com') || (current.includes('imgapi.cn') && current.includes('fl=meizi'))) {
+      return 'beauty'
+    }
+    
+    return appStore.userSettings.autoChangeMode
+  }
+
+  const autoChangeWallpaper = async (forceRefresh = false, modeOverride?: string) => {
+    const mode = modeOverride || appStore.userSettings.autoChangeMode
+    if (mode === 'off' && !modeOverride) return
 
     let nextWallpaper: WallpaperItem | null = null;
 
     // Retry loop for finding a valid wallpaper
+    // "Must crawl twice each time, automatic retry also re-crawls twice each time"
     for (let attempt = 0; attempt < 3; attempt++) {
       if (mode === 'custom') {
         const list = customThemeWallpapers.value
@@ -391,36 +457,48 @@ export function useWallpapers() {
          }
          const list = searchWallpapers.value
          if (list.length) {
-           // If we just fetched, use the first one, otherwise random
            if (forceRefresh) {
-             nextWallpaper = list[0]
+             nextWallpaper = list[0] // or random?
            } else {
              nextWallpaper = list[Math.floor(Math.random() * list.length)]
            }
          }
       } else if (mode === 'anime') {
+        // Fetch if needed or forced. Note: fetchAnimeWallpapers now ensures valid items.
         if (forceRefresh || animeWallpapers.value.length === 0) {
-           // Clear cache to force new
            animeWallpapers.value = []
-           await fetchAnimeWallpapers(1)
+           // Fetch 2 candidates as per "crawl twice" rule
+           await fetchAnimeWallpapers(2)
         }
         
         if (animeWallpapers.value.length) {
+          // Pick one
           nextWallpaper = animeWallpapers.value[Math.floor(Math.random() * animeWallpapers.value.length)]
         }
       } else if (mode === 'beauty') {
         if (forceRefresh || beautyWallpapers.value.length === 0) {
           beautyWallpapers.value = []
-          await fetchBeautyWallpapers(1)
+          await fetchBeautyWallpapers(2)
         }
         
         if (beautyWallpapers.value.length) {
           nextWallpaper = beautyWallpapers.value[Math.floor(Math.random() * beautyWallpapers.value.length)]
         }
+      } else if (mode === 'bing') {
+        // Bing logic: "Bing wallpaper auto-change needs to change from already obtained wallpapers"
+        // Ensure we have wallpapers
+        if (bingWallpapers.value.length === 0) {
+           await fetchBingWallpapers(appStore.wallpaperApiSettings.bingCountry || 'cn', 8)
+        }
+        if (bingWallpapers.value.length) {
+           nextWallpaper = bingWallpapers.value[Math.floor(Math.random() * bingWallpapers.value.length)]
+        }
       }
 
       if (nextWallpaper && nextWallpaper.filename) {
-        // Validate before setting
+        // Double check validation (even if fetched valid, it's good practice)
+        // For anime/beauty, they are already validated.
+        // For others, check now.
         const isValid = await validateImage(nextWallpaper.filename)
         if (isValid) {
           appStore.setWallpaper(nextWallpaper.filename)
@@ -432,10 +510,21 @@ export function useWallpapers() {
           nextWallpaper = null
         }
       } else {
-        // No wallpaper found, break to avoid infinite loop if lists are empty
-        break
+        // No wallpaper found, but we might want to try force refresh if we haven't?
+        if (!forceRefresh) {
+          forceRefresh = true
+        } else {
+          // If we already forced refresh and still nothing, break
+          break
+        }
       }
     }
+  }
+  
+  const changeWallpaperSameSeries = () => {
+    const mode = detectCurrentMode()
+    console.log('Changing wallpaper in series:', mode)
+    autoChangeWallpaper(true, mode)
   }
 
   // Timer Logic
@@ -499,6 +588,7 @@ export function useWallpapers() {
     fetchAnimeWallpapers,
     fetchSearchWallpapers,
     updateBingDaily,
-    autoChangeWallpaper
+    autoChangeWallpaper,
+    changeWallpaperSameSeries
   }
 }
