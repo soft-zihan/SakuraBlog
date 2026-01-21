@@ -183,7 +183,7 @@
     <Teleport to="body">
       <div
         v-if="themeOpen"
-        class="fixed inset-0 z-[160] flex items-center justify-center bg-black/20 backdrop-blur-sm"
+        class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/20 backdrop-blur-sm"
         @click.self="themeOpen = false"
       >
         <div
