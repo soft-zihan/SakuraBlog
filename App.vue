@@ -412,10 +412,6 @@
             </p>
             <div class="mt-10 w-full max-w-3xl">
               <div class="flex flex-wrap items-center justify-center gap-3">
-                <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                  <span class="text-base">📜</span>
-                  <span class="font-semibold text-sakura-600 dark:text-sakura-400">{{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}</span>
-                </div>
                 <button
                   class="px-3 py-1.5 text-xs rounded-full border border-sakura-200/80 dark:border-gray-700 text-sakura-600 dark:text-sakura-300 hover:bg-sakura-50/80 dark:hover:bg-gray-800 transition-colors"
                   :disabled="welcomePoemLoading"
@@ -447,10 +443,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-            <div v-if="welcomePoemNeedsScroll" class="mt-10 flex items-center justify-center gap-2 text-xs text-gray-400">
-              <span class="animate-bounce">⬇️</span>
-              <span>{{ lang === 'zh' ? '下滑查看更多' : 'Scroll for more' }}</span>
             </div>
           </div>
           <div class="h-16"></div>
@@ -916,11 +908,6 @@ const welcomePoemDetails = computed(() => {
   const remark = welcomePoem.value?.remark;
   const translation = welcomePoem.value?.translation;
   const shangxi = welcomePoem.value?.shangxi;
-  if (dynasty) items.push({ label: lang.value === 'zh' ? '朝代' : 'Dynasty', value: dynasty });
-  if (type) {
-    const value = Array.isArray(type) ? type.join('、') : type;
-    items.push({ label: lang.value === 'zh' ? '题材' : 'Tags', value });
-  }
   if (remark) items.push({ label: lang.value === 'zh' ? '注释' : 'Notes', value: remark });
   if (translation) items.push({ label: lang.value === 'zh' ? '译文' : 'Translation', value: translation });
   if (shangxi) items.push({ label: lang.value === 'zh' ? '赏析' : 'Appreciation', value: shangxi });
