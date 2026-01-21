@@ -5,7 +5,7 @@
   <!-- Global Audio Player -->
   <GlobalAudio />
 
-  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-white/30 dark:bg-gray-900/60 backdrop-blur-[2px] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
+  <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-gradient-to-br from-white/70 via-sakura-50/50 to-purple-50/40 dark:from-gray-950/80 dark:via-gray-900/70 dark:to-sakura-900/40 backdrop-blur-[3px] border border-white/30 dark:border-gray-800/60 shadow-[0_12px_60px_rgba(15,23,42,0.12)] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : 'font-sans', appStore.isDark ? 'dark' : '']">
     
     <!-- Mobile Menu Button (repositioned to avoid overlap) -->
     <button 
@@ -185,7 +185,7 @@
 
           <!-- Note Content View -->
           <div v-else-if="currentFile" 
-             class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/80 dark:bg-gray-900/80 p-8 md:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
+             class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/85 dark:bg-gray-900/85 p-8 md:p-12 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
              :class="fontSizeClass"
              :style="articleContainerStyle"
           >
@@ -400,27 +400,27 @@
         </div>
 
         <!-- Empty State / Home -->
-        <div v-else class="flex-1 flex flex-col items-center justify-center text-sakura-300 dark:text-gray-600 animate-fade-in p-6 text-center">
+        <div v-else class="flex-1 flex flex-col items-center justify-center text-sakura-400 dark:text-gray-500 animate-fade-in p-6 text-center">
             <div class="relative group cursor-default">
                <div class="text-[12rem] mb-6 opacity-90 animate-float drop-shadow-2xl filter saturate-150 transform hover:scale-105 transition-transform duration-700">🌸</div>
                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 h-8 bg-sakura-800/20 dark:bg-sakura-900/40 blur-2xl rounded-full group-hover:w-64 transition-all duration-500"></div>
             </div>
-            <h2 class="text-5xl font-bold text-sakura-600 dark:text-sakura-400 mb-4 tracking-tight drop-shadow-sm">{{ t.welcome_title }}</h2>
-            <p class="text-sakura-400 dark:text-gray-400 max-w-lg mx-auto leading-relaxed text-lg">
+            <h2 class="text-5xl font-bold mb-4 tracking-tight drop-shadow-sm bg-gradient-to-r from-sakura-500 via-pink-500 to-purple-500 dark:from-sakura-300 dark:via-rose-300 dark:to-purple-300 text-transparent bg-clip-text">{{ t.welcome_title }}</h2>
+            <p class="text-sakura-500/80 dark:text-gray-300 max-w-lg mx-auto leading-relaxed text-lg">
               {{ t.welcome_desc }}<br>
-              <span class="text-sm opacity-70 bg-white/50 dark:bg-gray-800 px-4 py-1 rounded-full mt-2 inline-block border border-white/50 dark:border-gray-700">{{ t.welcome_tags }}</span>
+              <span class="text-sm opacity-90 bg-white/70 dark:bg-gray-800/70 px-4 py-1.5 rounded-full mt-3 inline-block border border-white/70 dark:border-gray-700/70 shadow-sm backdrop-blur">{{ t.welcome_tags }}</span>
             </p>
             <div class="mt-8 w-full max-w-2xl">
-              <div class="bg-white/70 dark:bg-gray-900/60 border border-white/60 dark:border-gray-700 rounded-2xl px-6 py-4 text-left shadow-lg backdrop-blur">
+              <div class="bg-white/80 dark:bg-gray-900/70 border border-white/70 dark:border-gray-700/70 rounded-3xl px-6 py-5 text-left shadow-[0_20px_50px_rgba(244,63,114,0.18)] backdrop-blur">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
                     <span class="text-base">📜</span>
                     <span class="font-semibold text-sakura-600 dark:text-sakura-400">{{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}</span>
                     <span v-if="welcomePoemAuthor">· {{ welcomePoemAuthor }}</span>
                   </div>
                   <div class="flex items-center gap-2">
                     <button
-                      class="px-3 py-1 text-xs rounded-full border border-sakura-200 dark:border-gray-700 text-sakura-600 dark:text-sakura-300 hover:bg-sakura-50 dark:hover:bg-gray-800 transition-colors"
+                      class="px-3 py-1.5 text-xs rounded-full border border-sakura-200/80 dark:border-gray-700 text-sakura-600 dark:text-sakura-300 hover:bg-sakura-50/80 dark:hover:bg-gray-800 transition-colors"
                       :disabled="welcomePoemLoading"
                       @click="loadRandomPoem"
                     >
@@ -428,7 +428,7 @@
                     </button>
                     <button
                       v-if="welcomePoemHasMore"
-                      class="px-3 py-1 text-xs rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-sakura-600 dark:hover:text-sakura-300 transition-colors"
+                      class="px-3 py-1.5 text-xs rounded-full border border-gray-200/80 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-sakura-600 dark:hover:text-sakura-300 transition-colors"
                       @click="toggleWelcomePoemExpand"
                     >
                       {{ welcomePoemExpanded ? (lang === 'zh' ? '收起' : 'Collapse') : (lang === 'zh' ? '了解诗文' : 'Learn More') }}

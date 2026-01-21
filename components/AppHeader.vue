@@ -1,6 +1,6 @@
 <template>
   <header 
-    class="bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-b border-white/40 dark:border-gray-700/40 shrink-0 z-20 shadow-sm transition-all duration-300 hover:bg-white/60 dark:hover:bg-gray-900/60"
+    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/60 shrink-0 z-20 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-900/80"
     :class="[
       isMobile ? 'px-3 py-2' : 'h-16 px-6',
       { 'translate-y-0': !headerHidden, '-translate-y-full': headerHidden }
@@ -72,7 +72,7 @@
         <!-- Search Button -->
         <button 
           @click="$emit('open-search')" 
-          class="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 hover:text-sakura-600 transition-all text-sm"
+          class="p-2 bg-white/70 dark:bg-gray-800/70 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 hover:text-sakura-600 transition-all text-sm shadow-sm"
           title="Search (⌘K)"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -83,7 +83,7 @@
         <!-- Music Button -->
         <button 
           @click="$emit('open-music')" 
-          class="p-2 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 rounded-lg transition-colors relative"
+          class="p-2 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 rounded-lg transition-colors relative"
           :title="t.music_player"
         >
           <span class="text-lg">🎵</span>
@@ -93,7 +93,7 @@
         <!-- Write Button -->
         <button 
           @click="$emit('open-write')" 
-          class="p-2 hover:bg-sakura-50 dark:hover:bg-sakura-900/30 rounded-lg transition-colors"
+          class="p-2 hover:bg-sakura-50/80 dark:hover:bg-sakura-900/30 rounded-lg transition-colors"
           :title="t.write_title"
         >
           <span class="text-lg">✏️</span>
@@ -103,7 +103,7 @@
           <button
             @click="themeOpen = !themeOpen"
             ref="themeButtonRef"
-            class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors"
+            class="p-2 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-lg transition-colors"
             :title="lang === 'zh' ? '主题' : 'Theme'"
           >
             <span class="text-lg">🎨</span>
