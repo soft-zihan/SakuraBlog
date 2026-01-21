@@ -95,7 +95,7 @@
         @copy-link="copyLink"
         @download="downloadSource"
         @open-settings="showSettings = true; headerHidden = false; if (isMobile) sidebarOpen = false"
-        @open-theme-panel="headerHidden = false"
+        @open-theme-panel="handleThemePanelChange"
         @open-search="showSearch = true; if (isMobile) sidebarOpen = false"
         @open-music="musicStore.showMusicPlayer = true; if (isMobile) sidebarOpen = false"
         @open-write="showWriteEditor = true; if (isMobile) sidebarOpen = false"
@@ -692,6 +692,10 @@ const showDownloadModal = ref(false);
 const showSearch = searchModalOpen;
 const showWriteEditor = ref(false);
 const sidebarOpen = ref(true);
+const handleThemePanelChange = (open: boolean) => {
+  themePanelOpen.value = open;
+  if (open) headerHidden.value = false;
+};
 
 // Dual Column Mode
 const dualColumnMode = ref(false);
@@ -700,6 +704,7 @@ const dualColumnRight = ref<'notes' | 'lab' | 'source'>('lab');
 
 // Mobile header scroll behavior
 const headerHidden = ref(false);
+const themePanelOpen = ref(false);
 const lastScrollY = ref(0);
 const isMobile = ref(false);
 
@@ -710,7 +715,6 @@ type GuwenItem = {
   title?: string;
   dynasty?: string;
   writer?: string;
-  type?: string[] | string;
   content?: string;
   remark?: string;
   translation?: string;
@@ -722,6 +726,17 @@ const welcomePoemError = ref('');
 const guwenUrls = Object.values(import.meta.glob('./gushiwen/guwen/*.json', { as: 'url', eager: true })) as string[];
 
 const parseGuwenItems = (raw: string) => {
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      return (parsed as GuwenItem[]).filter(item => item?.content);
+    }
+    const data = (parsed as { data?: GuwenItem[] } | null)?.data;
+    if (Array.isArray(data)) {
+      return data.filter(item => item?.content);
+    }
+  } catch {
+  }
   const items: GuwenItem[] = [];
   const lines = raw.split(/\r?\n/);
   for (const line of lines) {
@@ -1488,6 +1503,10 @@ onMounted(async () => {
   const scrollContainer = document.getElementById('scroll-container');
   const handleScroll = () => {
     if (!isMobile.value) {
+      headerHidden.value = false;
+      return;
+    }
+    if (themePanelOpen.value) {
       headerHidden.value = false;
       return;
     }

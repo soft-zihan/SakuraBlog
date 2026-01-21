@@ -96,7 +96,7 @@
 
         <div class="relative">
           <button
-            @click.stop="openThemePanel"
+            @click.stop="toggleThemePanel"
             ref="themeButtonRef"
             class="p-2 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-lg transition-colors"
             :title="lang === 'zh' ? '主题' : 'Theme'"
@@ -184,7 +184,7 @@
       <div
         v-if="themeOpen"
         class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/20 backdrop-blur-sm"
-        @click.self="themeOpen = false"
+        @click.self="setThemePanelOpen(false)"
       >
         <div
           ref="themePanelRef"
@@ -192,7 +192,7 @@
         >
         <div class="flex items-center justify-between mb-3">
           <div class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ lang === 'zh' ? '主题' : 'Theme' }}</div>
-          <button @click="themeOpen = false" class="text-gray-400 hover:text-sakura-500">✕</button>
+          <button @click="setThemePanelOpen(false)" class="text-gray-400 hover:text-sakura-500">✕</button>
         </div>
 
         <div class="mb-4">
@@ -585,9 +585,13 @@ const setThemeColor = (id: ThemeColorId) => {
   appStore.setThemeColor(id)
 }
 
-const openThemePanel = () => {
-  themeOpen.value = !themeOpen.value;
-  if (themeOpen.value) emit('open-theme-panel');
+const setThemePanelOpen = (open: boolean) => {
+  themeOpen.value = open;
+  emit('open-theme-panel', open);
+};
+
+const toggleThemePanel = () => {
+  setThemePanelOpen(!themeOpen.value);
 };
 
 const primaryButtonStyle = computed(() => ({
@@ -607,7 +611,7 @@ const handleDocumentClick = (e: MouseEvent) => {
   const panel = themePanelRef.value;
   if (!btn || !panel) return;
   if (target && (btn.contains(target) || panel.contains(target))) return;
-  themeOpen.value = false;
+  setThemePanelOpen(false);
 };
 
 const customWallpaperUrl = ref('');
