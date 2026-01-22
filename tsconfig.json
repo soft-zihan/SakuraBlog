@@ -19,9 +19,9 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["src/*"]
     }
   },
-  "include": ["env.d.ts", "**/*.ts", "**/*.tsx", "**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "env.d.ts"],
   "exclude": ["node_modules", "dist", "public"]
 }

@@ -3,15 +3,17 @@ import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
+  root: 'src',
+  publicDir: '../public',
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
   base: './', 
   build: {
-    outDir: 'dist',
+    outDir: '../dist',
     assetsDir: 'assets',
     emptyOutDir: true
   }

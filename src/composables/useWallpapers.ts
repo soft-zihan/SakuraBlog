@@ -146,14 +146,14 @@ export function useWallpapers() {
     return allWallpapers.find(w => w.filename === filename)
   }
   
-  const addCustomWallpaper = (payload: { name: string; url: string; source: 'url' | 'local' | 'api' }) => {
+  const addCustomWallpaper = (payload: { name: string; url: string; source: 'url' | 'local' | 'api'; theme?: 'light' | 'dark' | 'auto' }) => {
     const id = `${payload.source}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     appStore.customWallpapers.push({
       id,
       name: payload.name,
       url: payload.url,
       source: payload.source,
-      theme: appStore.isDark ? 'dark' : 'light'
+      theme: payload.theme || (appStore.isDark ? 'dark' : 'light')
     })
     appStore.setWallpaper(payload.url)
   }
@@ -568,6 +568,7 @@ export function useWallpapers() {
     wallpapersData,
     isLoading,
     currentThemeWallpapers,
+    presetThemeWallpapers,
     customThemeWallpapers,
     bingWallpapers,
     beautyWallpapers,

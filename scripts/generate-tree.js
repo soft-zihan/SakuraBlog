@@ -129,10 +129,10 @@ const notesTree = scanDirectory(notesDir, '', false);
 // 2. Scan Source Code (Specific Folders/Files)
 const sourceTree = [];
 // Scan Components
-const componentsNodes = scanDirectory(path.join(rootDir, 'components'), 'components', true);
+const componentsNodes = scanDirectory(path.join(rootDir, 'src', 'components'), 'src/components', true);
 if (componentsNodes.length > 0) sourceTree.push(...componentsNodes);
 // Scan Root Files (App.vue, index.html, etc manually picked or scanned)
-const rootFilesToScan = ['App.vue', 'index.html', 'index.tsx', 'vite.config.ts', 'tailwind.config.js'];
+const rootFilesToScan = ['src/App.vue', 'src/index.html', 'src/main.ts', 'vite.config.ts', 'package.json', 'tsconfig.json'];
 rootFilesToScan.forEach(file => {
     const fullPath = path.join(rootDir, file);
     if(fs.existsSync(fullPath)) {

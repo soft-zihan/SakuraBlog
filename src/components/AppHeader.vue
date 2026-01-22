@@ -182,7 +182,8 @@
         @click="$emit('toggle-right-sidebar')" 
         class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 active:scale-95 transition-transform"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        <svg v-if="!rightSidebarOpen" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
       </button>
     </div>
 
@@ -608,15 +609,17 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { THEME_COLOR_LIST } from '../constants';
-import type { ThemeColorId } from '../constants';
-import type { BreadcrumbItem, FileNode } from '../types';
-import { useMusicStore } from '../stores/musicStore';
-import { useAppStore } from '../stores/appStore';
-import { useWallpapers } from '../composables/useWallpapers';
+import { storeToRefs } from 'pinia';
+import { THEME_COLOR_LIST } from '@/constants';
+import type { ThemeColorId } from '@/constants';
+import type { BreadcrumbItem, FileNode } from '@/types';
+import { useMusicStore } from '@/stores/musicStore';
+import { useAppStore } from '@/stores/appStore';
+import { useWallpapers } from '@/composables/useWallpapers';
 
 const musicStore = useMusicStore();
 const appStore = useAppStore();
+const { sidebarOpen, rightSidebarOpen } = storeToRefs(appStore);
 const {
   currentThemeWallpapers,
   presetThemeWallpapers,

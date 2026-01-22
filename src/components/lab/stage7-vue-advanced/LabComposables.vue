@@ -541,32 +541,29 @@ export function useLightbox() {
         descEn: 'Unified Markdown processing',
         file: 'composables/useMarkdown.ts',
         code: `// 📍 composables/useMarkdown.ts
-import MarkdownIt from 'markdown-it'
-import hljs from 'highlight.js'
+import { marked } from 'marked'
 
 export function useMarkdown() {
-  // 配置 Markdown 解析器
-  const md = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    highlight: (str, lang) => {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(str, { language: lang }).value
-      }
-      return ''
+  const renderedHtml = ref('')
+
+  // Setup marked renderer
+  const setupMarkedRenderer = () => {
+    const renderer = new marked.Renderer()
+    renderer.heading = (text, level) => {
+      const id = text.toLowerCase().replace(/[^\\w]+/g, '-')
+      return \`<h\${level} id="\${id}">\${text}</h\${level}>\`
     }
-  })
+    marked.use({ renderer })
+  }
   
-  // 添加插件
-  md.use(markdownItAnchor, {
-    permalink: true,
-    permalinkSymbol: '🔗'
-  })
+  // Render markdown content
+  const renderMarkdown = async (file: FileNode) => {
+    if (!file?.content) return ''
+    renderedHtml.value = await marked.parse(file.content)
+    return renderedHtml.value
+  }
   
-  const render = (content: string) => md.render(content)
-  
-  return { md, render }
+  return { renderedHtml, renderMarkdown }
 }`
       }
     ]

@@ -348,8 +348,8 @@ const handleAvatarError = (e: Event) => {
   const target = e.target as HTMLImageElement;
   // If fallback also fails, avoid infinite loop
   if (!target.src.includes('Avatar.webp')) {
-     // Fallback to local image. Assumes user puts 'Avatar.webp' in public/ root.
-     avatarSrc.value = './Avatar.webp';
+     // Fallback to local image. Assumes user puts 'Avatar.webp' in public/images/.
+     avatarSrc.value = './images/Avatar.webp';
   }
 };
 

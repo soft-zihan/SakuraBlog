@@ -128,96 +128,36 @@ Visit [Sakura Notes](https://soft-zihan.github.io/) directly and click the Setti
 
 ```
 sakura-notes/
-├── 📄 index.html          # HTML entry, includes Tailwind config
-├── 📄 index.tsx           # Vue app mount entry
-├── 📄 App.vue             # Root component (~1400 lines), core logic
+├── 📁 src/                  # Source code
+│   ├── 📄 main.ts           # Vue app mount entry
+│   ├── 📄 App.vue           # Root component (Layout & State)
+│   ├── 📄 index.html        # HTML entry
+│   ├── 📄 constants.ts      # i18n constants
+│   ├── 📄 types.ts          # Global type definitions
+│   │
+│   ├── 📁 views/            # Page Views
+│   │   └── ArticleReader.vue # Dedicated Article Reader & TOC
+│   │
+│   ├── 📁 components/       # Vue components
+│   │   ├── AppHeader.vue      # Top navigation bar
+│   │   ├── AppSidebar.vue     # Sidebar navigation
+│   │   ├── ... (Feature components)
+│   │   └── 📁 lab/            # Learning Lab system
+│   │
+│   ├── 📁 composables/      # Vue 3 Composables (Logic Reuse)
+│   │   ├── useArticleMeta.ts  # Metadata extraction
+│   │   ├── useContentRenderer.ts # Markdown rendering
+│   │   ├── useFile.ts         # File operations
+│   │   └── ...
+│   │
+│   └── 📁 stores/           # Pinia state management
+│       ├── appStore.ts        # Global app settings
+│       ├── articleStore.ts    # Article interactions
+│       ├── learningStore.ts   # Learning progress
+│       └── musicStore.ts      # Music player state
+│
 ├── 📄 vite.config.ts      # Vite build configuration
-├── 📄 tsconfig.json       # TypeScript configuration
-├── 📄 constants.ts        # i18n constants (~600 lines)
-├── 📄 types.ts            # Global type definitions
-│
-├── 📁 components/         # Vue components
-│   ├── AppHeader.vue      # Top navigation bar
-│   ├── AppSidebar.vue     # Sidebar navigation with filters
-│   ├── ArticleCard.vue    # Article card component
-│   ├── FileTree.vue       # Recursive file tree
-│   ├── FolderView.vue     # Folder grid view
-│   ├── SettingsModal.vue  # Settings panel with backup
-│   ├── WriteEditor.vue    # Publishing workbench
-│   ├── SearchModal.vue    # Full-text search modal
-│   ├── DownloadModal.vue  # Batch download with filters
-│   ├── DownloadTreeNode.vue # Download tree node component
-│   ├── MusicPlayer.vue    # Music player with lyrics
-│   ├── GlobalAudio.vue    # Global audio controller
-│   ├── GiscusComments.vue # Giscus comments integration
-│   ├── PetalBackground.vue# Sakura petal system (z-index layers)
-│   ├── WallpaperLayer.vue # Dynamic wallpaper layer
-│   ├── BannerSettings.vue # Banner mode settings
-│   │
-│   ├── 📁 lab/            # Learning Lab system
-│   │   ├── index.ts              # Lab exports
-│   │   ├── LabDashboard.vue      # Lab main dashboard
-│   │   ├── SourceCodeViewer.vue  # Source code viewer with notes
-│   │   ├── DualColumnView.vue    # Dual-column reading view (fullscreen)
-│   │   ├── PanelContent.vue      # Panel content with collapsible tree
-│   │   ├── SourceFileTree.vue    # Source file tree
-│   │   ├── LabProjectTour.vue    # Project tour guide
-│   │   ├── 📁 stage1-foundation/ # Web Basics components
-│   │   ├── 📁 stage2-js-basics/  # JS Basics components
-│   │   ├── 📁 stage3-css/        # CSS components
-│   │   ├── 📁 stage4-js-advanced/# Advanced JS components
-│   │   ├── 📁 stage5-engineering/# Engineering components
-│   │   ├── 📁 stage6-vue-core/   # Vue Core components
-│   │   ├── 📁 stage7-vue-advanced/# Vue Advanced components
-│   │   └── 📁 stage8-challenge/  # Challenge components
-│   │
-│   └── 📁 petal/          # Sakura effect system
-│       └── usePetals.ts   # Petal physics engine
-│
-├── 📁 composables/        # Vue 3 Composables
-│   ├── index.ts           # Composable exports
-│   ├── useArticleMeta.ts  # Metadata extraction
-│   ├── useContentRenderer.ts # Markdown rendering
-│   ├── useContentClick.ts # Content click handling
-│   ├── useGitHubPublish.ts# GitHub publishing (Fork+PR)
-│   ├── useBackup.ts       # Local & cloud backup/restore
-│   ├── useTokenSecurity.ts# Token AES-256-GCM encryption
-│   ├── useSearch.ts       # MiniSearch integration
-│   ├── useWallpapers.ts   # Wallpaper management
-│   ├── useLightbox.ts     # Image lightbox
-│   ├── useMarkdown.ts     # Markdown utilities
-│   ├── useCodeModal.ts    # Code modal handling
-│   ├── useFile.ts         # File operations
-│   ├── useRawEditor.ts    # Raw content editor
-│   └── useSelectionMenu.ts# Text selection menu
-│
-├── 📁 stores/             # Pinia state management
-│   ├── index.ts           # Store exports
-│   ├── appStore.ts        # Global app settings
-│   ├── articleStore.ts    # Article interactions (favorites, likes, tags)
-│   ├── learningStore.ts   # Learning progress tracking
-│   └── musicStore.ts      # Music player state
-│
-├── 📁 notes/              # Markdown content
-│   ├── 📁 zh/             # Chinese notes
-│   ├── 📁 en/             # English notes
-│   ├── 📁 VUE学习笔记/     # VUE Learning notes (Chinese)
-│   └── 📁 VUE Learning/   # VUE Learning notes (English)
-│
-├── 📁 public/             # Static assets
-│   ├── files.json         # File index (Auto-generated)
-│   ├── music.json         # Music list (Auto-generated)
-│   ├── wallpapers.json    # Wallpaper list (Auto-generated)
-│   ├── source-notes-preset.json # Preset source code notes
-│   ├── 📁 image/          # Images
-│   ├── 📁 music/          # Music files
-│   └── 📁 raw/            # Raw source files for viewer
-│
-└── 📁 scripts/            # Build scripts
-    ├── generate-tree.js   # Generates file index
-    ├── generate-raw.js    # Copies source for viewer
-    ├── generate-music.js  # Scans music folder
-    └── generate-wallpapers.js # Scans wallpaper folder
+└── 📄 tsconfig.json       # TypeScript configuration
 ```
 
 ---

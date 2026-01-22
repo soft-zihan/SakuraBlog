@@ -273,7 +273,7 @@ const [first, ...rest] = files;</pre>
           <!-- Vue Example -->
           <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
             <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '在 Vue 模板中的应用' : 'In Vue Templates' }}</p>
-            <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- 三元运算符在 :class 中 -->
+            <pre v-pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- 三元运算符在 :class 中 -->
 &lt;button :class="isDark ? 'bg-gray-800' : 'bg-white'"&gt;
   {{ isDark ? '🌙 夜间' : '☀️ 日间' }}
 &lt;/button&gt;
@@ -410,8 +410,7 @@ const computedTypeof = computed(() => {
   const val = typeofInput.value.trim();
   if (!val) return '...';
   try {
-    // eslint-disable-next-line no-eval
-    const evaluated = eval(`(${val})`);
+    const evaluated = new Function(`return (${val})`)();
     return typeof evaluated;
   } catch {
     return 'syntax error';

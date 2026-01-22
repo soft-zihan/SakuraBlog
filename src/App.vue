@@ -80,6 +80,7 @@
         :header-hidden="headerHidden"
         :dual-column-mode="dualColumnMode"
         :sidebar-open="sidebarOpen"
+        :right-sidebar-open="rightSidebarOpen"
         :get-article-views="getArticleViews"
         v-model:isRawMode="isRawMode"
         @reset="resetToHome"
@@ -176,236 +177,20 @@
             @open-file="openFile"
           />
 
-          <!-- Note Content View -->
-          <div v-else-if="currentFile" 
-             class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/85 dark:bg-gray-900/85 p-8 md:p-12 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
-             :class="[fontSizeClass, articleStyleClass]"
-             :style="articleContainerStyle"
-          >
-             <div v-if="contentLoading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
-               <div class="flex flex-col items-center gap-4">
-                  <div class="animate-spin text-4xl">🌸</div>
-                  <div class="text-sm font-bold animate-pulse" :style="loadingTextStyle">Fetching Content...</div>
-               </div>
-             </div>
+          <!-- Note Content View (ArticleReader) -->
+          <ArticleReader
+             v-else-if="currentFile" 
+             :file="currentFile"
+             :loading="contentLoading"
+             :isRawMode="isRawMode"
+             :lang="lang"
+             :t="t"
+             :getArticleViews="getArticleViews"
+             :getArticleComments="getArticleComments"
+             :onContentClick="handleContentClickEvent"
+             @update-comment-count="handleCommentCountUpdate"
+          />
 
-             <!-- Header with Like/Favorite buttons -->
-             <div class="mb-8 border-b border-gray-100 dark:border-gray-700 pb-6 bg-black/5 dark:bg-black/30 rounded-xl p-6 backdrop-blur-sm">
-                 <div class="flex justify-between items-start gap-4">
-                   <div class="flex flex-wrap items-center gap-3 flex-1">
-                     <span v-if="currentAuthorName || currentAuthorUrl" class="text-sm text-gray-400 flex items-center gap-1">
-                       <span>👤</span>
-                        <a
-                         v-if="currentAuthorUrl"
-                         :href="currentAuthorUrl"
-                         target="_blank"
-                         rel="noopener"
-                         class="hover:underline"
-                         :style="authorLinkStyle"
-                       >
-                         {{ currentAuthorName || currentAuthorUrl }}
-                       </a>
-                       <span v-else>{{ currentAuthorName }}</span>
-                     </span>
-                   </div>
-                   <span v-if="currentFile.isSource" class="bg-gray-100 dark:bg-gray-700 text-gray-500 px-3 py-1 rounded text-xs font-mono">Read Only</span>
-                 </div>
-                 <!-- Article Actions -->
-                 <div class="flex items-center gap-4 mt-4 flex-wrap" v-if="!currentFile.isSource">
-                   <button 
-                     @click="handleLike"
-                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all"
-                     :class="articleStore.isLiked(currentFile.path) ? 'bg-red-50 dark:bg-red-900/30 text-red-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-red-50'"
-                   >
-                     <span>{{ articleStore.isLiked(currentFile.path) ? '❤️' : '🤍' }}</span>
-                     <span class="font-bold">{{ articleStore.getLikes(currentFile.path) }}</span>
-                   </button>
-                   <button 
-                     @click="articleStore.toggleFavorite(currentFile.path)"
-                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all"
-                     :class="articleStore.isFavorite(currentFile.path) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-amber-50'"
-                   >
-                     <span>{{ articleStore.isFavorite(currentFile.path) ? '⭐' : '☆' }}</span>
-                     <span>{{ t.favorite }}</span>
-                   </button>
-                   
-                   <div class="flex items-center gap-2 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-full border border-gray-100 dark:border-gray-700">
-                      <input 
-                        type="color" 
-                        v-model="appStore.userSettings.articleBackgroundColor"
-                        class="w-5 h-5 rounded-full overflow-hidden cursor-pointer border-0 p-0 bg-transparent"
-                        :title="lang === 'zh' ? '文章背景色' : 'Article Background Color'"
-                      />
-                      <button 
-                        v-if="appStore.userSettings.articleBackgroundColor"
-                        @click="appStore.userSettings.articleBackgroundColor = ''"
-                        class="text-xs text-gray-400 hover:text-red-500"
-                        title="Reset"
-                      >✕</button>
-                   </div>
-
-                  <span class="text-xs text-gray-400 flex items-center gap-1">
-                    <span class="text-sm">🧑‍🎓</span>
-                    {{ getArticleViews(currentFile.path) }} {{ lang === 'zh' ? '人阅读' : 'views' }}
-                  </span>
-                 <span class="text-xs text-gray-400 flex items-center gap-1">
-                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 8l-4-4V4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H7z"/>
-                   </svg>
-                   {{ getArticleComments(currentFile.path) }} {{ lang === 'zh' ? '条评论' : 'comments' }}
-                 </span>
-                   <span class="text-xs text-gray-400">
-                    📝 {{ currentWordCount }} {{ t.words }}
-                   </span>
-                   <span class="text-xs text-gray-400 flex items-center gap-1">
-                     🕐 {{ t.updated }}: {{ formatDate(currentFile.lastModified) }}
-                   </span>
-                   <span v-if="currentTags.length" class="text-xs text-gray-400 flex items-center gap-1">
-                     🏷️
-                     <span class="flex flex-wrap gap-1.5">
-                      <span
-                        v-for="tag in currentTags"
-                        :key="tag"
-                        class="text-[10px] px-2 py-0.5 rounded-full"
-                        :style="tagBadgeStyle"
-                      >
-                         {{ tag }}
-                       </span>
-                     </span>
-                   </span>
-                 </div>
-             </div>
-
-            <!-- Markdown Content -->
-            <div 
-              v-if="!currentFile.isSource && !isRawMode"
-              id="markdown-viewer"
-              v-html="renderedHtml" 
-              class="markdown-body"
-              @click="handleContentClickEvent"
-              @mousedown="selectionMenuComposable.lockSelectionMenu()"
-              @mouseup="handleSelectionEvent"
-              @touchend="handleSelectionEvent"
-              @contextmenu="handleSelectionContextMenuEvent"
-            ></div>
-
-            <!-- Source Code / Raw Mode (Editable) -->
-            <div v-else class="relative group">
-               <!-- Edit Mode Toolbar -->
-               <div class="flex items-center justify-between mb-3 bg-[#252526] px-4 py-2 rounded-t-xl border border-gray-700 border-b-0">
-                 <div class="flex items-center gap-2">
-                   <span class="text-xs text-gray-400 font-mono">{{ isRawMode ? 'Markdown' : 'Source' }}</span>
-                   <span v-if="rawEditor.isEditingRaw.value" class="text-xs text-yellow-400 px-2 py-0.5 bg-yellow-900/30 rounded">{{ lang === 'zh' ? '编辑中' : 'Editing' }}</span>
-                 </div>
-                 <div class="flex items-center gap-2">
-                   <button
-                     v-if="!rawEditor.isEditingRaw.value && !currentFile.isSource"
-                     @click="rawEditor.startEditingRaw()"
-                   class="text-xs px-3 py-1.5 bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white rounded transition-colors"
-                 >
-                     {{ lang === 'zh' ? '编辑' : 'Edit' }}
-                   </button>
-                   <template v-if="rawEditor.isEditingRaw.value">
-                     <!-- Preview Toggle Button -->
-                     <button
-                       @click="rawEditor.togglePreviewMode()"
-                       class="text-xs px-3 py-1.5 rounded transition-colors flex items-center gap-1"
-                       :class="rawEditor.isPreviewMode.value ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-200'"
-                     >
-                       <svg v-if="!rawEditor.isPreviewMode.value" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                       </svg>
-                       <svg v-else class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                       </svg>
-                       {{ rawEditor.isPreviewMode.value ? (lang === 'zh' ? '编辑' : 'Edit') : (lang === 'zh' ? '预览' : 'Preview') }}
-                     </button>
-                     <button
-                       @click="rawEditor.cancelEditingRaw()"
-                       class="text-xs px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-white rounded transition-colors"
-                       :disabled="rawEditor.isSavingRaw.value"
-                     >
-                       {{ lang === 'zh' ? '取消' : 'Cancel' }}
-                     </button>
-                     <button
-                       @click="rawEditor.saveRawContent()"
-                       class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded transition-colors flex items-center gap-1"
-                       :disabled="rawEditor.isSavingRaw.value"
-                     >
-                       <svg v-if="rawEditor.isSavingRaw.value" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                       </svg>
-                       {{ rawEditor.isSavingRaw.value ? (lang === 'zh' ? '提交中...' : 'Publishing...') : (lang === 'zh' ? '提交修改' : 'Submit Changes') }}
-                     </button>
-                   </template>
-                 </div>
-               </div>
-               <!-- Editable Textarea or Preview -->
-               <div v-if="rawEditor.isEditingRaw.value" class="relative">
-                 <!-- Editor Mode -->
-                 <textarea
-                   v-if="!rawEditor.isPreviewMode.value"
-                   v-model="rawEditor.editedRawContent.value"
-                   class="w-full h-[60vh] font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-b-xl border border-gray-700 resize-none outline-none focus:ring-2 focus:ring-[var(--primary-500)]/50"
-                   spellcheck="false"
-                 ></textarea>
-                 <!-- Preview Mode -->
-                 <div
-                   v-else
-                   class="w-full h-[60vh] overflow-auto bg-white dark:bg-gray-900 p-6 rounded-b-xl border border-gray-200 dark:border-gray-700"
-                 >
-                   <div 
-                     class="prose dark:prose-invert max-w-none"
-                     v-html="previewEditingContent"
-                   ></div>
-                 </div>
-               </div>
-               <!-- Read-only Code View -->
-               <pre v-else class="whitespace-pre-wrap font-mono text-sm bg-[#1e1e1e] text-blue-200 p-6 rounded-b-xl border border-gray-700 overflow-x-auto select-text shadow-inner"><code :class="currentFile.name.endsWith('.vue') ? 'language-html' : ''">{{ currentFile.content }}</code></pre>
-            </div>
-
-            <!-- Contributors Section -->
-            <div v-if="currentContributors.length > 0" class="mt-8 pt-6 border-t" :style="articleDividerStyle">
-              <h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-                <span>👥</span> {{ lang === 'zh' ? '贡献者' : 'Contributors' }}
-              </h3>
-              <div class="flex flex-wrap gap-2">
-                <template v-for="contributor in currentContributors" :key="contributor.name">
-                  <a
-                    v-if="contributor.url"
-                    :href="contributor.url"
-                    target="_blank"
-                    rel="noopener"
-                    class="text-sm px-3 py-1 rounded-full transition-colors hover:opacity-90"
-                    :style="contributorBadgeStyle"
-                  >
-                    {{ contributor.name }}
-                  </a>
-                  <span
-                    v-else
-                    class="text-sm px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                  >
-                    {{ contributor.name }}
-                  </span>
-                </template>
-              </div>
-            </div>
-            
-            <div class="mt-12 pt-8 border-t flex justify-center text-xs" :style="articleFooterStyle">
-              <span class="italic">Sakura Notes</span>
-            </div>
-
-            <!-- Comments Section -->
-            <GiscusComments 
-              v-if="!currentFile.isSource"
-              :path="currentFile.path"
-              :lang="lang"
-              :is-dark="appStore.isDark"
-              @update-comment-count="handleCommentCountUpdate"
-            />
-          </div>
         </div>
 
         <!-- Empty State / Home -->
@@ -457,55 +242,6 @@
           </div>
           <div class="h-16"></div>
         </div>
-
-        <!-- Right Sidebar (TOC) -->
-        <aside v-if="currentFile && !currentTool && !isRawMode && !currentFile.isSource" class="hidden xl:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md overflow-y-auto custom-scrollbar z-20">
-          
-          <!-- Table of Contents -->
-          <div v-if="toc.length > 0">
-            <h3 class="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2" :style="tocTitleStyle">
-              <span>📑</span> {{ t.on_this_page }}
-            </h3>
-            <nav class="space-y-1 relative border-l-2 pl-4" :style="tocBorderStyle">
-               <!-- Active Indicator -->
-              <div 
-                class="absolute left-[-2px] w-[2px] transition-all duration-300"
-                :style="{
-                  top: activeIndicatorTop + 'px',
-                  height: '24px',
-                  ...tocIndicatorStyle
-                }"
-                v-if="activeHeaderId"
-              ></div>
-              <a 
-                v-for="item in toc" 
-                :key="item.id"
-                :href="`#${item.id}`"
-                class="block text-sm py-1.5 transition-all duration-200 leading-tight pr-2"
-                :class="[
-                  item.level === 1 ? 'font-bold mb-2 mt-4' : 'font-normal',
-                  item.level > 1 ? `ml-${(item.level-1)*3} text-xs` : '',
-                  activeHeaderId === item.id ? 'translate-x-1 font-medium scale-105 origin-left' : ''
-                ]"
-                :style="getTocItemStyle(item)"
-                @click.prevent="scrollToHeader(item.id)"
-              >
-                {{ item.text }}
-              </a>
-            </nav>
-          </div>
-
-          <!-- Decorative / Meta Info -->
-          <div class="mt-auto bg-white/50 dark:bg-gray-800/50 p-4 rounded-xl border border-white/60 dark:border-gray-700 shadow-sm backdrop-blur-sm">
-             <div class="text-[10px] uppercase font-bold mb-2" :style="tocMetaTitleStyle">{{ t.note_details }}</div>
-             <div class="space-y-2 text-xs text-gray-500 dark:text-gray-400">
-               <div class="flex justify-between"><span>{{ t.words }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentWordCount }}</span></div>
-               <div class="flex justify-between"><span>{{ t.lines }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentLineCount }}</span></div>
-               <div class="flex justify-between"><span>{{ t.format }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentFile.isSource ? 'Code' : 'Markdown' }}</span></div>
-             </div>
-          </div>
-        </aside>
-
       </div>
     </main>
     
@@ -650,26 +386,44 @@ import { useMusicStore } from './stores/musicStore';
 
 // Composables
 import { useSearch } from './composables/useSearch';
-import { useArticleMeta } from './composables/useArticleMeta';
+import { findNodeByPath, fetchFileContent } from './utils/fileUtils';
 import { useCodeModal } from './composables/useCodeModal';
-import { useContentRenderer } from './composables/useContentRenderer';
-import { useRawEditor } from './composables/useRawEditor';
 import { useLightbox } from './composables/useLightbox';
 import { useSelectionMenu } from './composables/useSelectionMenu';
 import { useContentClick, useFileVisibility, isSupportedInternalLink } from './composables/useContentClick';
-import { marked } from 'marked';
+import { useWallpapers } from './composables/useWallpapers';
 
 // =====================
 // Stores
 // =====================
 const appStore = useAppStore();
 const articleStore = useArticleStore();
+const { autoChangeWallpaper } = useWallpapers();
 const musicStore = useMusicStore();
+const showToast = (msg: string) => appStore.showToast(msg);
+
 
 // =====================
 // Search
 // =====================
 const { initSearchIndex, search, highlightMatches, showSearchModal: searchModalOpen, isLoadingContent, setFetchFunction, updateLanguage } = useSearch();
+
+// =====================
+// Lightbox
+// =====================
+const lightbox = useLightbox();
+const { lightboxImage, handleImageClick } = lightbox;
+
+// =====================
+// Selection Menu
+// =====================
+const { selectionMenu, handleSelection, handleSelectionContextMenu, applyFormat, hideSelectionMenu, handleSelectionChange } = useSelectionMenu(showToast);
+const handleSelectionEvent = (e: MouseEvent | TouchEvent) => handleSelection();
+const handleSelectionContextMenuEvent = (e: MouseEvent) => handleSelectionContextMenu(e);
+const applyFormatHandler = (format: string) => {
+  const errorMsg = lang.value === 'zh' ? '应用格式失败' : 'Format failed';
+  applyFormat(format, errorMsg);
+};
 
 // =====================
 // i18n
@@ -706,8 +460,14 @@ const showSettings = ref(false);
 const showDownloadModal = ref(false);
 const showSearch = searchModalOpen;
 const showWriteEditor = ref(false);
-const sidebarOpen = ref(true);
-const rightSidebarOpen = ref(false);
+const sidebarOpen = computed({
+  get: () => appStore.sidebarOpen,
+  set: (val) => appStore.setSidebarOpen(val)
+});
+const rightSidebarOpen = computed({
+  get: () => appStore.rightSidebarOpen,
+  set: (val) => appStore.setRightSidebarOpen(val)
+});
 const handleThemePanelChange = (open: boolean) => {
   themePanelOpen.value = open;
   if (open) headerHidden.value = false;
@@ -736,6 +496,7 @@ type GuwenItem = {
   remark?: string;
   translation?: string;
   shangxi?: string;
+  type?: string;
 };
 const welcomePoem = ref<GuwenItem | null>(null);
 const welcomePoemLoading = ref(false);
@@ -794,28 +555,9 @@ const loadRandomPoem = async () => {
 // =====================
 // Composables 初始化
 // =====================
-const showToast = (msg: string) => appStore.showToast(msg);
-
-// 文章元数据
-const { currentMeta, currentTags, currentAuthorName, currentAuthorUrl, currentContributors } = useArticleMeta(currentFile);
 
 // 代码弹窗
 const codeModal = useCodeModal();
-
-// 内容渲染
-const contentRenderer = useContentRenderer(currentFile, isRawMode);
-const { renderedHtml, toc, activeHeaderId, activeIndicatorTop, setupMarkedRenderer, updateRenderedContent, generateToc, scrollToHeader } = contentRenderer;
-
-// Raw 编辑器
-const rawEditor = useRawEditor(currentFile, isRawMode, updateRenderedContent, showToast, lang);
-
-// 图片灯箱
-const lightbox = useLightbox();
-const { lightboxImage, handleImageClick } = lightbox;
-
-// 选择菜单
-const selectionMenuComposable = useSelectionMenu(showToast);
-const { selectionMenu, handleSelection, handleSelectionContextMenu, handleSelectionChange, applyFormat, hideSelectionMenu } = selectionMenuComposable;
 
 // 文件可见性
 const { isFileVisible, collectAllTags } = useFileVisibility(articleStore);
@@ -823,104 +565,6 @@ const { isFileVisible, collectAllTags } = useFileVisibility(articleStore);
 // =====================
 // Computed
 // =====================
-const fontSizeClass = computed(() => {
-  switch(appStore.userSettings.fontSize) {
-    case 'small': return 'text-sm lg:text-base leading-relaxed';
-    case 'large': return 'text-xl lg:text-2xl leading-loose';
-    default: return 'text-base lg:text-lg leading-loose';
-  }
-});
-
-const articleContainerStyle = computed(() => {
-  const style: Record<string, string> = {
-    borderColor: appStore.isDark ? 'rgba(255,255,255,0.08)' : 'var(--primary-100)'
-  };
-  if (currentMeta.value.backgroundColor) {
-    style.backgroundColor = currentMeta.value.backgroundColor;
-  } else if (appStore.userSettings.articleBackgroundColor) {
-    style.backgroundColor = appStore.userSettings.articleBackgroundColor;
-  }
-  return style;
-});
-
-const articleStyleClass = computed(() => {
-  const style = appStore.userSettings.articleStyle;
-  return style ? `article-style-${style}` : '';
-});
-
-const loadingTextStyle = computed(() => ({
-  color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-500)'
-}));
-
-const authorLinkStyle = computed(() => ({
-  color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-600)'
-}));
-
-const tagBadgeStyle = computed(() => ({
-  backgroundColor: appStore.isDark ? 'var(--primary-900-30)' : 'var(--primary-100)',
-  color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-600)'
-}));
-
-const articleDividerStyle = computed(() => ({
-  borderColor: appStore.isDark ? 'rgba(255,255,255,0.08)' : 'var(--primary-100)'
-}));
-
-const contributorBadgeStyle = computed(() => ({
-  backgroundColor: appStore.isDark ? 'var(--primary-900-30)' : 'var(--primary-50)',
-  color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-600)'
-}));
-
-const articleFooterStyle = computed(() => ({
-  borderColor: appStore.isDark ? 'rgba(255,255,255,0.08)' : 'var(--primary-100)',
-  color: appStore.isDark ? 'rgba(255,255,255,0.45)' : 'var(--primary-300)'
-}));
-
-const tocTitleStyle = computed(() => ({
-  color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-600)'
-}));
-
-const tocBorderStyle = computed(() => ({
-  borderColor: appStore.isDark ? 'rgba(255,255,255,0.1)' : 'var(--primary-100)'
-}));
-
-const tocIndicatorStyle = computed(() => ({
-  backgroundColor: appStore.isDark ? 'var(--primary-400)' : 'var(--primary-500)',
-  boxShadow: `0 0 8px ${appStore.isDark ? 'var(--primary-400)' : 'var(--primary-500)'}`
-}));
-
-const tocMetaTitleStyle = computed(() => ({
-  color: appStore.isDark ? 'rgba(255,255,255,0.4)' : 'var(--primary-400)'
-}));
-
-const getTocItemStyle = (item: { id: string; level: number }) => {
-  if (activeHeaderId.value === item.id) {
-    return { color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-600)' };
-  }
-  if (item.level === 1) {
-    return { color: appStore.isDark ? 'var(--primary-200)' : 'var(--primary-700)' };
-  }
-  return { color: appStore.isDark ? 'rgba(255,255,255,0.55)' : 'var(--primary-400)' };
-};
-
-const computeWordCount = (content?: string | null) => {
-  if (!content) return 0;
-  const chineseChars = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
-  const englishWords = (content.match(/[a-zA-Z]+/g) || []).length;
-  return chineseChars + englishWords;
-};
-
-const currentWordCount = computed(() => {
-  if (!currentFile.value) return 0;
-  if (typeof currentFile.value.wordCount === 'number') return currentFile.value.wordCount;
-  return computeWordCount(currentFile.value.content);
-});
-
-const currentLineCount = computed(() => {
-  if (!currentFile.value) return 0;
-  if (typeof currentFile.value.lineCount === 'number') return currentFile.value.lineCount;
-  return currentFile.value.content ? currentFile.value.content.split(/\r?\n/).length : 0;
-});
-
 const welcomePoemLines = computed(() => {
   const content = welcomePoem.value?.content?.trim();
   if (!content) return [];
@@ -953,17 +597,6 @@ const welcomePoemNeedsScroll = computed(() => {
 });
 
 const currentPath = computed(() => currentFile.value?.path || currentFolder.value?.path || '');
-
-// 编辑模式下的预览内容
-const previewEditingContent = computed(() => {
-  if (!rawEditor.isEditingRaw.value || !rawEditor.editedRawContent.value) return ''
-  try {
-    return marked.parse(rawEditor.editedRawContent.value) as string
-  } catch (e) {
-    console.error('Preview render error:', e)
-    return '<div class="text-red-500">预览渲染出错</div>'
-  }
-})
 
 // Root Directory Logic based on Language
 const currentLangRoot = computed(() => {
@@ -1059,53 +692,10 @@ const resourceCategories = computed(() => [
   }
 ]);
 
+
 // =====================
 // File Operations
 // =====================
-const findNodeByPath = (nodes: FileNode[], path: string): FileNode | null => {
-  for (const node of nodes) {
-    if (node.path === path) return node;
-    if (node.children) {
-      const found = findNodeByPath(node.children, path);
-      if (found) return found;
-    }
-  }
-  const decodedPath = decodeURIComponent(path);
-  if (decodedPath !== path) {
-    for (const node of nodes) {
-      if (node.path === decodedPath) return node;
-      if (node.children) {
-        const found = findNodeByPath(node.children, decodedPath);
-        if (found) return found;
-      }
-    }
-  }
-  return null;
-};
-
-const fetchFileContent = async (file: FileNode): Promise<string> => {
-  let fetchPath = '';
-  if (file.isSource && file.fetchPath) {
-    fetchPath = `./${file.fetchPath}`;
-  } else {
-    const encodedPath = file.path.split('/').map(p => encodeURIComponent(p)).join('/');
-    fetchPath = `./notes/${encodedPath}`;
-  }
-
-  try {
-    let res = await fetch(fetchPath);
-    if (!res.ok) {
-      console.warn(`Fetch failed for ${fetchPath}, trying fallback...`);
-      res = await fetch(`./notes/${file.path}`);
-    }
-
-    if (res.ok) return await res.text();
-    return `# Error ${res.status}\nCould not load file content.\nPath: ${file.path}`;
-  } catch (e: any) {
-    return `# Error\n${e.message}\nPath: ${file.path}`;
-  }
-};
-
 const updateUrl = (path: string | null) => {
   try {
     const url = new URL(window.location.href);
@@ -1154,11 +744,6 @@ const openFile = async (file: FileNode) => {
     file.content = await fetchFileContent(file);
     contentLoading.value = false;
     currentFile.value = { ...file };
-  }
-
-  if (!file.isSource) {
-    await updateRenderedContent();
-    nextTick(() => generateToc());
   }
 };
 
@@ -1353,20 +938,6 @@ const handleContentClickEvent = (e: MouseEvent) => {
   handleContentClick(e, selectionMenu.value.locked);
 };
 
-const handleSelectionEvent = () => {
-  if (currentFile.value?.isSource) return;
-  handleSelection();
-};
-
-const handleSelectionContextMenuEvent = (e: MouseEvent) => {
-  if (currentFile.value?.isSource) return;
-  handleSelectionContextMenu(e);
-};
-
-const applyFormatHandler = (type: string) => {
-  applyFormat(type, t.value.selection_error);
-};
-
 // =====================
 // Actions
 // =====================
@@ -1454,12 +1025,6 @@ const handleSearchSelect = (result: any) => {
   }
 };
 
-const handleLike = () => {
-  if (currentFile.value) {
-    articleStore.toggleLike(currentFile.value.path);
-  }
-};
-
 const handleCommentCountUpdate = (payload: { path: string; count: number }) => {
   commentCounts.value[payload.path] = payload.count;
 };
@@ -1518,13 +1083,6 @@ watch(() => appStore.userSettings.autoChangeMode, (mode) => {
   }
 }, { immediate: true })
 
-watch(currentFile, async () => {
-  if (!currentFile.value?.isSource) {
-    await updateRenderedContent();
-    nextTick(() => generateToc());
-  }
-});
-
 // =====================
 // Lifecycle
 // =====================
@@ -1575,8 +1133,6 @@ onMounted(async () => {
   if (appStore.isDark) document.documentElement.classList.add('dark');
   appStore.applyThemeColor(appStore.userSettings.themeColor);
 
-  // Setup marked renderer
-  setupMarkedRenderer();
   loadRandomPoem();
 
   // Initialize music store

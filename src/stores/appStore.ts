@@ -56,7 +56,8 @@ export const useAppStore = defineStore('app', () => {
   // UI State
   const showParticles = ref(true)
   const showSettings = ref(false)
-  const sidebarOpen = ref(true) // For mobile
+  const sidebarOpen = ref(true) // For mobile (Left Sidebar)
+  const rightSidebarOpen = ref(false) // For mobile (Right Sidebar)
   const toastMessage = ref('')
   const readingMode = ref(false)
   const viewMode = ref<'latest' | 'files' | 'lab'>('latest')
@@ -98,6 +99,18 @@ export const useAppStore = defineStore('app', () => {
   
   function toggleSidebar() {
     sidebarOpen.value = !sidebarOpen.value
+  }
+
+  function toggleRightSidebar() {
+    rightSidebarOpen.value = !rightSidebarOpen.value
+  }
+
+  function setSidebarOpen(value: boolean) {
+    sidebarOpen.value = value
+  }
+
+  function setRightSidebarOpen(value: boolean) {
+    rightSidebarOpen.value = value
   }
 
   function toggleReadingMode() {
@@ -176,6 +189,7 @@ export const useAppStore = defineStore('app', () => {
     showParticles,
     showSettings,
     sidebarOpen,
+    rightSidebarOpen,
     toastMessage,
     readingMode,
     viewMode,
@@ -191,7 +205,11 @@ export const useAppStore = defineStore('app', () => {
     showToast,
     updateSettings,
     toggleSidebar,
+    toggleRightSidebar,
+    setSidebarOpen,
+    setRightSidebarOpen,
     toggleReadingMode,
+    setReadingMode,
     applyThemeColor,
     setThemeColor,
     // Computed
@@ -199,6 +217,6 @@ export const useAppStore = defineStore('app', () => {
   }
 }, {
   persist: {
-    pick: ['lang', 'isDark', 'currentWallpaperFilename', 'customWallpapers', 'apiWallpapers', 'wallpaperApiSettings', 'userSettings', 'showParticles', 'readingMode', 'expandedFolders', 'viewMode']
+    pick: ['lang', 'isDark', 'currentWallpaperFilename', 'customWallpapers', 'apiWallpapers', 'wallpaperApiSettings', 'userSettings', 'showParticles', 'readingMode', 'expandedFolders', 'viewMode', 'sidebarOpen', 'rightSidebarOpen']
   }
 })
