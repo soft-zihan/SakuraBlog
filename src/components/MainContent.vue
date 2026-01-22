@@ -57,6 +57,7 @@
        :getArticleComments="getArticleComments"
        :onContentClick="onContentClick"
        @update-comment-count="$emit('update-comment-count', $event)"
+       @navigate="$emit('open-file', $event)"
     />
 
   </div>

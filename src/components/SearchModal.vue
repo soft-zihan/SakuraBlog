@@ -135,7 +135,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'select', result: SearchResult): void
+  (e: 'select', payload: { result: SearchResult; query: string }): void
 }>()
 
 const searchInput = ref<HTMLInputElement | null>(null)
@@ -175,7 +175,7 @@ const navigateResults = (direction: number) => {
 
 const selectResult = () => {
   if (results.value.length > 0 && selectedIndex.value >= 0) {
-    emit('select', results.value[selectedIndex.value])
+    emit('select', { result: results.value[selectedIndex.value], query: query.value })
     emit('close')
     query.value = ''
     results.value = []

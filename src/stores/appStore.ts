@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { I18N, THEME_COLORS } from '../constants'
+import { NodeType } from '../types'
 import type { ThemeColorId } from '../constants'
 import type { FileNode } from '../types'
 
@@ -197,6 +198,27 @@ export const useAppStore = defineStore('app', () => {
       case 'large': return 'text-xl lg:text-2xl leading-loose'
       default: return 'text-base lg:text-lg leading-loose'
     }
+  })
+
+  // Helper to flatten tree
+  const flatten = (nodes: FileNode[]): FileNode[] => {
+    let files: FileNode[] = []
+    for (const node of nodes) {
+      if (node.type === NodeType.FILE) files.push(node)
+      else if (node.children) files = files.concat(flatten(node.children))
+    }
+    return files
+  }
+
+  const currentLangRoot = computed(() => {
+    const root = fileSystem.value.find((node: FileNode) => node.name === lang.value)
+    return root ? root.children : []
+  })
+
+  const flatFiles = computed(() => flatten(currentLangRoot.value || []))
+
+  const sortedFiles = computed(() => {
+    return [...flatFiles.value].sort((a, b) => new Date(b.lastModified || 0).getTime() - new Date(a.lastModified || 0).getTime())
   })
   
   return {

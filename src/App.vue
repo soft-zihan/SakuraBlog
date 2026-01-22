@@ -1098,12 +1098,12 @@ body {
 }
 
 .article-style-lined {
-  --line-h: 2rem;
+  --line-h: 1.8em;
   --line-color: var(--primary-100);
   line-height: var(--line-h) !important;
   background-image: linear-gradient(to bottom, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)) !important;
   background-size: 100% var(--line-h) !important;
-  background-position: 0 0; /* Align with line height block */
+  background-position: 0 0.2em; /* Slight offset to align text baseline */
   background-attachment: local;
 }
 

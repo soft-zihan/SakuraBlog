@@ -90,9 +90,37 @@
         <button @click="changeWallpaper" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="lang === 'zh' ? '更换壁纸' : 'Next Wallpaper'">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
         </button>
-        <button @click="addCurrentToList" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="lang === 'zh' ? '收藏壁纸' : 'Save Wallpaper'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-        </button>
+        
+        <!-- Collection Dropdown -->
+        <div class="relative" ref="collectionDropdownRef">
+          <button 
+            @click="showCollectionDropdown = !showCollectionDropdown" 
+            class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" 
+            :title="lang === 'zh' ? '收藏壁纸' : 'Save Wallpaper'"
+            :class="showCollectionDropdown ? 'bg-[var(--primary-50)]/80 dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)]' : ''"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          </button>
+          
+          <!-- Dropdown Menu -->
+          <div v-if="showCollectionDropdown" class="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 animate-fade-in origin-top-right">
+             <button 
+               @click="addCurrentToList('light')" 
+               class="w-full text-left px-4 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2 transition-colors text-gray-700 dark:text-gray-200"
+             >
+               <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+               {{ lang === 'zh' ? '添加到明亮主题' : 'Add to Light Theme' }}
+             </button>
+             <button 
+               @click="addCurrentToList('dark')" 
+               class="w-full text-left px-4 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2 transition-colors text-gray-700 dark:text-gray-200"
+             >
+               <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+               {{ lang === 'zh' ? '添加到深色主题' : 'Add to Dark Theme' }}
+             </button>
+          </div>
+        </div>
+
         <button @click="downloadCurrentWallpaper" class="p-2 hover:bg-[var(--primary-50)]/80 dark:hover:bg-[var(--primary-900)]/30 rounded-lg transition-colors text-gray-500 dark:text-gray-400" :title="lang === 'zh' ? '下载壁纸' : 'Download Wallpaper'">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         </button>
@@ -518,7 +546,7 @@
               >⬇</button>
             </div>
           </div>
-          <div v-else class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无结果' : 'No results' }}</div>
+          <div v-else-if="hasSearched" class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无结果' : 'No results' }}</div>
 
           <div class="mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '美女' : 'Beauty' }}</div>
           <div class="flex items-center gap-2 mb-2">
@@ -780,6 +808,11 @@ const handleDocumentClick = (e: MouseEvent) => {
   const target = e.target as Node | null;
   const btn = themeButtonRef.value;
   const panel = themePanelRef.value;
+  
+  if (showCollectionDropdown.value && collectionDropdownRef.value && !collectionDropdownRef.value.contains(target)) {
+    showCollectionDropdown.value = false;
+  }
+
   if (!btn || !panel) return;
   if (target && (btn.contains(target) || panel.contains(target))) return;
   setThemePanelOpen(false);

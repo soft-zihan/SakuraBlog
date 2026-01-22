@@ -2,7 +2,7 @@
   <div class="flex-1 flex overflow-hidden z-10 relative">
     <div 
       id="scroll-container" 
-      class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full"
+      class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 lg:p-8 w-full"
     >
       <div 
          class="w-full mx-auto bg-white/85 dark:bg-gray-900/85 p-8 md:p-12 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
@@ -168,8 +168,8 @@
     <!-- Right Sidebar (TOC) -->
     <aside 
       v-if="!file.isSource && !isRawMode"
-      class="hidden xl:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md overflow-y-auto custom-scrollbar z-20"
-      :class="appStore.rightSidebarOpen ? 'fixed right-0 top-16 bottom-0 z-50 bg-white dark:bg-gray-900 shadow-xl' : ''"
+      class="w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 backdrop-blur-md overflow-y-auto custom-scrollbar z-20 xl:flex xl:static xl:h-auto xl:shadow-none xl:bg-white/20 xl:dark:bg-gray-900/20"
+      :class="appStore.rightSidebarOpen ? 'fixed right-0 top-16 bottom-0 z-50 bg-white dark:bg-gray-900 shadow-xl flex' : 'hidden'"
     >
       
       <!-- Table of Contents -->

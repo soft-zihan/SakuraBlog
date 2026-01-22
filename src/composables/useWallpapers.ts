@@ -21,6 +21,7 @@ const bingWallpapers = ref<WallpaperItem[]>([])
 const beautyWallpapers = ref<WallpaperItem[]>([])
 const animeWallpapers = ref<WallpaperItem[]>([])
 const searchWallpapers = ref<WallpaperItem[]>([])
+const hasSearched = ref(false)
 const isApiLoading = ref(false)
 let cachedWallpaperKey: string | null = null
 let wallpaperKeyPromise: Promise<string> | null = null
@@ -338,6 +339,9 @@ export function useWallpapers() {
       
       const fetchLimit = Math.min(target * 2, 30) 
       const results: Array<WallpaperItem & { source: 'api' }> = []
+      
+      hasSearched.value = true
+      
       let page = 1
       let attempts = 0
       
@@ -575,6 +579,7 @@ export function useWallpapers() {
     animeWallpapers,
     searchWallpapers,
     baiduWallpapers: searchWallpapers,
+    hasSearched,
     isApiLoading,
     currentWallpaper,
     loadWallpapers,
