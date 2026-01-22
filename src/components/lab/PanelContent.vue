@@ -182,9 +182,10 @@ const noteContent = ref<string>('')
 const renderedContent = computed(() => {
   if (!noteContent.value) return ''
   try {
-    return marked.parse(noteContent.value) as string
+    const html = marked.parse(noteContent.value) as string
+    return sanitizeHtml(html)
   } catch {
-    return noteContent.value
+    return sanitizeHtml(noteContent.value)
   }
 })
 

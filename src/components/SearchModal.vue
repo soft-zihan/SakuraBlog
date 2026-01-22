@@ -123,6 +123,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted } from 'vue'
 import type { SearchResult } from '../composables/useSearch'
+import { sanitizeHtml } from '../utils/sanitize'
 
 const props = defineProps<{
   showSearchModal: boolean
@@ -162,7 +163,7 @@ const handleSearch = () => {
 }
 
 const highlightText = (text: string, q: string): string => {
-  return props.highlightFn(text, q)
+  return sanitizeHtml(props.highlightFn(text, q))
 }
 
 const navigateResults = (direction: number) => {

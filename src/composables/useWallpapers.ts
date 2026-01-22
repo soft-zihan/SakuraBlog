@@ -86,7 +86,7 @@ export function useWallpapers() {
   const customThemeWallpapers = computed(() => {
     const theme = appStore.isDark ? 'dark' : 'light'
     return appStore.customWallpapers.filter((item: { theme: string }) => item.theme === theme || item.theme === 'auto')
-      .map((item: any) => ({
+      .map((item: { url: string; name: string; id: string }) => ({
         filename: item.url,
         path: item.url,
         name: item.name,
@@ -347,7 +347,7 @@ export function useWallpapers() {
       
       while (results.length < target && attempts < 5) {
         // User provided example: https://cn.apihz.cn/api/img/apihzimgbaidu.php?id=10012344&key=e46073f4d678fa87669b88526e7448bc&limit=10&page=1&words=张含韵
-        const apiKey = 'e46073f4d678fa87669b88526e7448bc';
+        const apiKey = import.meta.env.VITE_BAIDU_IMAGE_API_KEY || '';
         const url = `https://cn.apihz.cn/api/img/apihzimgbaidu.php?id=10012344&key=${apiKey}&words=${encodeURIComponent(keyword || '小姐姐')}&page=${page}&limit=${fetchLimit}`;
         
         try {

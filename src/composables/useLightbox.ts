@@ -1,10 +1,11 @@
 import { ref } from 'vue'
 
+const lightboxImage = ref<string | null>(null)
+
 /**
  * 图片灯箱 composable
  */
 export function useLightbox() {
-  const lightboxImage = ref<string | null>(null)
 
   /**
    * 打开灯箱

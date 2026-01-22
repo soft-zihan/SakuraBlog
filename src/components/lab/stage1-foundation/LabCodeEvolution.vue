@@ -515,7 +515,7 @@ const highlightedCode = computed(() => {
   // Numbers
   code = code.replace(/\b(\d+(?:\.\d+)?)(rem|px|%|deg|s)?\b/g, '<span class="text-orange-300">$1$2</span>');
   
-  return code;
+  return sanitizeHtml(code);
 });
 
 const currentStageData = computed(() => {

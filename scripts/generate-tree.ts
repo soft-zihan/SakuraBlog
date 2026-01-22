@@ -16,8 +16,21 @@ if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
 if (fs.existsSync(rawDir)) fs.rmSync(rawDir, { recursive: true, force: true });
 fs.mkdirSync(rawDir, { recursive: true });
 
+interface FileNode {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  fetchPath?: string;
+  children?: FileNode[];
+  lastModified?: string;
+  isSource?: boolean;
+  wordCount?: number;
+  lineCount?: number;
+  contentSnippet?: string;
+}
+
 // 获取文件的 Git 最后提交时间（解决 CI 环境中文件时间戳问题）
-function getGitLastModified(filePath) {
+function getGitLastModified(filePath: string): string {
   try {
     // 获取文件相对于仓库根目录的路径
     const relativePath = path.relative(rootDir, filePath);
@@ -44,11 +57,11 @@ function getGitLastModified(filePath) {
 }
 
 // Helper to recursively scan directory
-function scanDirectory(basePath, relativePath, isSourceCode = false) {
+function scanDirectory(basePath: string, relativePath: string, isSourceCode = false): FileNode[] {
   if (!fs.existsSync(basePath)) return [];
   
   const items = fs.readdirSync(basePath);
-  const result = [];
+  const result: FileNode[] = [];
 
   for (const item of items) {
     if (item.startsWith('.') || item === 'node_modules' || item === 'dist' || item === 'public' || item === 'assets') continue;
@@ -127,7 +140,7 @@ function scanDirectory(basePath, relativePath, isSourceCode = false) {
 const notesTree = scanDirectory(notesDir, '', false);
 
 // 2. Scan Source Code (Specific Folders/Files)
-const sourceTree = [];
+const sourceTree: FileNode[] = [];
 
 // Scan Root Files
 const rootFilesToScan = ['index.html', 'vite.config.ts', 'package.json', 'tsconfig.json'];
@@ -149,47 +162,21 @@ rootFilesToScan.forEach(file => {
     }
 });
 
-// Scan src directory recursively
-const srcPath = path.join(rootDir, 'src');
-if (fs.existsSync(srcPath)) {
-    const srcNodes = scanDirectory(srcPath, 'src', true);
-    if (srcNodes.length > 0) {
-        sourceTree.push({
-            name: 'src',
-            path: 'src',
-            type: 'directory',
-            children: srcNodes
-        });
-    }
+// Scan src folder
+const srcTree = scanDirectory(path.join(rootDir, 'src'), 'src', true);
+if (srcTree.length > 0) {
+    sourceTree.push(...srcTree);
 }
 
-// Scan scripts directory recursively
-const scriptsPath = path.join(rootDir, 'scripts');
-if (fs.existsSync(scriptsPath)) {
-    const scriptsNodes = scanDirectory(scriptsPath, 'scripts', true);
-    if (scriptsNodes.length > 0) {
-        sourceTree.push({
-            name: 'scripts',
-            path: 'scripts',
-            type: 'directory',
-            children: scriptsNodes
-        });
-    }
-}
+// 3. Combine Trees
+// "zh" and "en" from notes are root nodes. "source" is a root node.
+const combinedTree: FileNode[] = [...notesTree, {
+    name: 'source',
+    path: 'source',
+    type: 'directory',
+    children: sourceTree
+}];
 
-// Combine trees
-// We put source code in a virtual folder
-const finalTree = [
-    ...notesTree,
-    {
-        name: 'Project Source Code',
-        path: 'source-code',
-        type: 'directory',
-        children: sourceTree
-    }
-];
-
-fs.writeFileSync(outputFile, JSON.stringify(finalTree, null, 2));
-console.log(`✨ File tree generated at ${outputFile}`);
-console.log(`✨ Source code copied to ${rawDir} for static serving.`);
-
+// Write output
+fs.writeFileSync(outputFile, JSON.stringify(combinedTree, null, 2), 'utf-8');
+console.log(`✅ File tree generated at ${outputFile}`);

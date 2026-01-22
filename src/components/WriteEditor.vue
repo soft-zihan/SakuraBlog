@@ -637,7 +637,8 @@ const importMdFiles = computed(() => {
 
 const importPreviewHtml = computed(() => {
   try {
-    return marked.parse(stripMetaComment(importPreviewContent.value || ''))
+    const html = marked.parse(stripMetaComment(importPreviewContent.value || '')) as string
+    return sanitizeHtml(html)
   } catch {
     return '<p class="text-red-500">Preview Error</p>'
   }

@@ -1,3 +1,4 @@
+
 /**
  * 自动生成 /public/raw/ 目录下的源代码文本文件
  * 用于"查看源代码"功能
@@ -97,94 +98,38 @@ const FILES_TO_GENERATE = [
   'src/components/lab/stage6-vue-core/LabLifecycle.vue',
   'src/components/lab/stage6-vue-core/LabReactivity.vue',
   'src/components/lab/stage6-vue-core/LabVueList.vue',
-  
-  // lab/stage7-vue-advanced
-  'src/components/lab/stage7-vue-advanced/LabComposables.vue',
-  'src/components/lab/stage7-vue-advanced/LabPinia.vue',
-  'src/components/lab/stage7-vue-advanced/LabPropsEmit.vue',
-  'src/components/lab/stage7-vue-advanced/LabProvideInject.vue',
-  'src/components/lab/stage7-vue-advanced/LabSlot.vue',
-  
-  // lab/stage8-challenge
-  'src/components/lab/stage8-challenge/LabMiniProject.vue',
-  'src/components/lab/stage8-challenge/LabQuizGame.vue',
-  
-  // composables
-  'src/composables/useFile.ts',
-  'src/composables/useGitHubPublish.ts',
-  'src/composables/useMarkdown.ts',
-  'src/composables/useSearch.ts',
-  'src/composables/useWallpapers.ts',
-  'src/composables/index.ts',
-  'src/composables/useArticleMeta.ts',
-  'src/composables/useBackup.ts',
-  'src/composables/useCodeModal.ts',
-  'src/composables/useContentClick.ts',
-  'src/composables/useContentRenderer.ts',
-  'src/composables/useLightbox.ts',
-  'src/composables/useRawEditor.ts',
-  'src/composables/useSelectionMenu.ts',
-  'src/composables/useTokenSecurity.ts',
-  'src/composables/usePoem.ts',
-  
-  // petal
-  'src/components/petal/usePetals.ts',
-  
-  // stores
-  'src/stores/appStore.ts',
-  'src/stores/articleStore.ts',
-  'src/stores/learningStore.ts',
-  'src/stores/musicStore.ts',
-  'src/stores/index.ts',
-  
-  // utils
-  'src/utils/fileUtils.ts'
 ];
 
 function generateRawFiles() {
-  console.log('🔄 Generating raw source files...');
+  console.log('📝 Generating raw source files...');
   
-  // 确保输出目录存在
+  // Ensure output directory exists
   if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   }
   
-  // 清理旧文件
-  const existingFiles = fs.readdirSync(OUTPUT_DIR);
-  for (const file of existingFiles) {
-    if (file.endsWith('.txt')) {
-      fs.unlinkSync(path.join(OUTPUT_DIR, file));
-    }
-  }
+  let count = 0;
   
-  let successCount = 0;
-  let failCount = 0;
-  
-  for (const filePath of FILES_TO_GENERATE) {
-    const sourcePath = path.join(ROOT_DIR, filePath);
+  for (const file of FILES_TO_GENERATE) {
+    const srcPath = path.join(ROOT_DIR, file);
     
-    // 生成输出文件名：将路径中的 / 替换为 _
-    const outputFileName = filePath.replace(/\//g, '_') + '.txt';
-    const outputPath = path.join(OUTPUT_DIR, outputFileName);
-    
-    try {
-      if (fs.existsSync(sourcePath)) {
-        const content = fs.readFileSync(sourcePath, 'utf-8');
-        fs.writeFileSync(outputPath, content, 'utf-8');
-        console.log(`  ✅ ${filePath} -> ${outputFileName}`);
-        successCount++;
-      } else {
-        console.log(`  ⚠️ File not found: ${filePath}`);
-        failCount++;
+    if (fs.existsSync(srcPath)) {
+      // Flatten path structure: src/components/AppHeader.vue -> src_components_AppHeader.vue.txt
+      const rawFileName = file.replace(/\//g, '_') + '.txt';
+      const destPath = path.join(OUTPUT_DIR, rawFileName);
+      
+      try {
+        fs.copyFileSync(srcPath, destPath);
+        count++;
+      } catch (err) {
+        console.warn(`⚠️ Failed to copy ${file}:`, err);
       }
-    } catch (error) {
-      console.log(`  ❌ Error processing ${filePath}: ${error.message}`);
-      failCount++;
+    } else {
+      // console.warn(`⚠️ Source file not found: ${file}`);
     }
   }
   
-  console.log(`\n📊 Summary: ${successCount} files generated, ${failCount} failed/skipped`);
-  console.log(`📁 Output directory: ${OUTPUT_DIR}\n`);
+  console.log(`✅ Generated ${count} raw files in ${OUTPUT_DIR}`);
 }
 
 generateRawFiles();

@@ -187,10 +187,12 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     }
 
     try {
-      renderedHtml.value = await marked.parse(rawContent)
+      const parsed = await marked.parse(rawContent)
+      renderedHtml.value = sanitizeHtml(parsed)
     } catch (e) {
       console.error("Marked render error:", e)
-      renderedHtml.value = `<div class="text-red-500 font-bold">Error rendering Markdown. Please check console.</div><pre>${rawContent}</pre>`
+      const errorHtml = `<div class="text-red-500 font-bold">Error rendering Markdown. Please check console.</div><pre>${rawContent}</pre>`
+      renderedHtml.value = sanitizeHtml(errorHtml)
     }
   }
 

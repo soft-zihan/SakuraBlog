@@ -1,3 +1,4 @@
+
 /**
  * 自动扫描 /public/music/ 目录生成 music.json
  * 封面图片自动使用 music/cover/ 下的同名图片
@@ -23,6 +24,13 @@ const AUDIO_EXTENSIONS = ['.mp3', '.m4a', '.m4s', '.ogg', '.wav', '.flac', '.aac
 // 支持的封面图片格式
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 
+interface Track {
+  title: string;
+  artist: string;
+  url: string;
+  cover: string;
+}
+
 function generateMusicJson() {
   console.log('🎵 Scanning music directory...');
   
@@ -39,8 +47,14 @@ function generateMusicJson() {
   
   // 扫描音乐文件
   const files = fs.readdirSync(MUSIC_DIR);
-  const coverFiles = fs.readdirSync(COVER_DIR);
-  const tracks = [];
+  let coverFiles: string[] = [];
+  try {
+    coverFiles = fs.readdirSync(COVER_DIR);
+  } catch (e) {
+    // cover dir might be empty
+  }
+  
+  const tracks: Track[] = [];
   
   for (const file of files) {
     const filePath = path.join(MUSIC_DIR, file);
@@ -67,7 +81,7 @@ function generateMusicJson() {
     }
     
     // 查找封面图片（同名、大小写不敏感、或含音频扩展名）
-    let cover = null;
+    let cover: string | null = null;
     const candidates = [baseName, file]; // file 可能用于 cover 为 “歌名-歌手.mp3.jpg” 的场景
     const normalizedCandidates = candidates.map(c => c.toLowerCase());
     
@@ -99,32 +113,15 @@ function generateMusicJson() {
       title,
       artist,
       url: `./music/${file}`,
-      cover
+      cover: cover || './image/default-cover.jpg' // Fallback
     });
-    
-    console.log(`  ✅ Found: ${title} - ${artist}`);
   }
   
-  // 按文件名排序
-  tracks.sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'));
+  console.log(`  Found ${tracks.length} track(s)`);
   
-  // 写入 JSON 文件
-  const output = {
-    _comment: "此文件由 scripts/generate-music.js 自动生成，请勿手动编辑",
-    _generated: new Date().toISOString(),
-    tracks
-  };
-  
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
-  
-  console.log(`\n📊 Summary: ${tracks.length} tracks found`);
-  console.log(`📁 Output: ${OUTPUT_FILE}\n`);
-  
-  if (tracks.length === 0) {
-    console.log('💡 Tip: Add music files to /public/music/ directory');
-    console.log('   Supported formats: ' + AUDIO_EXTENSIONS.join(', '));
-    console.log('   File naming: "SongTitle-ArtistName.mp3"\n');
-  }
+  // 生成输出
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(tracks, null, 2), 'utf-8');
+  console.log(`✅ Generated music.json with ${tracks.length} tracks`);
 }
 
 generateMusicJson();

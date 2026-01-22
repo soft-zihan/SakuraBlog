@@ -58,6 +58,9 @@ export const useAppStore = defineStore('app', () => {
   // UI State
   const showParticles = ref(true)
   const showSettings = ref(false)
+  const showDownloadModal = ref(false)
+  const showSearch = ref(false)
+  const showWriteEditor = ref(false)
   const sidebarOpen = ref(true) // For mobile (Left Sidebar)
   const rightSidebarOpen = ref(false) // For mobile (Right Sidebar)
   const toastMessage = ref('')
@@ -70,6 +73,9 @@ export const useAppStore = defineStore('app', () => {
   const currentFile = ref<FileNode | null>(null)
   const currentFolder = ref<FileNode | null>(null)
   const loading = ref(true)
+  const contentLoading = ref(false)
+  const currentTool = ref<string | null>(null)
+  const isRawMode = ref(false)
   
   // Actions
   function setFileSystem(files: FileNode[]) {
@@ -161,34 +167,9 @@ export const useAppStore = defineStore('app', () => {
     apiWallpapers.value = wallpapers
   }
   
-  function applyThemeColor(color: ThemeColorId) {
-    const p = THEME_COLORS[color].palette
-    const root = document.documentElement
-    root.style.setProperty('--primary-50', p[50])
-    root.style.setProperty('--primary-100', p[100])
-    root.style.setProperty('--primary-200', p[200])
-    root.style.setProperty('--primary-300', p[300])
-    root.style.setProperty('--primary-400', p[400])
-    root.style.setProperty('--primary-500', p[500])
-    root.style.setProperty('--primary-600', p[600])
-    root.style.setProperty('--primary-700', p[700])
-    root.style.setProperty('--primary-800', p[800])
-    root.style.setProperty('--primary-900', p[900])
-    const hexToRgba = (hex: string, alpha: number) => {
-      const h = hex.replace('#', '')
-      const r = parseInt(h.substring(0, 2), 16)
-      const g = parseInt(h.substring(2, 4), 16)
-      const b = parseInt(h.substring(4, 6), 16)
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`
-    }
-    root.style.setProperty('--primary-900-30', hexToRgba(p[900], 0.3))
-    root.style.setProperty('--primary-100-50', hexToRgba(p[100], 0.5))
-    root.setAttribute('data-theme-color', color)
-  }
-  
   function setThemeColor(color: ThemeColorId) {
     userSettings.value.themeColor = color
-    applyThemeColor(color)
+    // Theme color application is now handled by useTheme.ts watching this value
   }
   
   // Computed
@@ -231,8 +212,12 @@ export const useAppStore = defineStore('app', () => {
     apiWallpapers,
     wallpaperApiSettings,
     userSettings,
+// UI State
     showParticles,
     showSettings,
+    showDownloadModal,
+    showSearch,
+    showWriteEditor,
     sidebarOpen,
     rightSidebarOpen,
     toastMessage,
@@ -243,6 +228,9 @@ export const useAppStore = defineStore('app', () => {
     currentFile,
     currentFolder,
     loading,
+    contentLoading,
+    currentTool,
+    isRawMode,
     // Actions
     toggleLang,
     toggleTheme,
@@ -259,7 +247,6 @@ export const useAppStore = defineStore('app', () => {
     setRightSidebarOpen,
     toggleReadingMode,
     setReadingMode,
-    applyThemeColor,
     setThemeColor,
     setFileSystem,
     setCurrentFile,

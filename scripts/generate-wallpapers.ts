@@ -1,3 +1,4 @@
+
 /**
  * 自动扫描 /public/image/light/ 和 /public/image/dark/ 目录生成 wallpapers.json
  * 
@@ -19,6 +20,19 @@ const OUTPUT_FILE = path.join(ROOT_DIR, 'public', 'wallpapers.json');
 // 支持的图片格式
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 
+interface Wallpaper {
+  filename: string;
+  path: string;
+  name: string;
+}
+
+interface WallpapersData {
+  _comment: string;
+  _generated: string;
+  light: Wallpaper[];
+  dark: Wallpaper[];
+}
+
 function generateWallpapersJson() {
   console.log('🖼️ Scanning wallpaper directories...');
   
@@ -34,7 +48,7 @@ function generateWallpapersJson() {
   }
   
   // 扫描亮色主题壁纸
-  const lightFiles = fs.readdirSync(LIGHT_DIR)
+  const lightFiles: Wallpaper[] = fs.readdirSync(LIGHT_DIR)
     .filter(file => {
       const ext = path.extname(file).toLowerCase();
       return IMAGE_EXTENSIONS.includes(ext);
@@ -46,7 +60,7 @@ function generateWallpapersJson() {
     }));
   
   // 扫描暗色主题壁纸
-  const darkFiles = fs.readdirSync(DARK_DIR)
+  const darkFiles: Wallpaper[] = fs.readdirSync(DARK_DIR)
     .filter(file => {
       const ext = path.extname(file).toLowerCase();
       return IMAGE_EXTENSIONS.includes(ext);
@@ -61,8 +75,8 @@ function generateWallpapersJson() {
   console.log(`  Found ${darkFiles.length} dark wallpaper(s)`);
   
   // 生成输出
-  const output = {
-    _comment: "此文件由 scripts/generate-wallpapers.js 自动生成，请勿手动编辑",
+  const output: WallpapersData = {
+    _comment: "此文件由 scripts/generate-wallpapers.ts 自动生成，请勿手动编辑",
     _generated: new Date().toISOString(),
     light: lightFiles,
     dark: darkFiles

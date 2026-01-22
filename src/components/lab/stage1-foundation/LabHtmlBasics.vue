@@ -146,7 +146,7 @@
             <h3 class="font-bold mb-2 text-gray-800 dark:text-gray-200">实时预览</h3>
             <div 
               class="w-full h-96 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-auto"
-              v-html="htmlCode"
+              v-html="sanitizedHtmlCode"
             ></div>
           </div>
         </div>

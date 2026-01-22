@@ -871,9 +871,10 @@ const toggleUserNoteAtLine = (line: number) => {
 const highlightLine = (line: string) => {
   const language = getLanguage()
   try {
-    return hljs.highlight(line || ' ', { language }).value
+    const highlighted = hljs.highlight(line || ' ', { language }).value
+    return sanitizeHtml(highlighted)
   } catch {
-    return line || ' '
+    return sanitizeHtml(line || ' ')
   }
 }
 

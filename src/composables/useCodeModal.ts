@@ -2,16 +2,17 @@ import { ref, computed } from 'vue'
 import hljs from 'highlight.js/lib/common'
 import type { FileNode } from '../types'
 
+// 状态
+const showCodeModal = ref(false)
+const codeModalContent = ref('')
+const codeModalTitle = ref('')
+const codeModalPath = ref('')
+const previousUrl = ref<string | null>(null)
+
 /**
  * 代码弹窗管理 composable
  */
 export function useCodeModal() {
-  // 状态
-  const showCodeModal = ref(false)
-  const codeModalContent = ref('')
-  const codeModalTitle = ref('')
-  const codeModalPath = ref('')
-  const previousUrl = ref<string | null>(null)
 
   /**
    * 根据文件扩展名获取语言

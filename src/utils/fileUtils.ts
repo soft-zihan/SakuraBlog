@@ -37,7 +37,8 @@ export const fetchFileContent = async (file: FileNode): Promise<string> => {
     
     if (res.ok) return await res.text()
     return `# Error ${res.status}\nCould not load file content.\nPath: ${file.path}`
-  } catch (e: any) {
-    return `# Error\n${e.message}\nPath: ${file.path}`
+  } catch (e: unknown) {
+    const error = e as Error
+    return `# Error\n${error.message}\nPath: ${file.path}`
   }
 }
