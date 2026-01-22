@@ -90,6 +90,13 @@
               <span v-if="file.tags?.length" class="text-[10px] px-1.5 py-0.5 bg-sakura-100 dark:bg-sakura-900/30 text-sakura-600 dark:text-sakura-400 rounded">
                 {{ file.tags[0] }}
               </span>
+              <button 
+                @click.stop="downloadSingleFile(file)"
+                class="ml-auto p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-400 hover:text-sakura-500 transition-colors"
+                :title="lang === 'zh' ? '下载此文件' : 'Download file'"
+              >
+                ⬇️
+              </button>
             </div>
             <div v-if="filteredFiles.length === 0" class="text-center text-gray-400 py-4 text-sm">
               {{ lang === 'zh' ? '没有匹配的文件' : 'No matching files' }}
@@ -438,30 +445,21 @@ const downloadVueNotes = async () => {
   }
 }
 
-// Source code file list (same as SourceCodeViewer)
-const sourceCodeFiles = [
-  'index.html', 'index.tsx', 'App.vue', 'constants.ts', 'types.ts', 
-  'vite.config.ts', 'package.json', 'tsconfig.json',
-  'components/AppHeader.vue', 'components/AppSidebar.vue', 'components/ArticleCard.vue',
-  'components/FileTree.vue', 'components/FolderView.vue', 'components/SearchModal.vue',
-  'components/SettingsModal.vue', 'components/WriteEditor.vue', 'components/MusicPlayer.vue',
-  'components/GiscusComments.vue', 'components/PetalBackground.vue', 'components/WallpaperLayer.vue',
-  'components/DownloadModal.vue', 'components/DownloadTreeNode.vue',
-  'components/lab/index.ts', 'components/lab/LabDashboard.vue', 
-  'components/lab/LabProjectTour.vue', 'components/lab/SourceCodeViewer.vue',
-  'components/lab/DualColumnView.vue', 'components/lab/PanelContent.vue',
-  'components/lab/SourceFileTree.vue',
-  'components/petal/usePetals.ts',
-  'composables/index.ts', 'composables/useArticleMeta.ts', 'composables/useBackup.ts',
-  'composables/useCodeModal.ts', 'composables/useContentClick.ts', 'composables/useContentRenderer.ts',
-  'composables/useFile.ts', 'composables/useGitHubPublish.ts', 'composables/useLightbox.ts',
-  'composables/useMarkdown.ts', 'composables/useRawEditor.ts', 'composables/useSearch.ts',
-  'composables/useSelectionMenu.ts', 'composables/useWallpapers.ts', 'composables/useTokenSecurity.ts',
-  'stores/index.ts', 'stores/appStore.ts', 'stores/articleStore.ts', 
-  'stores/learningStore.ts', 'stores/musicStore.ts',
-  'scripts/generate-tree.js', 'scripts/generate-raw.js', 
-  'scripts/generate-music.js', 'scripts/generate-wallpapers.js'
-]
+// Helper to get all source files from tree
+const getAllSourceFiles = (nodes: any[]): string[] => {
+  const files: string[] = []
+  const traverse = (items: any[]) => {
+    for (const item of items) {
+      if (item.type === 'file') {
+        files.push(item.path)
+      } else if (item.children) {
+        traverse(item.children)
+      }
+    }
+  }
+  traverse(nodes)
+  return files
+}
 
 // Convert file path to raw file path format
 // e.g., "components/AppHeader.vue" -> "components_AppHeader.vue.txt"
@@ -485,6 +483,55 @@ const loadUserNotes = (): Record<string, Array<{line: number, content: string}>>
   return {}
 }
 
+// Download single file
+const downloadSingleFile = async (file: any) => {
+  if (isDownloading.value) return
+  isDownloading.value = true
+  downloadMessage.value = ''
+  
+  try {
+    let fetchUrl = ''
+    let fileName = file.name
+    
+    // Check if it is a source file or a note
+    // Source files usually start with src/ or are specific root files
+    const isSource = file.isSource || file.path.startsWith('src/') || ['package.json', 'vite.config.ts', 'tsconfig.json', 'index.html'].includes(file.path)
+    
+    if (isSource) {
+        const baseUrl = (import.meta as any).env?.BASE_URL || './'
+        const rawFileName = toRawFilePath(file.path)
+        fetchUrl = `${baseUrl}raw/${rawFileName}`
+    } else {
+        // It's a note
+        const encodedPath = file.path.split('/').map((p: string) => encodeURIComponent(p)).join('/')
+        fetchUrl = `./notes/${encodedPath}`
+    }
+
+    const res = await fetch(fetchUrl)
+    if (res.ok) {
+        const content = await res.text()
+        const blob = new Blob([content], { type: 'text/plain' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName
+        a.click()
+        URL.revokeObjectURL(url)
+        downloadMessage.value = props.lang === 'zh' ? '下载成功' : 'Download success'
+        downloadSuccess.value = true
+    } else {
+        throw new Error(`Fetch failed: ${res.status}`)
+    }
+  } catch (e) {
+    console.error('Download error:', e)
+    downloadMessage.value = props.lang === 'zh' ? '下载失败' : 'Download failed'
+    downloadSuccess.value = false
+  } finally {
+    isDownloading.value = false
+    setTimeout(() => { downloadMessage.value = '' }, 5000)
+  }
+}
+
 // Download source code with optional embedded notes
 const downloadSourceCodeWithNotes = async (withNotes: boolean) => {
   if (isDownloading.value) return
@@ -495,6 +542,14 @@ const downloadSourceCodeWithNotes = async (withNotes: boolean) => {
     const zip = new JSZip()
     let successCount = 0
     
+    // Get all source files dynamically from fileSystem
+    const sourceNode = props.fileSystem?.find(f => f.name === 'Project Source Code')
+    const sourceFiles = sourceNode ? getAllSourceFiles(sourceNode.children || []) : []
+    
+    if (sourceFiles.length === 0) {
+       throw new Error('No source files found in file system')
+    }
+
     // Load preset notes for embedding (only if withNotes is true)
     let presetNotes: Record<string, Array<{line: number, content: string}>> = {}
     let userNotes: Record<string, Array<{line: number, content: string}>> = {}
@@ -517,7 +572,7 @@ const downloadSourceCodeWithNotes = async (withNotes: boolean) => {
     }
     
     // Fetch and process source files
-    for (const filePath of sourceCodeFiles) {
+    for (const filePath of sourceFiles) {
       try {
         const baseUrl = (import.meta as any).env?.BASE_URL || './'
         // Use the correct raw file naming: components/AppHeader.vue -> components_AppHeader.vue.txt

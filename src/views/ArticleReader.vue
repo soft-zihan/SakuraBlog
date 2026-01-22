@@ -5,8 +5,8 @@
       class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full"
     >
       <div 
-         class="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white/85 dark:bg-gray-900/85 p-8 md:p-12 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
-         :class="[fontSizeClass, articleStyleClass]"
+         class="w-full mx-auto bg-white/85 dark:bg-gray-900/85 p-8 md:p-12 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
+         :class="[fontSizeClass, articleStyleClass, appStore.sidebarOpen ? 'max-w-4xl xl:max-w-5xl' : 'max-w-5xl xl:max-w-7xl']"
          :style="articleContainerStyle"
       >
          <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
@@ -189,7 +189,7 @@
             class="absolute left-[-2px] w-[2px] transition-all duration-300"
             :style="{
               top: activeIndicatorTop + 'px',
-              height: '24px',
+              height: activeIndicatorHeight + 'px',
               ...tocIndicatorStyle
             }"
             v-if="activeHeaderId"
@@ -197,6 +197,7 @@
           <a 
             v-for="item in toc" 
             :key="item.id"
+            :ref="(el) => setTocItemRef(el, item.id)"
             :href="`#${item.id}`"
             class="block text-sm py-1.5 transition-all duration-200 leading-tight pr-2"
             :class="[
@@ -259,7 +260,7 @@ const isRawMode = toRef(props, 'isRawMode');
 const { currentMeta, currentTags, currentAuthorName, currentAuthorUrl, currentWordCount, currentLineCount } = useArticleMeta(currentFile);
 
 // Renderer
-const { renderedHtml, toc, activeHeaderId, activeIndicatorTop, updateRenderedContent, scrollToHeader, setupMarkedRenderer, generateToc } = useContentRenderer(currentFile, isRawMode);
+const { renderedHtml, toc, activeHeaderId, updateRenderedContent, scrollToHeader, setupMarkedRenderer, generateToc } = useContentRenderer(currentFile, isRawMode);
 
 onMounted(() => {
   setupMarkedRenderer();
@@ -301,19 +302,49 @@ const handleLike = () => {
 // TOC Slider Logic
 const tocNavRef = ref<HTMLElement | null>(null);
 const isTocDragging = ref(false);
+const tocItemRefs = ref<Record<string, HTMLElement>>({});
+
+const setTocItemRef = (el: any, id: string) => {
+  if (el) tocItemRefs.value[id] = el;
+};
+
+const activeIndicatorTop = computed(() => {
+  if (!activeHeaderId.value) return 0;
+  const el = tocItemRefs.value[activeHeaderId.value];
+  return el ? el.offsetTop : 0;
+});
+
+const activeIndicatorHeight = computed(() => {
+  if (!activeHeaderId.value) return 24;
+  const el = tocItemRefs.value[activeHeaderId.value];
+  return el ? el.offsetHeight : 24;
+});
 
 const handleTocDrag = (e: MouseEvent | TouchEvent) => {
   if (!isTocDragging.value || !tocNavRef.value) return;
   if ('touches' in e) e.preventDefault();
   
   const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-  const rect = tocNavRef.value.getBoundingClientRect();
-  const relativeY = clientY - rect.top;
-  const itemHeight = 28; // Approximate height
+  const navRect = tocNavRef.value.getBoundingClientRect();
+  const relativeY = clientY - navRect.top;
   
-  const index = Math.max(0, Math.min(toc.value.length - 1, Math.floor(relativeY / itemHeight)));
-  if (toc.value[index]) {
-    scrollToHeader(toc.value[index].id);
+  let closestId = '';
+  let minDiff = Infinity;
+  
+  for (const item of toc.value) {
+    const el = tocItemRefs.value[item.id];
+    if (el) {
+      const elMiddle = el.offsetTop + el.offsetHeight / 2;
+      const diff = Math.abs(relativeY - elMiddle);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestId = item.id;
+      }
+    }
+  }
+  
+  if (closestId) {
+    scrollToHeader(closestId);
   }
 };
 

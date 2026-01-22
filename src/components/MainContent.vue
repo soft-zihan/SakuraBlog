@@ -1,43 +1,49 @@
 <template>
   <div 
     v-if="currentFile || (viewMode === 'lab' && currentTool) || currentFolder" 
-    id="scroll-container" 
-    class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full"
+    class="flex-1 flex flex-col overflow-hidden w-full"
   >
     
     <!-- Lab Tool View (Unified Dashboard) -->
-    <div v-if="viewMode === 'lab' && currentTool === 'dashboard'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
-       <LabDashboard 
-         :lang="lang" 
-         :model-value="labDashboardTab" 
-         @update:model-value="$emit('update:labDashboardTab', $event)"
-         @tab-change="$emit('tab-change', $event)" 
-         @select-lab="$emit('select-tool', $event)" 
-       />
+    <div v-if="viewMode === 'lab' && currentTool === 'dashboard'" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+       <div class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
+         <LabDashboard 
+           :lang="lang" 
+           :model-value="labDashboardTab" 
+           @update:model-value="$emit('update:labDashboardTab', $event)"
+           @tab-change="$emit('tab-change', $event)" 
+           @select-lab="$emit('select-tool', $event)" 
+         />
+       </div>
     </div>
 
     <!-- Lab: Source Code Viewer -->
-    <div v-else-if="viewMode === 'lab' && currentTool === 'source-code'" class="w-full h-[calc(100vh-12rem)] animate-fade-in">
+    <div v-else-if="viewMode === 'lab' && currentTool === 'source-code'" class="w-full h-full animate-fade-in">
        <SourceCodeViewer :lang="lang" />
     </div>
 
     <!-- Lab: Event Handling -->
-    <div v-else-if="viewMode === 'lab' && currentTool === 'event-handling'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
-       <LabEventHandling :lang="lang" />
+    <div v-else-if="viewMode === 'lab' && currentTool === 'event-handling'" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+       <div class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
+         <LabEventHandling :lang="lang" />
+       </div>
     </div>
 
     <!-- Lab: Slot System -->
-    <div v-else-if="viewMode === 'lab' && currentTool === 'slot'" class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
-       <LabSlot :lang="lang" />
+    <div v-else-if="viewMode === 'lab' && currentTool === 'slot'" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+       <div class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
+         <LabSlot :lang="lang" />
+       </div>
     </div>
 
     <!-- Folder View Component -->
-    <FolderView 
-      v-else-if="currentFolder"
-      :current-folder="currentFolder"
-      @open-folder="$emit('open-folder', $event)"
-      @open-file="$emit('open-file', $event)"
-    />
+    <div v-else-if="currentFolder" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+      <FolderView 
+        :current-folder="currentFolder"
+        @open-folder="$emit('open-folder', $event)"
+        @open-file="$emit('open-file', $event)"
+      />
+    </div>
 
     <!-- Note Content View (ArticleReader) -->
     <ArticleReader

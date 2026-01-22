@@ -129,18 +129,8 @@ const notesTree = scanDirectory(notesDir, '', false);
 // 2. Scan Source Code (Specific Folders/Files)
 const sourceTree = [];
 
-// Scan Source Directories
-const sourceDirs = ['src/components', 'src/composables', 'src/stores', 'src/utils'];
-sourceDirs.forEach(dir => {
-    const fullPath = path.join(rootDir, dir);
-    if (fs.existsSync(fullPath)) {
-        const nodes = scanDirectory(fullPath, dir, true);
-        if (nodes.length > 0) sourceTree.push(...nodes);
-    }
-});
-
-// Scan Root Files (App.vue, index.html, etc manually picked or scanned)
-const rootFilesToScan = ['src/App.vue', 'src/index.html', 'src/main.ts', 'vite.config.ts', 'package.json', 'tsconfig.json'];
+// Scan Root Files
+const rootFilesToScan = ['index.html', 'vite.config.ts', 'package.json', 'tsconfig.json'];
 rootFilesToScan.forEach(file => {
     const fullPath = path.join(rootDir, file);
     if(fs.existsSync(fullPath)) {
@@ -158,6 +148,34 @@ rootFilesToScan.forEach(file => {
         });
     }
 });
+
+// Scan src directory recursively
+const srcPath = path.join(rootDir, 'src');
+if (fs.existsSync(srcPath)) {
+    const srcNodes = scanDirectory(srcPath, 'src', true);
+    if (srcNodes.length > 0) {
+        sourceTree.push({
+            name: 'src',
+            path: 'src',
+            type: 'directory',
+            children: srcNodes
+        });
+    }
+}
+
+// Scan scripts directory recursively
+const scriptsPath = path.join(rootDir, 'scripts');
+if (fs.existsSync(scriptsPath)) {
+    const scriptsNodes = scanDirectory(scriptsPath, 'scripts', true);
+    if (scriptsNodes.length > 0) {
+        sourceTree.push({
+            name: 'scripts',
+            path: 'scripts',
+            type: 'directory',
+            children: scriptsNodes
+        });
+    }
+}
 
 // Combine trees
 // We put source code in a virtual folder

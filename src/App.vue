@@ -1103,7 +1103,7 @@ body {
   line-height: var(--line-h) !important;
   background-image: linear-gradient(to bottom, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)) !important;
   background-size: 100% var(--line-h) !important;
-  background-position: 0 0.4rem; /* 稍微下移，让线条出现在文字下方 */
+  background-position: 0 0; /* Align with line height block */
   background-attachment: local;
 }
 
