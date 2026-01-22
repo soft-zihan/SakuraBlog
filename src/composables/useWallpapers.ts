@@ -1,6 +1,55 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useAppStore } from '../stores/appStore'
 
+// Simple IndexedDB wrapper for caching blobs
+const DB_NAME = 'sakura-wallpapers';
+const DB_VERSION = 1;
+const STORE_NAME = 'blobs';
+
+const openDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (e) => {
+      const db = (e.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+  });
+};
+
+const cacheBlob = async (key: string, blob: Blob) => {
+  try {
+    const db = await openDB();
+    return new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.put(blob, key);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.error('Failed to cache blob', e);
+  }
+};
+
+const getCachedBlob = async (key: string): Promise<Blob | undefined> => {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  } catch {
+    return undefined;
+  }
+};
+
 export interface WallpaperItem {
   filename: string
   path: string
@@ -23,11 +72,13 @@ const animeWallpapers = ref<WallpaperItem[]>([])
 const searchWallpapers = ref<WallpaperItem[]>([])
 const hasSearched = ref(false)
 const isApiLoading = ref(false)
+const resolvedWallpaper = ref('')
 let cachedWallpaperKey: string | null = null
 let wallpaperKeyPromise: Promise<string> | null = null
 
 export function useWallpapers() {
   const appStore = useAppStore()
+  const resolvedWallpaper = ref('')
   
   // Sync with store
   const searchWallpapers = computed({
@@ -116,7 +167,7 @@ export function useWallpapers() {
   })
   
   // 当前选中的壁纸路径
-  const currentWallpaper = computed(() => {
+  const currentWallpaperPath = computed(() => {
     const filename = appStore.currentWallpaperFilename
     const wallpapers = currentThemeWallpapers.value
     
@@ -133,6 +184,29 @@ export function useWallpapers() {
     // 确保路径是相对路径（手机端兼容）
     return normalizePath(path)
   })
+
+  // Watch for changes and resolve blob if cached
+  watch(currentWallpaperPath, async (newPath) => {
+    if (!newPath) {
+      resolvedWallpaper.value = ''
+      return
+    }
+    
+    // Check if it's already a blob url or local path (not needing cache)
+    if (newPath.startsWith('blob:') || newPath.startsWith('data:') || newPath.startsWith('./') || newPath.startsWith('/')) {
+        resolvedWallpaper.value = newPath
+        return
+    }
+
+    // Check cache for remote URLs
+    const cached = await getCachedBlob(newPath)
+    if (cached) {
+      const url = URL.createObjectURL(cached)
+      resolvedWallpaper.value = url
+    } else {
+      resolvedWallpaper.value = newPath
+    }
+  }, { immediate: true })
   
   // 设置壁纸
   function setWallpaper(filename: string) {
@@ -147,7 +221,20 @@ export function useWallpapers() {
     return allWallpapers.find(w => w.filename === filename)
   }
   
-  const addCustomWallpaper = (payload: { name: string; url: string; source: 'url' | 'local' | 'api'; theme?: 'light' | 'dark' | 'auto' }) => {
+  const addCustomWallpaper = async (payload: { name: string; url: string; source: 'url' | 'local' | 'api'; theme?: 'light' | 'dark' | 'auto' }) => {
+    // Attempt to cache remote images
+    if (payload.url.startsWith('http')) {
+        try {
+            const res = await fetch(payload.url);
+            if (res.ok) {
+                const blob = await res.blob();
+                await cacheBlob(payload.url, blob);
+            }
+        } catch (e) {
+            console.warn('Background cache failed:', e);
+        }
+    }
+
     const id = `${payload.source}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     appStore.customWallpapers.push({
       id,
@@ -647,7 +734,7 @@ export function useWallpapers() {
     baiduWallpapers: searchWallpapers,
     hasSearched,
     isApiLoading,
-    currentWallpaper,
+    currentWallpaper: resolvedWallpaper,
     loadWallpapers,
     setWallpaper,
     getWallpaperInfo,

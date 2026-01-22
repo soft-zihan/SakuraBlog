@@ -1084,27 +1084,49 @@ const selectFile = async (file: SourceFile) => {
   selectedFile.value = file
   
   try {
-    const rawFileName = file.path.replace(/\//g, '_') + '.txt'
     const baseUrl = (import.meta as any).env?.BASE_URL || '/'
     
+    // Priority 1: Use pre-calculated fetchPath from files.json (most reliable)
+    if (file.fetchPath) {
+      const fetchUrl = file.fetchPath.startsWith('http') || file.fetchPath.startsWith('/') 
+        ? file.fetchPath 
+        : `${baseUrl}${file.fetchPath}`;
+        
+      let res = await fetch(fetchUrl);
+      if (res.ok) {
+        fileContent.value = await res.text();
+        return;
+      }
+    }
+
+    // Fallback logic if fetchPath is missing or failed
+    const rawFileName = file.path.replace(/\//g, '_') + '.txt'
+    
+    // Try 2: Generated raw file (absolute from base)
     let res = await fetch(`${baseUrl}raw/${rawFileName}`)
     
+    // Try 3: Generated raw file (relative)
     if (!res.ok) {
       res = await fetch(`./raw/${rawFileName}`)
     }
     
+    // Try 4: Direct source file (absolute from base)
     if (!res.ok) {
-      res = await fetch(`${baseUrl}${file.path}`)
+       // Ensure path doesn't start with / if base ends with /
+       const cleanBase = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'
+       const cleanPath = file.path.startsWith('/') ? file.path.slice(1) : file.path
+       res = await fetch(`${cleanBase}${cleanPath}`)
     }
-    
+
+    // Try 5: Direct source file (relative)
     if (!res.ok) {
-      res = await fetch(`./${file.path}`)
+        res = await fetch(`./${file.path}`)
     }
     
     if (res.ok) {
       fileContent.value = await res.text()
     } else {
-      fileContent.value = `// Could not load file: ${file.path}\n// Tried: ${baseUrl}raw/${rawFileName}`
+      fileContent.value = `// Failed to load file: ${file.path}\n// Error: ${res.status} ${res.statusText}\n// Note: For production, ensure "npm run gen-raw" has been run.`
     }
   } catch (e) {
     fileContent.value = `// Error loading file: ${e}`

@@ -10,7 +10,8 @@
     "gen-tree": "tsx scripts/generate-tree.ts",
     "gen-raw": "tsx scripts/generate-raw.ts",
     "gen-music": "tsx scripts/generate-music.ts",
-    "gen-wallpapers": "tsx scripts/generate-wallpapers.ts"
+    "gen-wallpapers": "tsx scripts/generate-wallpapers.ts",
+    "test": "vitest"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",

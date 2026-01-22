@@ -18,11 +18,35 @@ if (fs.existsSync(rawDir)) fs.rmSync(rawDir, { recursive: true, force: true });
 fs.mkdirSync(rawDir, { recursive: true });
 
 // Copy notes to public/notes to make them accessible via fetch
-if (fs.existsSync(publicNotesDir)) fs.rmSync(publicNotesDir, { recursive: true, force: true });
+
+const cleanupDir = (dir: string) => {
+    if (fs.existsSync(dir)) {
+        try {
+            fs.rmSync(dir, { recursive: true, force: true });
+        } catch (e: any) {
+            console.warn(`⚠️ Failed to clean ${dir}: ${e.message}. Retrying in 1s...`);
+            // Simple synchronous delay retry
+            const start = Date.now();
+            while (Date.now() - start < 1000) {} 
+            try {
+                fs.rmSync(dir, { recursive: true, force: true });
+            } catch (retryErr) {
+                 console.error(`❌ Could not clean ${dir}. Proceeding anyway (files might be stale).`);
+            }
+        }
+    }
+};
+
+cleanupDir(publicNotesDir);
+
 // Use cpSync for recursive copy (Node 16.7+)
 if (fs.existsSync(notesDir)) {
     console.log(`📦 Copying notes to ${publicNotesDir}...`);
-    fs.cpSync(notesDir, publicNotesDir, { recursive: true });
+    try {
+        fs.cpSync(notesDir, publicNotesDir, { recursive: true });
+    } catch (e: any) {
+        console.error(`❌ Error copying notes: ${e.message}`);
+    }
 } else {
     console.warn(`⚠️ Notes directory not found at ${notesDir}`);
 }
@@ -42,6 +66,15 @@ interface FileNode {
 
 // 获取文件的 Git 最后提交时间（解决 CI 环境中文件时间戳问题）
 function getGitLastModified(filePath: string): string {
+  if (process.env.SKIP_GIT_LOG) {
+      try {
+        const stat = fs.statSync(filePath);
+        return stat.mtime.toISOString();
+      } catch {
+        return new Date().toISOString();
+      }
+  }
+
   try {
     // 获取文件相对于仓库根目录的路径
     const relativePath = path.relative(rootDir, filePath);
@@ -153,36 +186,56 @@ const notesTree = scanDirectory(notesDir, '', false);
 // 2. Scan Source Code (Specific Folders/Files)
 const sourceTree: FileNode[] = [];
 
-// Scan Root Files
-const rootFilesToScan = ['index.html', 'vite.config.ts', 'package.json', 'tsconfig.json'];
-rootFilesToScan.forEach(file => {
-    const fullPath = path.join(rootDir, file);
-    if(fs.existsSync(fullPath)) {
-        const rawFileName = file.replace(/\//g, '_') + '.txt';
-        const rawDestPath = path.join(rawDir, rawFileName);
-        fs.copyFileSync(fullPath, rawDestPath);
-        
-        sourceTree.push({
-            name: file,
-            path: file,
-            fetchPath: `raw/${rawFileName}`,
-            type: 'file',
-            lastModified: getGitLastModified(fullPath),
-            isSource: true
-        });
+// Scan Root Files (Dynamic)
+const rootItems = fs.readdirSync(rootDir);
+for (const item of rootItems) {
+    const fullPath = path.join(rootDir, item);
+    const stat = fs.statSync(fullPath);
+
+    // Ignore directories and specific files
+    if (stat.isDirectory()) continue; // We only want files in root (folders like src/notes are handled separately)
+    
+    // Ignore specific files
+    if (item === 'files.json' || item.endsWith('.log') || item.endsWith('.lock')) continue;
+    
+    // Allowed extensions or specific files
+     const isConfig = item.endsWith('.json') || item.endsWith('.js') || item.endsWith('.ts') || item.endsWith('.html');
+     const isDoc = item.endsWith('.md');
+     const isDotFile = item.startsWith('.'); // .gitignore, .env, etc.
+     
+     if (isConfig || isDoc || isDotFile) {
+          console.log(`+ Adding root file: ${item}`);
+          const rawFileName = item.replace(/\//g, '_') + '.txt';
+         const rawDestPath = path.join(rawDir, rawFileName);
+         fs.copyFileSync(fullPath, rawDestPath);
+         
+         sourceTree.push({
+             name: item,
+             path: item,
+             fetchPath: `raw/${rawFileName}`,
+             type: 'file',
+             lastModified: getGitLastModified(fullPath),
+             isSource: true
+         });
     }
-});
+}
 
 // Scan src folder
 const srcTree = scanDirectory(path.join(rootDir, 'src'), 'src', true);
 if (srcTree.length > 0) {
-    sourceTree.push(...srcTree);
+    // Add src directory as a node instead of flattening it
+    sourceTree.push({
+        name: 'src',
+        path: 'src',
+        type: 'directory',
+        children: srcTree
+    });
 }
 
 // 3. Combine Trees
-// "zh" and "en" from notes are root nodes. "source" is a root node.
+// "zh" and "en" from notes are root nodes. "Project Source Code" is a root node.
 const combinedTree: FileNode[] = [...notesTree, {
-    name: 'source',
+    name: 'Project Source Code', // Renamed for clarity
     path: 'source',
     type: 'directory',
     children: sourceTree

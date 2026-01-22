@@ -18,9 +18,9 @@ export function useFileOperations() {
     appStore.isRawMode = !!file.isSource;
     
     // Ensure we are not in lab mode, otherwise MainContent might prioritize lab view
-    if (appStore.viewMode === 'lab') {
-      appStore.viewMode = 'files';
-    }
+    // if (appStore.viewMode === 'lab') {
+    //   appStore.viewMode = 'files';
+    // }
     
     updateUrl(file.path);
     

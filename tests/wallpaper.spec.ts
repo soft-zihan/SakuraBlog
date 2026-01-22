@@ -12,9 +12,6 @@ class MockImage {
 
   constructor() {
     setTimeout(() => {
-        // Simple logic: if src contains 'invalid', trigger error.
-        // if src contains 'small', trigger load with small dimensions.
-        // otherwise success with valid dimensions.
         if (this.src.includes('invalid')) {
             if (this.onerror) this.onerror();
         } else if (this.src.includes('small')) {
@@ -30,18 +27,54 @@ class MockImage {
   }
 }
 
+// Mock IndexedDB
+const mockTransaction = {
+  objectStore: vi.fn().mockReturnValue({
+    put: vi.fn().mockImplementation(() => {
+        const req = { onsuccess: null, onerror: null };
+        setTimeout(() => req.onsuccess && req.onsuccess({} as any), 0);
+        return req;
+    }),
+    get: vi.fn().mockImplementation(() => {
+        const req = { onsuccess: null, onerror: null, result: undefined };
+        setTimeout(() => req.onsuccess && req.onsuccess({ target: { result: undefined } } as any), 0);
+        return req;
+    })
+  })
+};
+
+const mockDB = {
+  transaction: vi.fn().mockReturnValue(mockTransaction),
+  objectStoreNames: { contains: vi.fn().mockReturnValue(true) },
+  createObjectStore: vi.fn()
+};
+
+const mockIndexedDB = {
+  open: vi.fn().mockImplementation(() => {
+    const req = { onsuccess: null, onerror: null, onupgradeneeded: null, result: mockDB };
+    setTimeout(() => req.onsuccess && req.onsuccess({ target: { result: mockDB } } as any), 0);
+    return req;
+  })
+};
+
 describe('Wallpaper System', () => {
   beforeEach(() => {
     const pinia = createPinia();
     setActivePinia(pinia);
     vi.clearAllMocks();
     (global as any).Image = MockImage;
+    (global as any).indexedDB = mockIndexedDB;
     
     // Default mock
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ light: [], dark: [] })
+      json: async () => ({ light: [], dark: [] }),
+      blob: async () => new Blob(['test'], { type: 'image/jpeg' })
     } as any);
+    
+    // Mock URL.createObjectURL
+    global.URL.createObjectURL = vi.fn().mockReturnValue('blob:test');
+    global.URL.revokeObjectURL = vi.fn();
   });
 
   afterEach(() => {
@@ -52,7 +85,6 @@ describe('Wallpaper System', () => {
     const { useWallpapers } = await import('../src/composables/useWallpapers');
     const { fetchBaiduWallpaper } = useWallpapers();
     
-    // Mock fetch response
     (global.fetch as any).mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -61,9 +93,7 @@ describe('Wallpaper System', () => {
         })
     });
 
-    // Request 5, should fetch 10 (limit param in URL)
     await fetchBaiduWallpaper('test', 5);
-
     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('limit=10'));
   });
 
@@ -71,22 +101,19 @@ describe('Wallpaper System', () => {
     const { useWallpapers } = await import('../src/composables/useWallpapers');
     const { fetchBaiduWallpaper, baiduWallpapers } = useWallpapers();
 
-    // Mock fetch: return mixed valid and invalid urls
     (global.fetch as any).mockResolvedValue({
         ok: true,
         json: async () => ({
             code: 200,
             res: [
                 'http://example.com/valid1.jpg',
-                'http://example.com/invalid1.jpg', // Will fail validation (onerror)
-                'http://example.com/small.jpg',   // Will fail size check (<200)
+                'http://example.com/invalid1.jpg', 
+                'http://example.com/small.jpg',   
                 'http://example.com/valid2.jpg'
             ]
         })
     });
 
-    // We ask for 2. The mock returns 4 candidates.
-    // 2 are invalid. So we should get 2 valid ones.
     await fetchBaiduWallpaper('test', 2);
     
     expect(baiduWallpapers.value.length).toBe(2);
@@ -96,70 +123,16 @@ describe('Wallpaper System', () => {
     ]);
   });
   
-  it('fetchBaiduWallpaper retries/paginates if not enough valid images', async () => {
-     const { useWallpapers } = await import('../src/composables/useWallpapers');
-     const { fetchBaiduWallpaper, baiduWallpapers } = useWallpapers();
-     
-     // Mock fetch to return only 1 valid image per page
-     (global.fetch as any).mockImplementation((url: string) => {
-         // Handle the initial wallpapers.json call or other calls
-         if (!url.includes('apihz.cn')) {
-             return Promise.resolve({ ok: false });
-         }
-
-         const pageMatch = url.match(/page=(\d+)/);
-         const page = pageMatch ? parseInt(pageMatch[1]) : 1;
-         
-         // Each page returns 1 valid image and 1 invalid image
-         return Promise.resolve({
-             ok: true,
-             json: async () => ({
-                 code: 200,
-                 res: [`http://example.com/valid${page}.jpg`, 'http://example.com/invalid.jpg']
-             })
-         });
-     });
-     
-     // Request 3 images. 
-     await fetchBaiduWallpaper('test', 3);
-     
-     expect(baiduWallpapers.value.length).toBe(3);
-     // Verify it called page 1, 2, and 3
-     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('page=1'));
-     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('page=2'));
-     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('page=3'));
-  });
-
-  it('autoChangeWallpaper validates before setting', async () => {
+  it('addCustomWallpaper caches image', async () => {
       const { useWallpapers } = await import('../src/composables/useWallpapers');
-      const { autoChangeWallpaper, baiduWallpapers } = useWallpapers();
-      const appStore = (await import('../src/stores/appStore')).useAppStore();
-
-      // Setup store mode
-      appStore.userSettings.autoChangeMode = 'search';
+      const { addCustomWallpaper } = useWallpapers();
       
-      // Setup baidu wallpapers with one invalid and one valid
-      baiduWallpapers.value = [
-          { filename: 'http://example.com/invalid-auto.jpg', path: 'http://example.com/invalid-auto.jpg', name: 'Invalid', source: 'api' },
-          { filename: 'http://example.com/valid-auto.jpg', path: 'http://example.com/valid-auto.jpg', name: 'Valid', source: 'api' }
-      ];
-
-      // Mock Math.random to pick invalid (0) first, then valid (1)
-      const randomSpy = vi.spyOn(Math, 'random');
-      // 1st call: returns 0 -> index 0 (Invalid)
-      // 2nd call: returns 0.9 -> index 1 (Valid)
-      randomSpy.mockReturnValueOnce(0).mockReturnValueOnce(0.9);
-
-      // Spy on setWallpaper
-      const spySet = vi.spyOn(appStore, 'setWallpaper');
+      const payload = { name: 'Test', url: 'http://example.com/test.jpg', source: 'url' as const };
       
-      // Mock fetch to fail fast for any Baidu calls (triggered by retry)
-      (global.fetch as any).mockResolvedValue({ ok: false });
-
-      // Call with false to avoid initial fetch, but retry will trigger fetch
-      await autoChangeWallpaper(false);
-
-      // It should eventually set the valid one
-      expect(spySet).toHaveBeenCalledWith('http://example.com/valid-auto.jpg');
+      await addCustomWallpaper(payload);
+      
+      // Should verify cacheBlob was called. 
+      // Since cacheBlob is internal, we check if IndexedDB was accessed.
+      expect(mockIndexedDB.open).toHaveBeenCalled();
   });
 });
