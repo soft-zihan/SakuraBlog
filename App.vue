@@ -9,39 +9,10 @@
     
     <!-- Mobile Overlay -->
     <div 
-      v-if="sidebarOpen || toolBarOpen" 
-      @click="sidebarOpen = false; toolBarOpen = false"
+      v-if="sidebarOpen" 
+      @click="sidebarOpen = false"
       class="md:hidden fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
     />
-
-    <!-- Mobile Right Toolbar -->
-    <div 
-      v-if="toolBarOpen"
-      class="md:hidden fixed top-0 right-0 bottom-0 w-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-l border-white/20 dark:border-gray-700/50 z-40 flex flex-col items-center py-4 gap-4 shadow-2xl transition-transform duration-300"
-    >
-      <!-- Close Button -->
-      <button @click="toolBarOpen = false" class="p-2 text-gray-500 dark:text-gray-400 hover:text-[var(--primary-500)] mb-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-      
-      <!-- Actions -->
-      <button @click="showSearch = true; toolBarOpen = false" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-        <span class="text-xl">🔍</span>
-      </button>
-      <button @click="musicStore.showMusicPlayer = true; toolBarOpen = false" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 relative">
-        <span class="text-xl">🎵</span>
-        <span v-if="musicStore.isPlaying" class="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-      </button>
-      <button @click="appStore.toggleTheme(); toolBarOpen = false" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-        <span class="text-xl">{{ appStore.isDark ? '🌙' : '🌞' }}</span>
-      </button>
-      <button @click="showSettings = true; toolBarOpen = false" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-        <span class="text-xl">⚙️</span>
-      </button>
-      <button @click="showDownloadModal = true; toolBarOpen = false" class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-        <span class="text-xl">⬇</span>
-      </button>
-    </div>
 
     <!-- Left Sidebar: Navigation -->
     <AppSidebar 
@@ -49,7 +20,7 @@
       :class="[
         sidebarOpen ? 'translate-x-0 md:translate-x-0 md:w-72 lg:w-80' : '-translate-x-full md:-translate-x-full md:w-0 md:opacity-0 md:overflow-hidden md:pointer-events-none'
       ]"
-      class="fixed inset-y-0 left-0 md:relative z-50 transition-all duration-300 ease-out h-full"
+      class="fixed md:relative z-40 transition-all duration-300 ease-out"
       :lang="lang"
       :t="t"
       v-model:viewMode="viewMode"
@@ -123,7 +94,6 @@
         @update:petal-speed="handlePetalSpeedChange"
         @toggle-dual-column="dualColumnMode = !dualColumnMode; if(dualColumnMode && !currentTool) currentTool = 'dashboard'"
         @toggle-sidebar="sidebarOpen = !sidebarOpen"
-        @toggle-toolbar="toolBarOpen = !toolBarOpen"
       />
 
       <!-- Content Area -->
@@ -734,24 +704,10 @@ const showDownloadModal = ref(false);
 const showSearch = searchModalOpen;
 const showWriteEditor = ref(false);
 const sidebarOpen = ref(true);
-const toolBarOpen = ref(false);
-
 const handleThemePanelChange = (open: boolean) => {
   themePanelOpen.value = open;
   if (open) headerHidden.value = false;
 };
-
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value;
-  if (sidebarOpen.value) toolBarOpen.value = false;
-};
-
-const toggleToolbar = () => {
-  toolBarOpen.value = !toolBarOpen.value;
-  if (toolBarOpen.value) sidebarOpen.value = false;
-};
-
-const toggleTheme = (dark: boolean) => appStore.setTheme(dark);
 
 // Dual Column Mode
 const dualColumnMode = ref(false);
@@ -764,34 +720,6 @@ const themePanelOpen = ref(false);
 const lastScrollY = ref(0);
 const isMobile = ref(false);
 const mounted = ref(false);
-
-const initMobileState = () => {
-  isMobile.value = window.innerWidth < 768;
-  if (isMobile.value) {
-    sidebarOpen.value = false;
-  }
-};
-
-onMounted(() => {
-  mounted.value = true;
-  initMobileState();
-  window.addEventListener('resize', initMobileState);
-  document.addEventListener('click', handleDocumentClick);
-  initSearchIndex();
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', initMobileState);
-  document.removeEventListener('click', handleDocumentClick);
-});
-
-const handleDocumentClick = (e: MouseEvent) => {
-  // Close selection menu if clicking outside
-  const target = e.target as HTMLElement;
-  if (!target.closest('#selection-menu') && !window.getSelection()?.toString()) {
-    hideSelectionMenu();
-  }
-};
 
 // Wallpaper URLs
 const wallpaperLightUrl = '/image/wallpaper-light.jpg';
