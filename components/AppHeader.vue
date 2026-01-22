@@ -341,7 +341,7 @@
                      @click="appStore.userSettings.wallpaperFill = 'cover'" 
                      class="px-2 py-1 text-[10px] rounded border transition-colors"
                      :class="appStore.userSettings.wallpaperFill === 'cover' ? 'bg-white dark:bg-gray-700 border-[var(--primary-300)] text-[var(--primary-500)]' : 'border-transparent text-gray-400 hover:text-gray-600'"
-                 >{{ lang === 'zh' ? '覆盖' : 'Cover' }}</button>
+                 >{{ lang === 'zh' ? '截取' : 'Cut' }}</button>
                  <button 
                    @click="appStore.userSettings.wallpaperFill = 'contain'" 
                    class="px-2 py-1 text-[10px] rounded border transition-colors"
