@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-20",
+  "intros": {
+    "src/index.html": "🌐 HTML 入口文件。定义页面基础结构，引入 Tailwind CSS，设置 Vue 挂载点 #app。"
+  },
+  "notes": {
+    "src/App.vue": [
+      { "line": 1, "content": "💡 这是测试预置笔记" }
+    ]
+  }
+}

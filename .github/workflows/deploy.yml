@@ -1,0 +1,73 @@
+name: Deploy Sakura Notes
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整 Git 历史，用于读取文件的真实修改时间
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 关键步骤：强制清理环境，防止使用仓库中权限错误的 node_modules
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Generate File Tree
+        run: npm run gen-tree
+
+      - name: Generate Raw Source Files
+        run: npm run gen-raw
+      
+      - name: Generate Music Playlist
+        run: npm run gen-music
+
+      - name: Generate Wallpapers List
+        run: npm run gen-wallpapers
+
+      - name: Build
+        run: npm run build
+
+      - name: Copy Content to Dist
+        run: |
+          mkdir -p dist/notes
+          if [ -d "notes" ]; then cp -r notes/* dist/notes/ || true; fi
+          if [ -d "public" ]; then cp -r public/* dist/ || true; fi
+          touch dist/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
