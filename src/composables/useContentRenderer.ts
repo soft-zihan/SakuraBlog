@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, type Ref } from 'vue'
+import { ref, computed, nextTick, watch, onUnmounted, type Ref } from 'vue'
 import { marked } from 'marked'
 import hljs from 'highlight.js/lib/common'
 import type { FileNode, TocItem } from '../types'
@@ -10,10 +10,11 @@ import { sanitizeHtml } from '../utils/sanitize'
  * 内容渲染 composable
  * 负责 Markdown 渲染、TOC 生成、语法高亮等
  */
-export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode: Ref<boolean>) {
+export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode: Ref<boolean>, scrollContainer?: Ref<HTMLElement | null>) {
   const renderedHtml = ref('')
   const toc = ref<TocItem[]>([])
   const activeHeaderId = ref<string>('')
+  let boundScrollContainer: HTMLElement | null = null
 
   const splitPathSuffix = (input: string) => {
     const trimmed = input.trim()
@@ -227,11 +228,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     toc.value = headers
 
     nextTick(() => {
-      const el = document.getElementById('scroll-container')
-      if (el) {
-        el.removeEventListener('scroll', updateActiveHeader)
-        el.addEventListener('scroll', updateActiveHeader)
-      }
+      updateActiveHeader()
     })
   }
 
@@ -239,7 +236,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
    * 更新激活的标题
    */
   const updateActiveHeader = () => {
-    const container = document.getElementById('scroll-container')
+    const container = scrollContainer?.value || null
     if (!container) return
     const scrollPosition = container.scrollTop
 
@@ -260,8 +257,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
    */
   const scrollToHeader = (id: string) => {
     const el = document.getElementById(id)
-    const container = document.getElementById('scroll-container')
-    if (el && container) {
+    if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       activeHeaderId.value = id
     }
@@ -274,6 +270,24 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     if (!activeHeaderId.value) return 0
     const idx = toc.value.findIndex(t => t.id === activeHeaderId.value)
     return idx * 28
+  })
+
+  if (scrollContainer) {
+    watch(scrollContainer, (el) => {
+      if (boundScrollContainer && boundScrollContainer !== el) {
+        boundScrollContainer.removeEventListener('scroll', updateActiveHeader)
+      }
+      if (el && boundScrollContainer !== el) {
+        el.addEventListener('scroll', updateActiveHeader)
+      }
+      boundScrollContainer = el
+    }, { immediate: true })
+  }
+
+  onUnmounted(() => {
+    if (boundScrollContainer) {
+      boundScrollContainer.removeEventListener('scroll', updateActiveHeader)
+    }
   })
 
   return {

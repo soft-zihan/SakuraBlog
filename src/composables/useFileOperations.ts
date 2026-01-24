@@ -1,10 +1,11 @@
+import type { Ref } from 'vue';
 import { useAppStore } from '../stores/appStore';
 import { useRouting } from './useRouting';
 import { fetchFileContent } from '../utils/fileUtils';
 import type { FileNode } from '../types';
 import { useSelectionMenu } from './useSelectionMenu';
 
-export function useFileOperations() {
+export function useFileOperations(scrollContainer?: Ref<HTMLElement | null>) {
   const appStore = useAppStore();
   const { updateUrl } = useRouting();
   const { hideSelectionMenu } = useSelectionMenu();
@@ -24,7 +25,7 @@ export function useFileOperations() {
     
     updateUrl(file.path);
     
-    const container = document.getElementById('scroll-container');
+    const container = scrollContainer?.value || null;
     if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
 
     hideSelectionMenu();

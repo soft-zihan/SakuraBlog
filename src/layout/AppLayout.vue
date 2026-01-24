@@ -131,10 +131,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick, defineAsyncComponent } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch, defineAsyncComponent } from 'vue';
 import { useAppStore } from '../stores/appStore';
 import { useMusicStore } from '../stores/musicStore';
 import { I18N } from '../constants';
+import type { BreadcrumbItem, FileNode } from '../types';
 import AppSidebar from '../components/AppSidebar.vue';
 import AppHeader from '../components/AppHeader.vue';
 import WallpaperLayer from '../components/WallpaperLayer.vue';
@@ -145,17 +146,21 @@ import MiniPlayer from '../components/MiniPlayer.vue';
 const RightSidebar = defineAsyncComponent(() => import('../components/RightSidebar.vue'));
 
 const props = defineProps<{
-  filteredFileSystem: any[];
-  filteredFlatFiles: any[];
-  labFolder: any;
-  resourceCategories: any[];
-  labTabs: any[];
+  filteredFileSystem: FileNode[];
+  filteredFlatFiles: FileNode[];
+  labFolder: FileNode | null;
+  resourceCategories: Array<{
+    title: string;
+    items: Array<{ name: string; url: string; icon: string; desc: string }>;
+  }>;
+  labTabs: Array<{ id: string; shortLabel: string; icon: string; noteNum: number }>;
   labDashboardTab: string;
   commentCounts: Record<string, number>;
   getArticleViews: (path: string) => number;
   currentPath: string;
-  breadcrumbs: any[];
+  breadcrumbs: BreadcrumbItem[];
   dualColumnMode: boolean;
+  scrollContainer: HTMLElement | null;
 }>();
 
 const emit = defineEmits([
@@ -175,6 +180,7 @@ const headerHidden = ref(false);
 const headerRef = ref<InstanceType<typeof AppHeader> | null>(null);
 const lastScrollY = ref(0);
 const isMobile = ref(false);
+const activeScrollContainer = ref<HTMLElement | null>(null);
 const handleRightSidebarThemePanel = () => {
   headerRef.value?.toggleThemePanel?.();
 };
@@ -199,10 +205,7 @@ const handleScroll = () => {
     headerHidden.value = false;
     return;
   }
-  // If theme panel is open logic is missing here as state is local in App.vue originally
-  
-  const scrollContainer = document.getElementById('scroll-container');
-  const currentScrollY = scrollContainer?.scrollTop || 0;
+  const currentScrollY = activeScrollContainer.value?.scrollTop || 0;
   const delta = currentScrollY - lastScrollY.value;
 
   if (Math.abs(delta) > 5) {
@@ -215,22 +218,24 @@ const handleScroll = () => {
 onMounted(() => {
   checkMobile();
   window.addEventListener('resize', checkMobile);
-  
-  nextTick(() => {
-    const scrollEl = document.getElementById('scroll-container');
-    if (scrollEl) {
-      scrollEl.addEventListener('scroll', handleScroll, { passive: true });
-    }
-  });
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile);
-  const scrollEl = document.getElementById('scroll-container');
-  if (scrollEl) {
-    scrollEl.removeEventListener('scroll', handleScroll);
+  if (activeScrollContainer.value) {
+    activeScrollContainer.value.removeEventListener('scroll', handleScroll);
   }
 });
+
+watch(() => props.scrollContainer, (el) => {
+  if (activeScrollContainer.value && activeScrollContainer.value !== el) {
+    activeScrollContainer.value.removeEventListener('scroll', handleScroll);
+  }
+  if (el && activeScrollContainer.value !== el) {
+    el.addEventListener('scroll', handleScroll, { passive: true });
+  }
+  activeScrollContainer.value = el;
+}, { immediate: true });
 
 defineExpose({
   isMobile,

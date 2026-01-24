@@ -11,6 +11,7 @@
     :current-path="currentPath"
     :breadcrumbs="breadcrumbs"
     :dual-column-mode="dualColumnMode"
+    :scroll-container="scrollContainer"
     @reset="resetToHome"
     @select-tool="selectTool"
     @toggle-folder="toggleFolder"
@@ -57,6 +58,7 @@
       :get-article-views="getArticleViews"
       :get-article-comments="getArticleComments"
       :on-content-click="handleContentClickEvent"
+      :markdown-viewer-ref="markdownViewerRef"
       @update:labDashboardTab="handleLabTabChange"
       @tab-change="handleLabTabChange"
       @select-tool="selectTool"
@@ -64,6 +66,7 @@
       @open-file="openFile"
       @update-comment-count="handleCommentCountUpdate"
       @load-random-poem="loadRandomPoem"
+      @scroll-container-change="handleScrollContainerChange"
       @open-search="appStore.showSearch = true; if (layoutRef?.isMobile) appStore.sidebarOpen = false; appStore.setRightSidebarOpen(false)"
       @open-settings="appStore.showSettings = true; if (layoutRef?.isMobile) appStore.sidebarOpen = false; appStore.setRightSidebarOpen(false)"
       @open-music="musicStore.showMusicPlayer = true; if (layoutRef?.isMobile) appStore.sidebarOpen = false; appStore.setRightSidebarOpen(false)"
@@ -184,6 +187,7 @@ const articleStore = useArticleStore();
 const { autoChangeWallpaper } = useWallpapers();
 const musicStore = useMusicStore();
 const { showToast } = useToast();
+const markdownViewerRef = ref<HTMLElement | null>(null);
 
 // =====================
 // Search
@@ -199,7 +203,7 @@ const { handleImageClick } = lightbox;
 // =====================
 // Selection Menu
 // =====================
-const { selectionMenu, applyFormat, hideSelectionMenu, handleSelectionChange } = useSelectionMenu();
+const { selectionMenu, applyFormat, hideSelectionMenu, handleSelectionChange } = useSelectionMenu(markdownViewerRef, showToast);
 
 const applyFormatHandler = (format: string) => {
   const errorMsg = lang.value === 'zh' ? '应用格式失败' : 'Format failed';
@@ -233,8 +237,9 @@ const { initCodeOpener, openCodeByPath } = useCodeOpener();
 initTheme();
 initCodeOpener();
 
+const scrollContainer = ref<HTMLElement | null>(null);
 const { updateUrl, updateLabUrl } = useRouting();
-const { openFile, openFolder, handleSidebarFileSelect } = useFileOperations();
+const { openFile, openFolder, handleSidebarFileSelect } = useFileOperations(scrollContainer);
 const { filteredFileSystem, filteredFlatFiles, labFolder, collectAllTags } = useFilteredFiles();
 
 useKeyboardShortcuts();
@@ -327,6 +332,10 @@ const handleLabTabChange = (tab: string) => {
   }
 };
 
+const handleScrollContainerChange = (el: HTMLElement | null) => {
+  scrollContainer.value = el;
+};
+
 const openLabDashboard = (tab?: string) => {
   appStore.viewMode = 'lab';
   appStore.currentTool = 'dashboard';
@@ -391,7 +400,8 @@ const { handleContentClick } = useContentClick(
 const handleLinkCapture = (e: Event) => {
   const mouseEvent = e as MouseEvent;
   const target = mouseEvent.target as HTMLElement;
-  if (!target.closest('#markdown-viewer')) return;
+  const viewer = markdownViewerRef.value;
+  if (!viewer || !viewer.contains(target)) return;
   
   const link = target.closest('a');
   if (link) {

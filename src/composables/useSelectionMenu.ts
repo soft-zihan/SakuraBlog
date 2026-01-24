@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { useToast } from './useToast'
 
 export interface SelectionMenuState {
@@ -11,6 +11,10 @@ export interface SelectionMenuState {
 // 状态 (State)
 const selectionMenu = ref<SelectionMenuState>({ show: false, x: 0, y: 0, locked: false })
 const lastSelectionRange = ref<Range | null>(null)
+let activeViewerRef: Ref<HTMLElement | null> | null = null
+let activeShowToast: ((msg: string) => void) | null = null
+
+const getViewerElement = () => activeViewerRef?.value || null
 
 // 格式化类型映射
 const formatClassMap: Record<string, string> = {
@@ -30,7 +34,7 @@ const getSelectionRangeInViewer = () => {
   const selection = window.getSelection()
   if (!selection || selection.rangeCount === 0) return null
   const range = selection.getRangeAt(0)
-  const viewer = document.getElementById('markdown-viewer')
+  const viewer = getViewerElement()
   if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) return null
   return { range, viewer }
 }
@@ -52,7 +56,7 @@ const handleSelection = () => {
     if (!selectionMenu.value.locked) selectionMenu.value.show = false
     return
   }
-  const viewer = document.getElementById('markdown-viewer')
+  const viewer = getViewerElement()
   if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) {
     selectionMenu.value.show = false
     return
@@ -100,7 +104,7 @@ const handleSelectionContextMenu = (e: MouseEvent) => {
     return
   }
 
-  const viewer = document.getElementById('markdown-viewer')
+  const viewer = getViewerElement()
   if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) {
     selectionMenu.value.show = false
     return
@@ -127,7 +131,7 @@ const handleSelectionChange = () => {
     return
   }
   const range = sel.getRangeAt(0)
-  const viewer = document.getElementById('markdown-viewer')
+  const viewer = getViewerElement()
   if (!viewer || !viewer.contains(range.startContainer) || !viewer.contains(range.endContainer)) {
     // 选区不在 viewer 中时隐藏菜单
     selectionMenu.value.show = false
@@ -187,8 +191,8 @@ const applyFormat = (type: string, errorMsg: string) => {
     selectionMenu.value.show = false
     selectionMenu.value.locked = false
   } catch (e) {
-    const { showToast } = useToast()
-    showToast(errorMsg)
+    const toast = activeShowToast || useToast().showToast
+    toast(errorMsg)
   }
 }
 
@@ -210,7 +214,9 @@ const lockSelectionMenu = () => {
 /**
  * 文本选择菜单 composable
  */
-export function useSelectionMenu() {
+export function useSelectionMenu(viewerRef?: Ref<HTMLElement | null>, showToast?: (msg: string) => void) {
+  if (viewerRef) activeViewerRef = viewerRef
+  if (showToast) activeShowToast = showToast
   return {
     selectionMenu,
     lastSelectionRange,

@@ -1,7 +1,7 @@
 <template>
   <div class="flex-1 flex overflow-hidden z-10 relative">
     <div 
-      id="scroll-container" 
+      :ref="scrollContainerRef"
       class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 lg:p-8 w-full"
     >
       <div 
@@ -107,6 +107,7 @@
         <div 
           v-if="!file.isSource && !isRawMode"
           id="markdown-viewer"
+          :ref="markdownViewerRef"
           v-html="renderedHtml" 
           class="markdown-body"
           @click="handleContentClickEvent"
@@ -258,7 +259,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef, ref, watch, onMounted, nextTick } from 'vue';
+import { computed, toRef, ref, watch, onMounted, nextTick, type Ref } from 'vue';
 import type { FileNode } from '../types';
 import { useAppStore } from '../stores/appStore';
 import { useArticleStore } from '../stores/articleStore';
@@ -279,6 +280,8 @@ const props = defineProps<{
   getArticleViews: (path: string) => number;
   getArticleComments: (path: string) => number;
   onContentClick: (e: MouseEvent) => void;
+  scrollContainerRef: Ref<HTMLElement | null>;
+  markdownViewerRef: Ref<HTMLElement | null>;
 }>();
 
 const emit = defineEmits([
@@ -294,6 +297,7 @@ const emit = defineEmits([
 
 const appStore = useAppStore();
 const articleStore = useArticleStore();
+const markdownViewerRef = props.markdownViewerRef;
 
 const currentFile = toRef(props, 'file');
 const isRawMode = toRef(props, 'isRawMode');
@@ -329,7 +333,7 @@ watch(() => appStore.searchTarget, (target) => {
   if (target) {
     nextTick(() => {
       setTimeout(() => {
-        const viewer = document.getElementById('markdown-viewer');
+        const viewer = props.markdownViewerRef?.value || null;
         if (viewer) {
           // Use TreeWalker to find text node
           const walker = document.createTreeWalker(viewer, NodeFilter.SHOW_TEXT, null);
@@ -369,7 +373,7 @@ watch(() => appStore.searchTarget, (target) => {
 const { currentMeta, currentTags, currentAuthorName, currentAuthorUrl, currentWordCount, currentLineCount } = useArticleMeta(currentFile);
 
 // Renderer
-const { renderedHtml, toc, activeHeaderId, updateRenderedContent, scrollToHeader, setupMarkedRenderer, generateToc } = useContentRenderer(currentFile, isRawMode);
+const { renderedHtml, toc, activeHeaderId, updateRenderedContent, scrollToHeader, setupMarkedRenderer, generateToc } = useContentRenderer(currentFile, isRawMode, props.scrollContainerRef);
 
 onMounted(() => {
   setupMarkedRenderer();
@@ -387,7 +391,7 @@ const showToast = (msg: string) => appStore.showToast(msg);
 const rawEditor = useRawEditor(currentFile, isRawMode, updateRenderedContent, showToast, computed(() => props.lang));
 
 // Selection Menu
-const selectionMenuComposable = useSelectionMenu(showToast);
+const selectionMenuComposable = useSelectionMenu(props.markdownViewerRef, showToast);
 const { selectionMenu, handleSelection, handleSelectionContextMenu, applyFormat } = selectionMenuComposable;
 
 const handleSelectionEvent = (e: MouseEvent | TouchEvent) => handleSelection(e);

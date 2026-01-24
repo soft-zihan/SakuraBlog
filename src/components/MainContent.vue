@@ -5,7 +5,7 @@
   >
     
     <!-- Lab Tool View (Unified Dashboard) -->
-    <div v-if="viewMode === 'lab' && currentTool === 'dashboard'" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+    <div v-if="viewMode === 'lab' && currentTool === 'dashboard'" :ref="scrollContainerRef" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
        <div class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
          <LabDashboard 
            :lang="lang" 
@@ -23,21 +23,21 @@
     </div>
 
     <!-- Lab: Event Handling -->
-    <div v-else-if="viewMode === 'lab' && currentTool === 'event-handling'" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+    <div v-else-if="viewMode === 'lab' && currentTool === 'event-handling'" :ref="scrollContainerRef" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
        <div class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
          <LabEventHandling :lang="lang" />
        </div>
     </div>
 
     <!-- Lab: Slot System -->
-    <div v-else-if="viewMode === 'lab' && currentTool === 'slot'" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+    <div v-else-if="viewMode === 'lab' && currentTool === 'slot'" :ref="scrollContainerRef" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
        <div class="w-full max-w-6xl mx-auto animate-fade-in pb-20">
          <LabSlot :lang="lang" />
        </div>
     </div>
 
     <!-- Folder View Component -->
-    <div v-else-if="currentFolder" id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
+    <div v-else-if="currentFolder" :ref="scrollContainerRef" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 md:p-6 lg:p-8 w-full">
       <FolderView 
         :current-folder="currentFolder"
         @open-folder="$emit('open-folder', $event)"
@@ -56,6 +56,8 @@
        :getArticleViews="getArticleViews"
        :getArticleComments="getArticleComments"
        :onContentClick="onContentClick"
+       :scroll-container-ref="scrollContainerRef"
+       :markdown-viewer-ref="markdownViewerRef"
        @update-comment-count="$emit('update-comment-count', $event)"
        @open-file="$emit('open-file', $event)"
        @open-search="$emit('open-search')"
@@ -69,7 +71,7 @@
   </div>
 
   <!-- Empty State / Home -->
-  <div v-else id="scroll-container" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-6">
+  <div v-else :ref="scrollContainerRef" class="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-6">
     <WelcomeScreen
       :t="t"
       :lang="lang"
@@ -86,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, type Ref } from 'vue';
 import type { FileNode } from '../types';
 import type { GuwenItem } from '../composables/usePoem';
 
@@ -118,9 +121,10 @@ defineProps<{
   getArticleViews: (path: string) => number;
   getArticleComments: (path: string) => number;
   onContentClick: (e: MouseEvent) => void;
+  markdownViewerRef: Ref<HTMLElement | null>;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:labDashboardTab', val: string): void;
   (e: 'tab-change', val: string): void;
   (e: 'select-tool', val: string): void;
@@ -128,5 +132,12 @@ defineEmits<{
   (e: 'open-file', val: FileNode): void;
   (e: 'update-comment-count', val: { path: string; count: number }): void;
   (e: 'load-random-poem'): void;
+  (e: 'scroll-container-change', val: HTMLElement | null): void;
 }>();
+
+const scrollContainerRef = ref<HTMLElement | null>(null);
+
+watch(scrollContainerRef, (el) => {
+  emit('scroll-container-change', el);
+}, { immediate: true });
 </script>
