@@ -10,7 +10,8 @@ export const LEARNING_STAGES = [
   { id: 'engineering', name: 'Engineering', nameZh: '前端工程化' },
   { id: 'vue-core', name: 'Vue Core', nameZh: 'Vue 核心' },
   { id: 'vue-advanced', name: 'Vue Advanced', nameZh: 'Vue 进阶' },
-  { id: 'challenge', name: 'Challenge', nameZh: '综合挑战' }
+  { id: 'challenge', name: 'Challenge', nameZh: '综合挑战' },
+  { id: 'extensions', name: 'Extensions', nameZh: '扩展' }
 ] as const
 
 export type StageId = typeof LEARNING_STAGES[number]['id']
@@ -18,9 +19,10 @@ export type StageId = typeof LEARNING_STAGES[number]['id']
 // 实验室列表
 export const LABS = [
   // Stage 1: Foundation
-  { id: 'LabCodeEvolution', stageId: 'foundation', name: 'Code Evolution', nameZh: '代码演进史' },
+  { id: 'LabCodeEvolution', stageId: 'extensions', name: 'Code Evolution', nameZh: '代码演进史' },
   { id: 'LabHtml', stageId: 'foundation', name: 'HTML Basics', nameZh: 'HTML 基础' },
   { id: 'LabHtmlBasics', stageId: 'foundation', name: 'HTML Elements', nameZh: 'HTML 元素' },
+  { id: 'LabBrowserPipeline', stageId: 'extensions', name: 'Rendering Pipeline', nameZh: '渲染流水线' },
   
   // Stage 2: JS Basics
   { id: 'LabJsBasics', stageId: 'js-basics', name: 'JS Basics', nameZh: 'JS 基础语法' },
@@ -28,7 +30,8 @@ export const LABS = [
   // Stage 3: CSS
   { id: 'LabCssBasics', stageId: 'css-layout', name: 'CSS Basics', nameZh: 'CSS 基础' },
   { id: 'LabCssLayout', stageId: 'css-layout', name: 'CSS Layout', nameZh: 'CSS 布局' },
-  { id: 'LabCssAnimation', stageId: 'css-layout', name: 'CSS Animation', nameZh: 'CSS 动画' },
+  { id: 'LabCssAnimation', stageId: 'extensions', name: 'CSS Animation', nameZh: 'CSS 动画' },
+  { id: 'LabCssPerformance', stageId: 'extensions', name: 'CSS Performance', nameZh: 'CSS 性能' },
   
   // Stage 4: JS Advanced
   { id: 'LabJs', stageId: 'js-advanced', name: 'JS Core', nameZh: 'JS 核心' },
@@ -37,13 +40,14 @@ export const LABS = [
   { id: 'LabAsync', stageId: 'js-advanced', name: 'Async', nameZh: '异步编程' },
   { id: 'LabJsAdvanced', stageId: 'js-advanced', name: 'JS Advanced', nameZh: 'JS 进阶' },
   { id: 'LabTypeScript', stageId: 'js-advanced', name: 'TypeScript', nameZh: 'TypeScript' },
+  { id: 'LabTypeScriptAdvanced', stageId: 'extensions', name: 'TypeScript Advanced', nameZh: 'TypeScript 进阶' },
   
   // Stage 5: Engineering
   { id: 'LabModuleSystem', stageId: 'engineering', name: 'Modules', nameZh: '模块系统' },
   { id: 'LabNpm', stageId: 'engineering', name: 'NPM', nameZh: '包管理' },
   { id: 'LabBuildTools', stageId: 'engineering', name: 'Build Tools', nameZh: '构建工具' },
-  { id: 'LabTailwind', stageId: 'engineering', name: 'Tailwind', nameZh: 'Tailwind CSS' },
-  { id: 'LabCssFrameworks', stageId: 'engineering', name: 'CSS Frameworks', nameZh: 'CSS 框架' },
+  { id: 'LabTailwind', stageId: 'extensions', name: 'Tailwind', nameZh: 'Tailwind CSS' },
+  { id: 'LabCssFrameworks', stageId: 'extensions', name: 'CSS Frameworks', nameZh: 'CSS 框架' },
   
   // Stage 6: Vue Core
   { id: 'LabReactivity', stageId: 'vue-core', name: 'Reactivity', nameZh: '响应式' },
@@ -139,6 +143,7 @@ export const useLearningStore = defineStore('learning', () => {
   // 检查是否可以进入某个阶段（前置阶段完成度>=50%）
   const canAccessStage = computed(() => {
     return (stageId: StageId) => {
+      if (stageId === 'extensions') return true
       const stageIndex = LEARNING_STAGES.findIndex(s => s.id === stageId)
       if (stageIndex === 0) return true // 第一阶段始终可访问
       

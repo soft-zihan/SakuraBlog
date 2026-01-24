@@ -152,15 +152,20 @@ const showLabSidebar = ref(true)
 
 // Lab tabs configuration
 const labTabs = computed(() => [
-  { id: 'note1-html-css', icon: '🎨', shortLabel: isZh.value ? 'HTML/CSS' : 'HTML/CSS' },
-  { id: 'note2-javascript', icon: '⚡', shortLabel: 'JavaScript' },
-  { id: 'note3-vue-basics', icon: '🥝', shortLabel: isZh.value ? 'Vue基础' : 'Vue Basics' },
-  { id: 'note4-vue-engineering', icon: '🚀', shortLabel: isZh.value ? '工程化' : 'Engineering' },
+  { id: 'project-builder', icon: '🏗️', shortLabel: isZh.value ? 'Tlias 主线' : 'Tlias Path' },
+  { id: 'foundation', icon: '🧱', shortLabel: isZh.value ? '网页基础' : 'Foundation' },
+  { id: 'js-basics', icon: '⚡', shortLabel: isZh.value ? 'JS 基础' : 'JS Basics' },
+  { id: 'css-layout', icon: '🎨', shortLabel: isZh.value ? 'CSS 布局' : 'CSS Layout' },
+  { id: 'js-advanced', icon: '🛡️', shortLabel: isZh.value ? 'JS 进阶/TS' : 'JS Adv/TS' },
+  { id: 'engineering', icon: '🚀', shortLabel: isZh.value ? '工程化' : 'Engineering' },
+  { id: 'vue-core', icon: '🥝', shortLabel: isZh.value ? 'Vue 核心' : 'Vue Core' },
+  { id: 'vue-advanced', icon: '🧩', shortLabel: isZh.value ? 'Vue 进阶' : 'Vue Adv' },
   { id: 'challenge', icon: '🏆', shortLabel: isZh.value ? '挑战' : 'Challenge' },
+  { id: 'extensions', icon: '✨', shortLabel: isZh.value ? '扩展' : 'Extensions' },
 ])
 
 // Selected lab tab
-const selectedLabTab = ref(props.labDashboardTab || 'note1-html-css')
+const selectedLabTab = ref(props.labDashboardTab || 'project-builder')
 
 // Sync with props
 watch(() => props.labDashboardTab, (val) => {

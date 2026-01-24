@@ -195,7 +195,7 @@
         </div>
 
         <div v-if="gymLevel === 1" class="space-y-4">
-          <p class="text-gray-300">1. 实现一个类型 `MyPick`，模拟 TS 内置的 `Pick<T, K>`。</p>
+          <p class="text-gray-300">1. 实现一个类型 `MyPick`，模拟 TS 内置的 `Pick&lt;T, K&gt;`。</p>
           <div class="bg-black rounded p-4 font-mono text-sm text-blue-300">
             type MyPick&lt;T, K extends keyof T&gt; = {<br>
             &nbsp;&nbsp;[P in K]: T[P]<br>
@@ -205,7 +205,7 @@
         </div>
 
         <div v-if="gymLevel === 2" class="space-y-4">
-          <p class="text-gray-300">2. 实现 `Readonly<T>`。</p>
+          <p class="text-gray-300">2. 实现 `Readonly&lt;T&gt;`。</p>
           <div class="bg-black rounded p-4 font-mono text-sm text-blue-300">
             type MyReadonly&lt;T&gt; = {<br>
             &nbsp;&nbsp;readonly [P in keyof T]: T[P]<br>

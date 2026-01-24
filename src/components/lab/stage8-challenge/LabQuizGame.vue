@@ -54,14 +54,14 @@
       <!-- Question -->
       <div class="flex-1 flex items-center justify-center mb-8 min-h-[120px]">
         <h3 class="text-xl md:text-2xl font-bold text-center text-gray-800 dark:text-gray-100 leading-relaxed">
-          {{ currentQuestion.text }}
+          {{ currentQuestionSafe.text }}
         </h3>
       </div>
 
       <!-- Options -->
       <div class="grid grid-cols-1 gap-3 mb-6">
         <button 
-          v-for="(opt, idx) in currentQuestion.options" 
+          v-for="(opt, idx) in currentQuestionSafe.options" 
           :key="idx"
           @click="selectAnswer(idx)"
           class="p-4 rounded-xl border-2 font-bold text-left transition-all relative overflow-hidden group flex items-center"
@@ -69,7 +69,7 @@
              hiddenOptions.includes(idx) ? 'opacity-20 pointer-events-none filter blur-sm' : '',
              selectedAnswer === null 
                ? 'border-gray-200 dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-gray-700' 
-               : (idx === currentQuestion.correct ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : (idx === selectedAnswer ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'opacity-40'))
+               : (idx === currentCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : (idx === selectedAnswer ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'opacity-40'))
           ]"
           :disabled="selectedAnswer !== null || hiddenOptions.includes(idx)"
         >
@@ -79,8 +79,8 @@
           <span class="flex-1">{{ opt }}</span>
           
           <!-- Result Icon -->
-          <span v-if="selectedAnswer !== null && idx === currentQuestion.correct" class="text-green-500 ml-2">✓</span>
-          <span v-if="selectedAnswer !== null && idx === selectedAnswer && idx !== currentQuestion.correct" class="text-red-500 ml-2">✗</span>
+          <span v-if="selectedAnswer !== null && idx === currentCorrect" class="text-green-500 ml-2">✓</span>
+          <span v-if="selectedAnswer !== null && idx === selectedAnswer && idx !== currentCorrect" class="text-red-500 ml-2">✗</span>
         </button>
       </div>
 
@@ -341,6 +341,8 @@ const currentQuestion = computed(() => {
     ...q.content[props.lang] // Flatten localized text/options into the object
   }
 });
+const currentQuestionSafe = computed(() => currentQuestion.value ?? { text: '', options: [], correct: -1 })
+const currentCorrect = computed(() => currentQuestion.value?.correct ?? -1)
 const feedbackClass = computed(() => feedback.value.includes('✓') ? 'text-green-500 animate-bounce' : 'text-red-500 animate-pulse');
 
 // --- Methods ---

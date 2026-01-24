@@ -27,6 +27,86 @@
       </div>
     </div>
 
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white/90 dark:bg-gray-800/70 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+              <span class="text-base">📈</span> {{ isZh ? '学习进度' : 'Learning Progress' }}
+            </h3>
+            <div class="flex items-center gap-2">
+              <button
+                v-if="activeStageId"
+                @click="completeCurrentStage"
+                class="px-3 py-1.5 text-xs font-bold rounded-lg bg-[var(--primary-500)] hover:bg-[var(--primary-600)] text-white transition-colors"
+              >
+                {{ isZh ? '完成本阶段' : 'Complete Stage' }}
+              </button>
+              <button
+                @click="resetLearningProgress"
+                class="px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
+              >
+                {{ isZh ? '重置' : 'Reset' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="text-2xl font-extrabold text-[var(--primary-600)] dark:text-[var(--primary-300)] w-16 text-right">
+              {{ learningStore.overallProgress.percent }}%
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-[var(--primary-500)] rounded-full transition-all duration-500"
+                  :style="{ width: `${learningStore.overallProgress.percent}%` }"
+                ></div>
+              </div>
+              <div class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                {{ learningStore.overallProgress.completed }} / {{ learningStore.overallProgress.total }}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+            <div
+              v-for="p in stageProgressItems"
+              :key="p.stageId"
+              class="p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/20"
+            >
+              <div class="flex items-center justify-between text-xs">
+                <div class="font-bold text-gray-700 dark:text-gray-200">
+                  {{ p.label }}
+                </div>
+                <div class="font-mono text-gray-500 dark:text-gray-400">
+                  {{ p.percent }}%
+                </div>
+              </div>
+              <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mt-2">
+                <div class="h-full bg-[var(--primary-500)] rounded-full transition-all duration-500" :style="{ width: `${p.percent}%` }"></div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="learningStore.nextRecommendedLab" class="mt-4 p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-white/70 dark:bg-gray-900/10">
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              {{ isZh ? '下一推荐' : 'Next Recommended' }}
+            </div>
+            <div class="text-sm font-bold text-gray-700 dark:text-gray-200 mt-1">
+              {{ isZh ? learningStore.nextRecommendedLab.nameZh : learningStore.nextRecommendedLab.name }}
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white/90 dark:bg-gray-800/70 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+          <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2 mb-3">
+            <span class="text-base">🧭</span> {{ isZh ? '技能雷达' : 'Skill Radar' }}
+          </h3>
+          <SkillRadar :skills="skillRadarItems" :size="240" />
+        </div>
+      </div>
+    </div>
+
     <!-- Content Area -->
     <div class="min-h-[500px] transition-all duration-500">
 
@@ -36,11 +116,7 @@
       </div>
 
       <!-- Stage 1: HTML & CSS -->
-      <div v-else-if="activeTab === 'stage-1'" class="space-y-12 animate-fade-in">
-        <section>
-          <LabCodeEvolution :lang="lang" />
-        </section>
-
+      <div v-else-if="activeTab === 'foundation'" class="space-y-12 animate-fade-in">
         <!-- Standards Interactive -->
         <section class="max-w-4xl mx-auto">
           <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-8 border border-[var(--primary-100)] dark:border-gray-700 shadow-xl relative overflow-hidden">
@@ -124,26 +200,50 @@
           <LabHtmlBasics :lang="lang" />
         </section>
 
-        <section>
-          <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2">
-            <span class="text-2xl">🧠</span> {{ isZh ? '浏览器渲染流水线' : 'Rendering Pipeline' }}
-          </h2>
-          <LabBrowserPipeline :lang="lang" />
-        </section>
-
         <NextStageGuide 
           :is-zh="isZh" 
           :next-text="isZh ? '你已经理解了网页的基本结构与样式！接下来深入学习 JavaScript。' : 'You understand web structure and styling! Next, dive into JavaScript.'"
-          @next="activeTab = 'stage-2'"
+          @next="activeTab = 'js-basics'"
         />
       </div>
 
       <!-- Stage 2: JS Core -->
-      <div v-else-if="activeTab === 'stage-2'" class="space-y-12 animate-fade-in">
+      <div v-else-if="activeTab === 'js-basics'" class="space-y-12 animate-fade-in">
         <section>
           <LabJsBasics :lang="lang" />
         </section>
 
+        <NextStageGuide 
+          :is-zh="isZh" 
+          :next-text="isZh ? '掌握了 JS 核心，接下来我们来看看现代 CSS 布局。' : 'Mastered JS Core? Next let\'s check out modern CSS layout.'"
+          @next="activeTab = 'css-layout'"
+        />
+      </div>
+
+      <!-- Stage 3: CSS Layout -->
+      <div v-else-if="activeTab === 'css-layout'" class="space-y-12 animate-fade-in">
+        <section>
+          <div class="max-w-3xl mx-auto px-4 mb-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-blue-400">
+              💡 {{ isZh ? 'CSS 负责「穿衣打扮」。通过选择器、属性值的组合，我们可以精确控制每个元素的外观。' : 'CSS handles the "styling". Through selectors and property values, we can precisely control each element\'s appearance.' }}
+            </p>
+          </div>
+          <LabCssBasics :lang="lang" />
+        </section>
+
+        <section>
+          <LabCssLayout :lang="lang" />
+        </section>
+
+        <NextStageGuide 
+          :is-zh="isZh" 
+          :next-text="isZh ? '布局搞定！现在进入 TypeScript 和异步编程的世界。' : 'Layout done! Now enter the world of TypeScript and Async.' "
+          @next="activeTab = 'js-advanced'"
+        />
+      </div>
+
+      <!-- Stage 4: TS & Async -->
+      <div v-else-if="activeTab === 'js-advanced'" class="space-y-12 animate-fade-in">
         <section>
           <div class="max-w-3xl mx-auto px-4 mb-6">
             <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-yellow-400">
@@ -179,51 +279,6 @@
           <LabEventLoop />
         </section>
 
-        <NextStageGuide 
-          :is-zh="isZh" 
-          :next-text="isZh ? '掌握了 JS 核心，接下来我们来看看现代 CSS 布局。' : 'Mastered JS Core? Next let\'s check out modern CSS layout.'"
-          @next="activeTab = 'stage-3'"
-        />
-      </div>
-
-      <!-- Stage 3: CSS Layout -->
-      <div v-else-if="activeTab === 'stage-3'" class="space-y-12 animate-fade-in">
-        <section>
-          <div class="max-w-3xl mx-auto px-4 mb-6">
-            <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-blue-400">
-              💡 {{ isZh ? 'CSS 负责「穿衣打扮」。通过选择器、属性值的组合，我们可以精确控制每个元素的外观。' : 'CSS handles the "styling". Through selectors and property values, we can precisely control each element\'s appearance.' }}
-            </p>
-          </div>
-          <LabCssBasics :lang="lang" />
-        </section>
-
-        <section>
-          <LabCssLayout :lang="lang" />
-        </section>
-
-        <section>
-          <h2 class="text-xl font-bold text-pink-600 dark:text-pink-400 mb-4 flex items-center gap-2">
-            <span class="text-2xl">🌸</span> {{ isZh ? 'CSS 动画' : 'CSS Animation' }}
-          </h2>
-          <LabCssAnimation :lang="lang" />
-        </section>
-
-        <section>
-          <h2 class="text-xl font-bold text-pink-600 dark:text-pink-400 mb-4 flex items-center gap-2">
-            <span class="text-2xl">🧩</span> {{ isZh ? 'CSS 性能与渲染成本' : 'CSS Performance' }}
-          </h2>
-          <LabCssPerformance :lang="lang" />
-        </section>
-
-        <NextStageGuide 
-          :is-zh="isZh" 
-          :next-text="isZh ? '布局搞定！现在进入 TypeScript 和异步编程的世界。' : 'Layout done! Now enter the world of TypeScript and Async.' "
-          @next="activeTab = 'stage-4'"
-        />
-      </div>
-
-      <!-- Stage 4: TS & Async -->
-      <div v-else-if="activeTab === 'stage-4'" class="space-y-12 animate-fade-in">
         <section class="max-w-4xl mx-auto">
           <h2 class="text-xl font-bold text-green-600 dark:text-green-400 mb-4 flex items-center gap-2 justify-center">
             <span class="text-2xl">📡</span> {{ t.lab_ajax_title }}
@@ -254,12 +309,12 @@
 
         <NextStageGuide 
           :is-zh="isZh" 
-          @next="activeTab = 'stage-5'"
+          @next="activeTab = 'engineering'"
         />
       </div>
 
       <!-- Stage 5: Engineering -->
-      <div v-else-if="activeTab === 'stage-5'" class="space-y-12 animate-fade-in">
+      <div v-else-if="activeTab === 'engineering'" class="space-y-12 animate-fade-in">
         <section>
           <LabModuleSystem :lang="lang" />
         </section>
@@ -282,22 +337,14 @@
           <LabBuildTools :lang="lang" />
         </section>
 
-        <section>
-          <LabTailwind :lang="lang" />
-        </section>
-
-        <section>
-          <LabCssFrameworks :lang="lang" />
-        </section>
-
         <NextStageGuide 
           :is-zh="isZh" 
-          @next="activeTab = 'stage-6'"
+          @next="activeTab = 'vue-core'"
         />
       </div>
 
       <!-- Stage 6: Vue Core -->
-      <div v-else-if="activeTab === 'stage-6'" class="space-y-12 animate-fade-in">
+      <div v-else-if="activeTab === 'vue-core'" class="space-y-12 animate-fade-in">
         <section>
           <div class="max-w-3xl mx-auto px-4 mb-6">
             <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-sakura-400">
@@ -366,12 +413,12 @@
 
         <NextStageGuide 
           :is-zh="isZh" 
-          @next="activeTab = 'stage-7'"
+          @next="activeTab = 'vue-advanced'"
         />
       </div>
 
       <!-- Stage 7: Vue Advanced -->
-      <div v-else-if="activeTab === 'stage-7'" class="space-y-12 animate-fade-in">
+      <div v-else-if="activeTab === 'vue-advanced'" class="space-y-12 animate-fade-in">
         <section>
           <div class="max-w-3xl mx-auto px-4 mb-6">
             <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-indigo-400">
@@ -424,12 +471,12 @@
 
         <NextStageGuide 
           :is-zh="isZh" 
-          @next="activeTab = 'stage-8'"
+          @next="activeTab = 'challenge'"
         />
       </div>
 
       <!-- Stage 8: Challenge -->
-      <div v-else-if="activeTab === 'stage-8'" class="animate-fade-in space-y-12">
+      <div v-else-if="activeTab === 'challenge'" class="animate-fade-in space-y-12">
         <div class="max-w-3xl mx-auto px-4">
           <div class="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-100 dark:border-orange-800/30">
             <h3 class="font-bold text-orange-800 dark:text-orange-200 mb-2">🏆 {{ isZh ? '挑战赛' : 'Challenge' }}</h3>
@@ -457,6 +504,56 @@
         </section>
       </div>
 
+      <div v-else-if="activeTab === 'extensions'" class="animate-fade-in space-y-12">
+        <div class="max-w-4xl mx-auto px-4">
+          <div class="bg-gradient-to-r from-gray-50 to-purple-50 dark:from-gray-900/40 dark:to-purple-900/20 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+              <span class="text-xl">✨</span> {{ isZh ? '扩展实验（可选加餐）' : 'Extensions (Optional)' }}
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {{ isZh ? '这些内容不强依赖主线项目，可按需学习与补强。' : 'These labs are optional and can be explored as needed.' }}
+            </p>
+          </div>
+        </div>
+
+        <section>
+          <LabCodeEvolution :lang="lang" />
+        </section>
+
+        <section>
+          <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2">
+            <span class="text-2xl">🧠</span> {{ isZh ? '浏览器渲染流水线' : 'Rendering Pipeline' }}
+          </h2>
+          <LabBrowserPipeline :lang="lang" />
+        </section>
+
+        <section>
+          <h2 class="text-xl font-bold text-pink-600 dark:text-pink-400 mb-4 flex items-center gap-2">
+            <span class="text-2xl">🌸</span> {{ isZh ? 'CSS 动画' : 'CSS Animation' }}
+          </h2>
+          <LabCssAnimation :lang="lang" />
+        </section>
+
+        <section>
+          <h2 class="text-xl font-bold text-pink-600 dark:text-pink-400 mb-4 flex items-center gap-2">
+            <span class="text-2xl">🧩</span> {{ isZh ? 'CSS 性能与渲染成本' : 'CSS Performance' }}
+          </h2>
+          <LabCssPerformance :lang="lang" />
+        </section>
+
+        <section>
+          <LabTailwind :lang="lang" />
+        </section>
+
+        <section>
+          <LabCssFrameworks :lang="lang" />
+        </section>
+
+        <section>
+          <LabTypeScriptAdvanced />
+        </section>
+      </div>
+
     </div>
   </div>
 </template>
@@ -464,6 +561,8 @@
 <script setup lang="ts">
 import { ref, computed, reactive, watch, onMounted } from 'vue'
 import { I18N } from '../../constants'
+import { useLearningStore, LEARNING_STAGES, LABS, type StageId } from '../../stores/learningStore'
+import SkillRadar from './SkillRadar.vue'
 
 // Stage 1: Foundation
 import LabCodeEvolution from './stage1-foundation/LabCodeEvolution.vue'
@@ -561,6 +660,56 @@ const isZh = computed(() => props.lang === 'zh')
 const activeTab = ref('project-builder')
 const labTabStorageKey = computed(() => `lab_active_tab_${props.lang}`)
 
+const learningStore = useLearningStore()
+
+const stageMetaById = computed(() => {
+  const map: Record<string, { name: string; nameZh: string }> = {}
+  for (const s of LEARNING_STAGES) map[s.id] = { name: s.name, nameZh: s.nameZh }
+  return map
+})
+
+const stageProgressItems = computed(() => {
+  return learningStore.stageProgress.map(p => ({
+    ...p,
+    label: isZh.value ? stageMetaById.value[p.stageId]?.nameZh : stageMetaById.value[p.stageId]?.name
+  }))
+})
+
+const activeStageId = computed<StageId | null>(() => {
+  if (activeTab.value === 'project-builder') return null
+  if (LEARNING_STAGES.some(s => s.id === activeTab.value)) return activeTab.value as StageId
+  return null
+})
+
+const skillRadarItems = computed(() => {
+  const byId = new Map(stageProgressItems.value.map(p => [p.stageId, p.percent]))
+  const js = Math.round(((byId.get('js-basics') || 0) + (byId.get('js-advanced') || 0)) / 2)
+  const vue = Math.round(((byId.get('vue-core') || 0) + (byId.get('vue-advanced') || 0)) / 2)
+  const ts = learningStore.completedLabs.includes('LabTypeScript') ? 100 : 0
+  return [
+    { name: isZh.value ? 'HTML 语义化' : 'HTML Semantics', value: byId.get('foundation') || 0 },
+    { name: isZh.value ? 'CSS 布局' : 'CSS Layout', value: byId.get('css-layout') || 0 },
+    { name: isZh.value ? 'JS 核心' : 'JS Core', value: js },
+    { name: 'TypeScript', value: ts },
+    { name: isZh.value ? 'Vue 生态' : 'Vue Ecosystem', value: vue },
+    { name: isZh.value ? '工程化' : 'Engineering', value: byId.get('engineering') || 0 }
+  ]
+})
+
+function completeStage(stageId: StageId) {
+  const labsInStage = LABS.filter(l => l.stageId === stageId)
+  for (const lab of labsInStage) learningStore.completeLab(lab.id)
+}
+
+function completeCurrentStage() {
+  if (!activeStageId.value) return
+  completeStage(activeStageId.value)
+}
+
+function resetLearningProgress() {
+  learningStore.resetProgress()
+}
+
 type LabTab = {
   id: string
   label: string
@@ -587,8 +736,8 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'LabProjectBuilder.vue'
   },
   { 
-    id: 'stage-1', 
-    label: isZh.value ? 'Stage 1: HTML & CSS' : 'Stage 1: HTML & CSS', 
+    id: 'foundation', 
+    label: isZh.value ? 'Stage 1: 网页基础' : 'Stage 1: Web Foundation', 
     shortLabel: 'HTML/CSS',
     icon: '🧱',
     noteNum: 1,
@@ -598,8 +747,8 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'index.html, App.vue'
   },
   { 
-    id: 'stage-2', 
-    label: isZh.value ? 'Stage 2: JavaScript 核心' : 'Stage 2: JavaScript Core', 
+    id: 'js-basics', 
+    label: isZh.value ? 'Stage 2: JS 基础' : 'Stage 2: JS Basics', 
     shortLabel: 'JS Core',
     icon: '⚡',
     noteNum: 2,
@@ -609,8 +758,8 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'useSearch.ts'
   },
   {
-    id: 'stage-3',
-    label: isZh.value ? 'Stage 3: CSS 现代布局' : 'Stage 3: CSS Modern Layout',
+    id: 'css-layout',
+    label: isZh.value ? 'Stage 3: CSS 布局' : 'Stage 3: CSS Layout',
     shortLabel: 'CSS Layout',
     icon: '🎨',
     noteNum: 1,
@@ -620,8 +769,8 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'styles/main.css'
   },
   {
-    id: 'stage-4',
-    label: isZh.value ? 'Stage 4: TS & Async' : 'Stage 4: TS & Async',
+    id: 'js-advanced',
+    label: isZh.value ? 'Stage 4: JS 进阶 & TS' : 'Stage 4: JS Advanced & TS',
     shortLabel: 'TS/Async',
     icon: '🛡️',
     noteNum: 4,
@@ -631,7 +780,7 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'types/*.ts'
   },
   {
-    id: 'stage-5',
+    id: 'engineering',
     label: isZh.value ? 'Stage 5: 前端工程化' : 'Stage 5: Engineering',
     shortLabel: 'Engineering',
     icon: '🚀',
@@ -642,7 +791,7 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'vite.config.ts'
   },
   { 
-    id: 'stage-6', 
+    id: 'vue-core', 
     label: isZh.value ? 'Stage 6: Vue 核心' : 'Stage 6: Vue Core', 
     shortLabel: 'Vue Core',
     icon: '🥝',
@@ -653,7 +802,7 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'App.vue'
   },
   { 
-    id: 'stage-7', 
+    id: 'vue-advanced', 
     label: isZh.value ? 'Stage 7: Vue 进阶' : 'Stage 7: Vue Advanced', 
     shortLabel: 'Vue Adv',
     icon: '🧩',
@@ -664,7 +813,7 @@ const tabs = computed<LabTab[]>(() => [
     relatedCode: 'stores/*.ts'
   },
   { 
-    id: 'stage-8', 
+    id: 'challenge', 
     label: isZh.value ? 'Stage 8: 综合挑战' : 'Stage 8: Challenge', 
     shortLabel: 'Challenge',
     icon: '🏆',
@@ -673,6 +822,17 @@ const tabs = computed<LabTab[]>(() => [
     goal: isZh.value ? '检验综合能力' : 'Test your skills',
     noteLink: '',
     relatedCode: 'Challenge'
+  },
+  {
+    id: 'extensions',
+    label: isZh.value ? '扩展：可选加餐' : 'Extensions: Optional',
+    shortLabel: isZh.value ? '扩展' : 'Extensions',
+    icon: '✨',
+    noteNum: 0,
+    desc: isZh.value ? '不强依赖主线项目的补充实验' : 'Optional labs for extra practice',
+    goal: isZh.value ? '按需补强与拓展' : 'Learn and reinforce as needed',
+    noteLink: '',
+    relatedCode: 'Various'
   },
 ])
 

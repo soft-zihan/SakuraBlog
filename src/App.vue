@@ -160,6 +160,7 @@ const Lightbox = defineAsyncComponent(() => import('./components/Modals/Lightbox
 import { useAppStore } from './stores/appStore';
 import { useArticleStore } from './stores/articleStore';
 import { useMusicStore } from './stores/musicStore';
+import { useLearningStore } from './stores/learningStore';
 
 // Composables
 import { useSearch } from './composables/useSearch';
@@ -184,6 +185,7 @@ import { useCodeOpener } from './composables/useCodeOpener';
 // =====================
 const appStore = useAppStore();
 const articleStore = useArticleStore();
+const learningStore = useLearningStore();
 const { autoChangeWallpaper } = useWallpapers();
 const musicStore = useMusicStore();
 const { showToast } = useToast();
@@ -311,17 +313,22 @@ const selectTool = (tool: string) => {
   dualColumnMode.value = false;
 };
 
-const labDashboardTab = ref<string>('note1-html-css');
+const labDashboardTab = ref<string>('project-builder');
 
 // Lab tabs
 const labTabs = computed(() => {
   const isZh = lang.value === 'zh'
   return [
-    { id: 'note1-html-css', shortLabel: isZh ? 'HTML/CSS' : 'HTML/CSS', icon: '🎨', noteNum: 1 },
-    { id: 'note2-javascript', shortLabel: 'JavaScript', icon: '⚡', noteNum: 2 },
-    { id: 'note3-vue-basics', shortLabel: isZh ? 'Vue基础' : 'Vue Basics', icon: '🥝', noteNum: 3 },
-    { id: 'note4-vue-engineering', shortLabel: isZh ? '工程化' : 'Engineering', icon: '🚀', noteNum: 4 },
-    { id: 'challenge', shortLabel: isZh ? '挑战' : 'Challenge', icon: '🏆', noteNum: 0 },
+    { id: 'project-builder', shortLabel: isZh ? 'Tlias 主线' : 'Tlias Path', icon: '🏗️', noteNum: 0, tag: 'Tlias' },
+    { id: 'foundation', shortLabel: isZh ? '网页基础' : 'Foundation', icon: '🧱', noteNum: 1, disabled: !learningStore.canAccessStage('foundation') },
+    { id: 'js-basics', shortLabel: isZh ? 'JS 基础' : 'JS Basics', icon: '⚡', noteNum: 2, disabled: !learningStore.canAccessStage('js-basics') },
+    { id: 'css-layout', shortLabel: isZh ? 'CSS 布局' : 'CSS Layout', icon: '🎨', noteNum: 1, disabled: !learningStore.canAccessStage('css-layout') },
+    { id: 'js-advanced', shortLabel: isZh ? 'JS 进阶/TS' : 'JS Adv/TS', icon: '🛡️', noteNum: 4, disabled: !learningStore.canAccessStage('js-advanced') },
+    { id: 'engineering', shortLabel: isZh ? '工程化' : 'Engineering', icon: '🚀', noteNum: 4, disabled: !learningStore.canAccessStage('engineering') },
+    { id: 'vue-core', shortLabel: isZh ? 'Vue 核心' : 'Vue Core', icon: '🥝', noteNum: 3, disabled: !learningStore.canAccessStage('vue-core') },
+    { id: 'vue-advanced', shortLabel: isZh ? 'Vue 进阶' : 'Vue Adv', icon: '🧩', noteNum: 4, disabled: !learningStore.canAccessStage('vue-advanced') },
+    { id: 'challenge', shortLabel: isZh ? '挑战' : 'Challenge', icon: '🏆', noteNum: 0, disabled: !learningStore.canAccessStage('challenge') },
+    { id: 'extensions', shortLabel: isZh ? '扩展' : 'Extensions', icon: '✨', noteNum: 0, disabled: !learningStore.canAccessStage('extensions') },
   ]
 })
 

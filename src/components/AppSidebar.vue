@@ -78,15 +78,23 @@
               <div 
                 v-for="tab in labTabs" 
                 :key="tab.id"
-                @click="handleLabTabClick(tab.id)"
-                class="p-2 rounded-lg cursor-pointer transition-all hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm border flex items-center gap-2"
-                :class="activeLabTab === tab.id && currentTool === 'dashboard'
-                  ? 'bg-gradient-to-r from-[var(--primary-50)] to-purple-50 dark:from-[var(--primary-900)]/30 dark:to-purple-900/20 border-[var(--primary-300)] dark:border-[var(--primary-700)]/50' 
-                  : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700'"
+                @click="handleLabTabClick(tab)"
+                class="p-2 rounded-lg transition-all border flex items-center gap-2"
+                :class="[
+                  tab.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm',
+                  activeLabTab === tab.id && currentTool === 'dashboard'
+                    ? 'bg-gradient-to-r from-[var(--primary-50)] to-purple-50 dark:from-[var(--primary-900)]/30 dark:to-purple-900/20 border-[var(--primary-300)] dark:border-[var(--primary-700)]/50' 
+                    : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700'
+                ]"
               >
                 <span class="text-lg">{{ tab.icon }}</span>
                 <div class="flex-1 min-w-0">
-                  <div class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{{ tab.shortLabel }}</div>
+                  <div class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate flex items-center gap-2">
+                    <span class="truncate">{{ tab.shortLabel }}</span>
+                    <span v-if="tab.tag" class="flex-shrink-0 text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800/30">
+                      {{ tab.tag }}
+                    </span>
+                  </div>
                   <div v-if="tab.noteNum" class="text-[10px] text-gray-400 dark:text-gray-500">{{ lang === 'zh' ? `笔记 ${tab.noteNum}` : `Note ${tab.noteNum}` }}</div>
                 </div>
                 <span v-if="activeLabTab === tab.id && currentTool === 'dashboard'" class="w-1.5 h-1.5 rounded-full bg-[var(--primary-500)]"></span>
@@ -255,9 +263,10 @@ const handleLogoClick = () => {
 };
 
 // Handle lab tab click - select dashboard tool and switch tab
-const handleLabTabClick = (tabId: string) => {
+const handleLabTabClick = (tab: any) => {
+  if (tab?.disabled) return
   emit('select-tool', 'dashboard');
-  emit('update:activeLabTab', tabId);
+  emit('update:activeLabTab', tab.id);
 };
 
 const headerGlowStyle = computed(() => ({

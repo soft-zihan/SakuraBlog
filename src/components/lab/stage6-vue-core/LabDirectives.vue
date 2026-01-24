@@ -299,17 +299,17 @@
           <div class="bg-[#1e1e1e] p-4 rounded-lg font-mono text-xs text-gray-300">
             <div class="text-gray-500 mb-2">// {{ lang === 'zh' ? '基本语法' : 'Basic syntax' }}</div>
             <div>&lt;li <span class="text-purple-400">v-for</span>=<span class="text-green-400">"item in items"</span> <span class="text-purple-400">:key</span>=<span class="text-green-400">"item.id"</span>&gt;</div>
-            <div>&nbsp;&nbsp;{'{{ item.text }}'}</div>
+            <div>&nbsp;&nbsp;&#123;&#123; item.text &#125;&#125;</div>
             <div>&lt;/li&gt;</div>
             
             <div class="text-gray-500 mt-4 mb-2">// {{ lang === 'zh' ? '带索引' : 'With index' }}</div>
             <div>&lt;li <span class="text-purple-400">v-for</span>=<span class="text-green-400">"(item, index) in items"</span>&gt;</div>
-            <div>&nbsp;&nbsp;{'{{ index }}: {{ item }}'}</div>
+            <div>&nbsp;&nbsp;&#123;&#123; index &#125;&#125;: &#123;&#123; item &#125;&#125;</div>
             <div>&lt;/li&gt;</div>
 
             <div class="text-gray-500 mt-4 mb-2">// {{ lang === 'zh' ? '遍历对象' : 'Iterate object' }}</div>
             <div>&lt;div <span class="text-purple-400">v-for</span>=<span class="text-green-400">"(value, key) in object"</span>&gt;</div>
-            <div>&nbsp;&nbsp;{'{{ key }}: {{ value }}'}</div>
+            <div>&nbsp;&nbsp;&#123;&#123; key &#125;&#125;: &#123;&#123; value &#125;&#125;</div>
             <div>&lt;/div&gt;</div>
           </div>
 
