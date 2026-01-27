@@ -25,6 +25,15 @@ export function useAppInit(
   const musicStore = useMusicStore();
   const { collectAllTags } = useFilteredFiles();
 
+  const runWhenIdle = (fn: () => void) => {
+    const w = window as any
+    if (typeof w.requestIdleCallback === 'function') {
+      w.requestIdleCallback(() => fn(), { timeout: 1500 })
+      return
+    }
+    window.setTimeout(fn, 0)
+  }
+
   const initFileSystem = async () => {
     try {
       const res = await fetch(`./data/files.json?t=${Date.now()}`);
@@ -70,14 +79,20 @@ export function useAppInit(
       appStore.fileSystem = [];
     } finally {
       appStore.loading = false;
+      await nextTick();
+      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
 
       if (appStore.fileSystem.length > 0) {
         const root = appStore.fileSystem.find((node: FileNode) => node.type === NodeType.DIRECTORY && node.name === lang.value);
         const currentLangRoot = root?.children?.length
           ? root.children
           : appStore.fileSystem.filter((node: FileNode) => !(node.type === NodeType.DIRECTORY && node.path === 'source'));
-        await searchApi.initSearchIndex(appStore.fileSystem, lang.value as 'en' | 'zh');
-        collectAllTags(currentLangRoot || [], articleStore.setAvailableTags);
+        runWhenIdle(() => {
+          searchApi.initSearchIndex(appStore.fileSystem, lang.value as 'en' | 'zh').catch(() => {});
+        });
+        runWhenIdle(() => {
+          collectAllTags(currentLangRoot || [], articleStore.setAvailableTags);
+        });
       }
     }
   };

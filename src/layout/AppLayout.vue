@@ -398,6 +398,8 @@ const handleMobileShellTouchEnd = (e: TouchEvent) => {
 
   const absDx = Math.abs(dx);
   const absDy = Math.abs(dy);
+  const isTap = absDx < 8 && absDy < 8;
+  if (isTap) return;
   const isVerticalGesture = absDy > absDx * 1.2;
   const deltaScroll = el.scrollLeft - state.startScrollLeft;
   const minSwipe = Math.max(90, Math.floor(width * 0.18));

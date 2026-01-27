@@ -98,7 +98,6 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
     isFullIndexReady.value = false
 
     await rebuildSearchIndex()
-    loadFullContentAndRebuild()
   }
   
   // Load all file contents and rebuild index with complete data
@@ -165,7 +164,11 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
       return []
     }
     
-    // 不再需要懒加载检查，内容在初始化时已加载
+    if (!isFullIndexReady.value && !isLoadingContent.value) {
+      window.setTimeout(() => {
+        loadFullContentAndRebuild()
+      }, 0)
+    }
     
     isSearching.value = true
     

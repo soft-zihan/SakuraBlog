@@ -198,7 +198,7 @@ const markdownViewerRef = ref<HTMLElement | null>(null);
 // =====================
 // Search
 // =====================
-const { initSearchIndex, search, highlightMatches, isLoadingContent, setFetchFunction, updateLanguage } = useSearch();
+const { initSearchIndex, search, highlightMatches, isLoadingContent, setFetchFunction, updateLanguage, loadFullContentAndRebuild } = useSearch();
 
 // =====================
 // Lightbox
@@ -587,6 +587,16 @@ watch(() => appStore.userSettings.autoChangeMode, (mode) => {
     wallpaperInterval = setInterval(autoChangeWallpaper, 60000 * 5)
   }
 }, { immediate: true })
+
+watch(() => appStore.showSearch, (open) => {
+  if (!open) return
+  const w = window as any
+  if (typeof w.requestIdleCallback === 'function') {
+    w.requestIdleCallback(() => loadFullContentAndRebuild(), { timeout: 1000 })
+    return
+  }
+  window.setTimeout(() => loadFullContentAndRebuild(), 0)
+})
 
 // =====================
 // App Initialization
