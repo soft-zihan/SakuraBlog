@@ -15,11 +15,14 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
   const toc = ref<TocItem[]>([])
   const activeHeaderId = ref<string>('')
   let boundScrollContainer: HTMLElement | null = null
-  const renderCache = new Map<string, string>()
+  const renderCache = new Map<string, { html: string, toc: TocItem[] }>()
   const renderCacheKeys: string[] = []
   let isRendering = false
   let rerenderRequested = false
   let headingIdCount = new Map<string, number>()
+  // Optimization: cache header positions
+  let headerPositionsCache: Map<string, number> | null = null
+  let isScrollingToHeader = false
 
   const normalizeHeadingText = (input: string) => {
     return input
@@ -131,6 +134,9 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     `.trim()
   }
 
+  // Temp storage for TOC items during rendering
+  let tempToc: TocItem[] = []
+
   /**
    * 配置 marked 渲染器
    */
@@ -138,6 +144,12 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     const renderer = new marked.Renderer()
     renderer.heading = function(text, level, raw) {
       const id = nextUniqueHeadingId(String(raw ?? text))
+      // Collect TOC item directly from renderer to ensure consistency
+      tempToc.push({
+        id,
+        text: normalizeHeadingText(text).trim(),
+        level
+      })
       return `<h${level} id="${id}">${text}</h${level}>`
     }
     renderer.code = function(code, language) {
@@ -196,7 +208,13 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     const cacheKey = `${currentFile.value.path}|${currentFile.value.lastModified || ''}|${currentFile.value.content.length}|toc-v2`
     const cached = renderCache.get(cacheKey)
     if (cached !== undefined) {
-      renderedHtml.value = cached
+      renderedHtml.value = cached.html
+      toc.value = cached.toc
+      // Force position cache invalidation
+      headerPositionsCache = null
+      nextTick(() => {
+        updateActiveHeader()
+      })
       return
     }
 
@@ -232,21 +250,35 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     rerenderRequested = false
     try {
       headingIdCount = new Map<string, number>()
+      tempToc = [] // Reset temp TOC
       const parsed = await marked.parse(rawContent)
       const sanitized = sanitizeHtml(parsed)
       const finalHtml = sanitized || parsed
       renderedHtml.value = finalHtml
-      renderCache.set(cacheKey, finalHtml)
+      
+      // Update TOC from collected items
+      toc.value = [...tempToc]
+      
+      renderCache.set(cacheKey, { html: finalHtml, toc: [...tempToc] })
       renderCacheKeys.push(cacheKey)
       if (renderCacheKeys.length > 25) {
         const keyToDelete = renderCacheKeys.shift()
         if (keyToDelete) renderCache.delete(keyToDelete)
       }
+      
+      // Force position cache invalidation
+      headerPositionsCache = null
+      
+      // Trigger active header update
+      nextTick(() => {
+        updateActiveHeader()
+      })
     } catch (e) {
       console.error("Marked render error:", e)
       const errorHtml = `<div class="text-red-500 font-bold">Error rendering Markdown. Please check console.</div><pre>${rawContent}</pre>`
       const sanitizedError = sanitizeHtml(errorHtml)
       renderedHtml.value = sanitizedError || errorHtml
+      toc.value = []
     } finally {
       isRendering = false
       if (rerenderRequested) updateRenderedContent()
@@ -254,62 +286,62 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
   }
 
   /**
-   * 生成目录
+   * 生成目录 - Deprecated, now handled during rendering
    */
   const generateToc = () => {
-    if (!currentFile.value?.content || currentFile.value.isSource) {
-      toc.value = []
-      return
-    }
-    const headers: TocItem[] = []
-    const localCount = new Map<string, number>()
-    const lines = currentFile.value.content.split(/\r?\n/)
-    let inCodeBlock = false
-
-    lines.forEach(line => {
-      if (line.trim().startsWith('```')) inCodeBlock = !inCodeBlock
-      if (inCodeBlock) return
-
-      const match = line.match(/^(#{1,6})\s+(.+)$/)
-      if (match) {
-        const text = match[2].trim()
-        const base = slugifyHeading(text)
-        const current = localCount.get(base) ?? 0
-        const next = current + 1
-        localCount.set(base, next)
-        const id = next === 1 ? base : `${base}-${next}`
-        headers.push({ id, text: normalizeHeadingText(text).trim(), level: match[1].length })
-      }
-    })
-    toc.value = headers
-
-    nextTick(() => {
-      updateActiveHeader()
-    })
+    // Legacy function kept for interface compatibility, but logic moved to renderer
+    // If needed we can trigger a re-render or just do nothing as updateRenderedContent handles it
   }
 
   /**
-   * 更新激活的标题
+   * Update active header with optimization
+   * Uses throttled scroll handling and cached positions
    */
   const updateActiveHeader = () => {
+    // Skip update if we are auto-scrolling to avoid flickering
+    if (isScrollingToHeader) return
+
     const container = scrollContainer?.value || null
     if (!container) return
     const scrollPosition = container.scrollTop
-    const containerRect = container.getBoundingClientRect()
-    const offset = 120
-
-    let active = ''
-    for (const item of toc.value) {
-      const el = document.getElementById(item.id)
-      if (el) {
-        const elRect = el.getBoundingClientRect()
-        const topInContainer = elRect.top - containerRect.top + scrollPosition
-        if (topInContainer <= scrollPosition + offset) {
-          active = item.id
+    
+    // Invalidate position cache if null
+    if (!headerPositionsCache) {
+      headerPositionsCache = new Map()
+      const containerRect = container.getBoundingClientRect()
+      // Relative offset base
+      const baseTop = containerRect.top - container.scrollTop
+      
+      for (const item of toc.value) {
+        const el = document.getElementById(item.id)
+        if (el) {
+          const elRect = el.getBoundingClientRect()
+          // Store relative top position to the container content area
+          headerPositionsCache.set(item.id, elRect.top - baseTop)
         }
       }
     }
-    if (active) activeHeaderId.value = active
+
+    const offset = 120
+    let active = ''
+    
+    // Efficient lookup using cached positions
+    for (const item of toc.value) {
+      const top = headerPositionsCache.get(item.id)
+      if (top !== undefined) {
+        if (top <= scrollPosition + offset) {
+          active = item.id
+        } else {
+          // Since TOC is ordered, we can break early if we passed the scroll point
+          // Assuming document order matches TOC order (mostly true)
+          // break 
+        }
+      }
+    }
+    
+    if (active && active !== activeHeaderId.value) {
+      activeHeaderId.value = active
+    }
   }
 
   /**
@@ -318,16 +350,24 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
   const scrollToHeader = (id: string) => {
     const el = document.getElementById(id)
     if (el) {
+      // Set flag to prevent scroll spy from overwriting active state during animation
+      isScrollingToHeader = true
+      activeHeaderId.value = id
+      
       const container = scrollContainer?.value || null
       if (container) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       } else {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
-      activeHeaderId.value = id
-      nextTick(() => {
+      
+      // Reset flag after animation (approximate duration)
+      // Smooth scroll duration is browser dependent, 800ms is a safe bet
+      setTimeout(() => {
+        isScrollingToHeader = false
+        // One final check to correct any drift
         updateActiveHeader()
-      })
+      }, 800)
     }
   }
 

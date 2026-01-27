@@ -15,7 +15,7 @@ body {
   background: var(--primary-900-30);
 }
 
-/* Dynamic Title Colors */
+/* Dynamic Title Colors & Scroll Margin */
 .markdown-body h1,
 .markdown-body h2,
 .markdown-body h3,
@@ -23,6 +23,7 @@ body {
 .markdown-body h5,
 .markdown-body h6 {
   color: var(--primary-600);
+  scroll-margin-top: 5rem; /* Ensure title is not hidden behind header */
 }
 
 .dark .markdown-body h1,

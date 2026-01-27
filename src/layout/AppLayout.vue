@@ -94,10 +94,12 @@
           ref="mobileShellRef"
           class="flex h-full w-full overflow-x-auto overflow-y-hidden no-scrollbar overscroll-x-contain"
           style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;"
+          @touchstart.passive="handleMobileShellTouchStart"
+          @touchend="handleMobileShellTouchEnd"
           @scroll.passive="handleMobileShellScroll"
         >
           <div class="flex h-full w-full">
-            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full" style="scroll-snap-align: start;">
+            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full" style="scroll-snap-align: start; scroll-snap-stop: always;">
               <AppSidebar
                 v-if="!appStore.readingMode"
                 class="h-full w-full max-w-full"
@@ -120,23 +122,23 @@
                 :comment-counts="commentCounts"
                 @toggle-lang="appStore.toggleLang"
                 @reset="$emit('reset'); scrollToMobilePage(1)"
-                @logo-click="showToast(t.welcome_title); scrollToMobilePage(1)"
-                @select-tool="$emit('select-tool', $event); scrollToMobilePage(1)"
+                @logo-click="showToast(t.welcome_title); scrollToMobilePage(1, 'auto')"
+                @select-tool="$emit('select-tool', $event); scrollToMobilePage(1, 'auto')"
                 @toggle-folder="$emit('toggle-folder', $event)"
-                @select-file="$emit('select-file', $event); scrollToMobilePage(1)"
-                @select-folder="$emit('select-folder', $event); scrollToMobilePage(1)"
-                @open-search="appStore.showSearch = true; scrollToMobilePage(1)"
-                @toggle-sidebar="scrollToMobilePage(1)"
+                @select-file="$emit('select-file', $event); scrollToMobilePage(1, 'auto')"
+                @select-folder="$emit('select-folder', $event); scrollToMobilePage(1, 'auto')"
+                @open-search="appStore.showSearch = true; scrollToMobilePage(1, 'auto')"
+                @toggle-sidebar="scrollToMobilePage(1, 'auto')"
                 @toggle-right-sidebar="appStore.rightSidebarOpen = !appStore.rightSidebarOpen"
-                @update:activeLabTab="$emit('update:activeLabTab', $event); scrollToMobilePage(1)"
+                @update:activeLabTab="$emit('update:activeLabTab', $event); scrollToMobilePage(1, 'auto')"
               />
             </div>
 
-            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full flex overflow-hidden" style="scroll-snap-align: start;">
+            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full flex overflow-hidden" style="scroll-snap-align: start; scroll-snap-stop: always;">
               <slot></slot>
             </div>
 
-            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full overflow-y-auto custom-scrollbar" style="scroll-snap-align: start;">
+            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full overflow-y-auto custom-scrollbar" style="scroll-snap-align: start; scroll-snap-stop: always;">
               <div class="p-4">
                 <div class="max-w-md mx-auto bg-white/85 dark:bg-gray-900/85 p-4 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] backdrop-blur-xl transition-all duration-300">
                   <div class="flex items-center justify-between mb-6">
@@ -268,30 +270,50 @@ const mobileShellPage = ref(1);
 const mobileShellScrollRaf = ref<number | null>(null);
 const contentScrollRaf = ref<number | null>(null);
 
+const mobileShellTouch = ref<{
+  active: boolean
+  startX: number
+  startY: number
+  startScrollLeft: number
+  startPage: number
+}>({
+  active: false,
+  startX: 0,
+  startY: 0,
+  startScrollLeft: 0,
+  startPage: 1
+})
+
 const handleRightSidebarThemePanel = () => {
   headerRef.value?.toggleThemePanel?.();
 };
 
 const handleMobileTocSelect = async (id: string) => {
   if (appStore.rightSidebarOpen) appStore.rightSidebarOpen = false;
-  scrollToMobilePage(1, 'auto');
-  await nextTick();
+  
+  // 1. First trigger horizontal scroll to the article page
+  scrollToMobilePage(1, 'smooth');
+  
+  // 2. Wait for the horizontal scroll to effectively complete
   const waitForArticlePage = () => {
     const el = mobileShellRef.value
-    if (!el) return true
+    if (!el) return true // Should not happen, but safe to bail out
+    
     const width = el.clientWidth || 1
-    const page = Math.round(el.scrollLeft / width)
-    return page === 1
+    return Math.abs(el.scrollLeft - width) <= 2
   }
+
   const tryRequest = () => {
     if (waitForArticlePage()) {
-      window.requestAnimationFrame(() => {
-        articleNavStore.requestScrollTo(id);
-      });
+      // Force request scroll
+      articleNavStore.requestScrollTo(id);
       return
     }
+    // Continue polling
     window.requestAnimationFrame(tryRequest)
   }
+
+  // Start polling
   window.requestAnimationFrame(tryRequest)
 };
 
@@ -319,6 +341,10 @@ const scrollToMobilePage = (page: number, behavior: ScrollBehavior = 'smooth') =
   const el = mobileShellRef.value;
   if (!el) return;
   const width = el.clientWidth;
+  if (!width) {
+    window.requestAnimationFrame(() => scrollToMobilePage(page, behavior));
+    return;
+  }
   el.scrollTo({ left: width * page, behavior });
   mobileShellPage.value = page;
   if (page !== 1) headerHidden.value = false;
@@ -332,12 +358,57 @@ const handleMobileShellScroll = () => {
     const el = mobileShellRef.value;
     if (!el) return;
     const width = el.clientWidth || 1;
-    const page = Math.round(el.scrollLeft / width);
+    const thresholdBias = 0.3;
+    const page = Math.floor(el.scrollLeft / width + thresholdBias);
     if (page !== mobileShellPage.value) {
       mobileShellPage.value = page;
       if (page !== 1) headerHidden.value = false;
     }
   });
+};
+
+const handleMobileShellTouchStart = (e: TouchEvent) => {
+  if (!isMobile.value) return;
+  const el = mobileShellRef.value;
+  if (!el) return;
+  const t = e.touches[0];
+  if (!t) return;
+  mobileShellTouch.value = {
+    active: true,
+    startX: t.clientX,
+    startY: t.clientY,
+    startScrollLeft: el.scrollLeft,
+    startPage: mobileShellPage.value
+  };
+};
+
+const handleMobileShellTouchEnd = (e: TouchEvent) => {
+  if (!isMobile.value) return;
+  const el = mobileShellRef.value;
+  if (!el) return;
+  const width = el.clientWidth || window.innerWidth || 1;
+  const state = mobileShellTouch.value;
+  if (!state.active) return;
+  mobileShellTouch.value.active = false;
+
+  const t = e.changedTouches[0];
+  if (!t) return;
+  const dx = t.clientX - state.startX;
+  const dy = t.clientY - state.startY;
+
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
+  const isVerticalGesture = absDy > absDx * 1.2;
+  const deltaScroll = el.scrollLeft - state.startScrollLeft;
+  const minSwipe = Math.max(90, Math.floor(width * 0.18));
+
+  let targetPage = state.startPage;
+  if (!isVerticalGesture && Math.abs(deltaScroll) >= minSwipe) {
+    if (deltaScroll > 0) targetPage = Math.min(2, state.startPage + 1);
+    else targetPage = Math.max(0, state.startPage - 1);
+  }
+
+  scrollToMobilePage(targetPage, 'auto');
 };
 
 const handleScroll = () => {

@@ -618,6 +618,7 @@ const navigateTo = (file: FileNode) => {
 
 // Renderer
 const { renderedHtml, toc, activeHeaderId, updateRenderedContent, scrollToHeader, setupMarkedRenderer, generateToc } = useContentRenderer(currentFile, isRawMode, localScrollContainerRef);
+setupMarkedRenderer();
 
 watch(
   toc,
@@ -639,21 +640,35 @@ watch(
   () => articleNavStore.pendingScrollToId,
   (id) => {
     if (!id) return;
-    const el = document.getElementById(id)
-    if (!el) return;
-    scrollToHeader(id);
-    articleNavStore.consumePendingScrollTo();
+    
+    // Robust scroll with retry mechanism
+    let attempts = 0;
+    const maxAttempts = 20; // Try for ~1s
+    const tryScroll = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        scrollToHeader(id);
+        articleNavStore.consumePendingScrollTo();
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        requestAnimationFrame(tryScroll);
+      }
+    };
+    tryScroll();
   }
 );
 
 watch(renderedHtml, () => {
   const id = articleNavStore.pendingScrollToId
   if (!id) return
-  const el = document.getElementById(id)
-  if (!el) return
-  scrollToHeader(id)
-  articleNavStore.consumePendingScrollTo()
-})
+  // Use nextTick to ensure DOM is updated
+  nextTick(() => {
+    const el = document.getElementById(id)
+    if (!el) return
+    scrollToHeader(id)
+    articleNavStore.consumePendingScrollTo()
+  })
+}, { flush: 'post' })
 
 useSearchJump({
   getTarget: () => String((appStore as any).searchTarget ?? ''),
@@ -750,7 +765,6 @@ const handleReaderKeydown = (e: KeyboardEvent) => {
 }
 
 onMounted(() => {
-  setupMarkedRenderer();
   document.addEventListener('keydown', handleReaderKeydown)
 });
 
