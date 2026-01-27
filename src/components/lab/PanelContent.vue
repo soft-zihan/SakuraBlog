@@ -47,7 +47,7 @@
         
         <!-- Note Content -->
         <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
-          <div v-if="selectedNote && noteContent" v-html="renderedContent" class="markdown-body dark:text-gray-300 prose prose-sm max-w-none"></div>
+          <div v-if="selectedNote && noteContent" v-html="renderedContent" class="markdown-body dark:text-gray-300 max-w-none"></div>
           <div v-else class="flex items-center justify-center h-full text-gray-400 text-sm flex-col gap-4">
             <span class="text-4xl">📚</span>
             <span>{{ isZh ? '请点击左上角文件夹图标选择笔记' : 'Click folder icon to select note' }}</span>

@@ -1,34 +1,38 @@
 <template>
   <Transition name="slide-left">
-    <div 
+    <aside
       v-if="isOpen"
-      class="w-12 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-l border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col items-center py-6 gap-6 overflow-y-auto no-scrollbar"
+      class="fixed right-0 top-0 bottom-0 z-50 w-12 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-l border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col items-center py-6 gap-6 overflow-y-auto no-scrollbar"
       @click.stop
     >
-      <ActionDockGroup
-        layout="vertical"
-        :lang="lang"
-        :t="t"
-        :current-file="currentFile"
-        :is-raw-mode="isRawMode"
-        :is-pdf="isPdf"
-        :view-mode="viewMode"
-        :dual-column-mode="dualColumnMode"
-        :show-dual-column-toggle="false"
-        :is-playing="musicStore.isPlaying"
-        :download-toast="true"
-        @update:isRawMode="emit('update:isRawMode', $event)"
-        @copy-link="emit('copy-link')"
-        @download="emit('download')"
-        @toggle-dual-column="emit('toggle-dual-column')"
-        @open-search="emit('open-search')"
-        @open-music="emit('open-music')"
-        @open-write="emit('open-write')"
-        @toggle-theme-panel="emit('toggle-theme-panel')"
-        @open-download="emit('open-download')"
-        @open-settings="emit('open-settings')"
-      />
-    </div>
+      <div class="flex-1"></div>
+
+      <div class="mt-auto">
+        <ActionDockGroup
+          layout="vertical"
+          :lang="lang"
+          :t="t"
+          :current-file="currentFile"
+          :is-raw-mode="isRawMode"
+          :is-pdf="isPdf"
+          :view-mode="viewMode"
+          :dual-column-mode="dualColumnMode"
+          :show-dual-column-toggle="false"
+          :is-playing="musicStore.isPlaying"
+          :download-toast="true"
+          @update:isRawMode="emit('update:isRawMode', $event)"
+          @copy-link="emit('copy-link')"
+          @download="emit('download')"
+          @toggle-dual-column="emit('toggle-dual-column')"
+          @open-search="emit('open-search')"
+          @open-music="emit('open-music')"
+          @open-write="emit('open-write')"
+          @toggle-theme-panel="emit('toggle-theme-panel')"
+          @open-download="emit('open-download')"
+          @open-settings="emit('open-settings')"
+        />
+      </div>
+    </aside>
   </Transition>
 </template>
 

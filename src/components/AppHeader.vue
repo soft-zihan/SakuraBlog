@@ -1,6 +1,7 @@
 <template>
   <header 
-    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/60 shrink-0 z-20 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-all duration-300 ease-out hover:bg-white/80 dark:hover:bg-gray-900/80 overflow-hidden"
+    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/60 shrink-0 z-20 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-transform duration-300 ease-out hover:bg-white/80 dark:hover:bg-gray-900/80 overflow-hidden"
+    style="will-change: transform;"
     :class="[
       isMobile ? 'px-3' : 'h-16 px-6',
       isMobile
@@ -70,14 +71,6 @@
 
     <!-- Mobile Layout -->
     <div v-else class="flex items-center h-full px-3 gap-2">
-      <!-- Left Sidebar Toggle Button -->
-      <button 
-        @click="$emit('toggle-sidebar')" 
-        class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 active:scale-95 transition-transform"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg>
-      </button>
-
       <!-- Breadcrumbs (Scrollable) -->
       <div class="flex-1 flex items-center text-xs overflow-x-auto no-scrollbar whitespace-nowrap mask-linear px-2">
         <span class="text-[var(--primary-300)] dark:text-[var(--primary-500)] mr-1 shrink-0 cursor-pointer" @click="$emit('reset')">🏠</span>

@@ -295,12 +295,16 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     const container = scrollContainer?.value || null
     if (!container) return
     const scrollPosition = container.scrollTop
+    const containerRect = container.getBoundingClientRect()
+    const offset = 120
 
     let active = ''
     for (const item of toc.value) {
       const el = document.getElementById(item.id)
       if (el) {
-        if (el.offsetTop - container.offsetTop - 150 <= scrollPosition) {
+        const elRect = el.getBoundingClientRect()
+        const topInContainer = elRect.top - containerRect.top + scrollPosition
+        if (topInContainer <= scrollPosition + offset) {
           active = item.id
         }
       }
@@ -316,11 +320,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     if (el) {
       const container = scrollContainer?.value || null
       if (container) {
-        const containerRect = container.getBoundingClientRect()
-        const elRect = el.getBoundingClientRect()
-        const top = elRect.top - containerRect.top + container.scrollTop
-        const targetTop = Math.max(0, top - 80)
-        container.scrollTo({ top: targetTop, behavior: 'smooth' })
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       } else {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }

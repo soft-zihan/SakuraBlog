@@ -1,7 +1,7 @@
 <template>
   <div class="flex-1 overflow-hidden z-10 relative">
     <div
-      v-if="isMobile"
+      v-if="false"
       ref="mobilePagerRef"
       class="flex h-full overflow-x-auto overflow-y-hidden"
       style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;"
@@ -28,7 +28,7 @@
 
          <ArticleInfoBar
            :lang="lang"
-           :is-source="file.isSource"
+           :is-source="!!file.isSource"
            :author-name="currentAuthorName"
            :author-url="currentAuthorUrl"
            :author-link-style="authorLinkStyle"
@@ -50,8 +50,8 @@
            :updated-date="formatDate(file.lastModified)"
            :tags="currentTags"
            :tag-badge-style="tagBadgeStyle"
-           :show-toc-button="toc.length > 0"
-           :on-open-toc="() => scrollToTocPage()"
+           :show-toc-button="false"
+           :on-open-toc="() => {}"
          />
 
         <!-- Markdown Content -->
@@ -106,7 +106,7 @@
               <span>{{ t.previous || (lang === 'zh' ? '上一篇' : 'Previous') }}</span>
             </div>
             <div class="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-600)] dark:group-hover:text-[var(--primary-400)] truncate">
-              {{ prevFile.name.replace('.md', '') }}
+              {{ (prevFile?.name || '').replace('.md', '') }}
             </div>
           </button>
           <div v-else class="flex-1"></div>
@@ -120,7 +120,7 @@
               <span>→</span>
             </div>
             <div class="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-600)] dark:group-hover:text-[var(--primary-400)] truncate">
-              {{ nextFile.name.replace('.md', '') }}
+              {{ (nextFile?.name || '').replace('.md', '') }}
             </div>
           </button>
           <div v-else class="flex-1"></div>
@@ -214,7 +214,7 @@
     <div v-else class="flex h-full">
       <div 
         ref="localScrollContainerRef"
-        class="flex-1 overflow-y-auto custom-scrollbar w-full"
+        class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar w-full"
         :style="{ padding: 'var(--reader-page-padding, 1.5rem)' }"
       >
         <div 
@@ -231,7 +231,7 @@
 
           <ArticleInfoBar
             :lang="lang"
-            :is-source="file.isSource"
+            :is-source="!!file.isSource"
             :author-name="currentAuthorName"
             :author-url="currentAuthorUrl"
             :author-link-style="authorLinkStyle"
@@ -466,6 +466,7 @@ import { computed, toRef, ref, watch, onMounted, onUnmounted, nextTick, type Ref
 import type { FileNode } from '../types';
 import { useAppStore } from '../stores/appStore';
 import { useArticleStore } from '../stores/articleStore';
+import { useArticleNavStore } from '../stores/articleNavStore';
 import { useArticleMeta } from '../composables/useArticleMeta';
 import { useContentRenderer } from '../composables/useContentRenderer';
 import { useRawEditor } from '../composables/useRawEditor';
@@ -502,6 +503,7 @@ const emit = defineEmits([
 
 const appStore = useAppStore();
 const articleStore = useArticleStore();
+const articleNavStore = useArticleNavStore();
 const markdownViewerRef = ref<HTMLElement | null>(null)
 const localScrollContainerRef = ref<HTMLElement | null>(null)
 const mobilePagerRef = ref<HTMLElement | null>(null)
@@ -616,6 +618,42 @@ const navigateTo = (file: FileNode) => {
 
 // Renderer
 const { renderedHtml, toc, activeHeaderId, updateRenderedContent, scrollToHeader, setupMarkedRenderer, generateToc } = useContentRenderer(currentFile, isRawMode, localScrollContainerRef);
+
+watch(
+  toc,
+  (nextToc) => {
+    articleNavStore.setToc(nextToc, props.file?.path || null);
+  },
+  { deep: true, immediate: true }
+);
+
+watch(
+  activeHeaderId,
+  (id) => {
+    articleNavStore.setActiveHeader(id || '');
+  },
+  { immediate: true }
+);
+
+watch(
+  () => articleNavStore.pendingScrollToId,
+  (id) => {
+    if (!id) return;
+    const el = document.getElementById(id)
+    if (!el) return;
+    scrollToHeader(id);
+    articleNavStore.consumePendingScrollTo();
+  }
+);
+
+watch(renderedHtml, () => {
+  const id = articleNavStore.pendingScrollToId
+  if (!id) return
+  const el = document.getElementById(id)
+  if (!el) return
+  scrollToHeader(id)
+  articleNavStore.consumePendingScrollTo()
+})
 
 useSearchJump({
   getTarget: () => String((appStore as any).searchTarget ?? ''),
