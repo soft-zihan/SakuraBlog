@@ -46,19 +46,57 @@
         <span>{{ favoriteText }}</span>
       </button>
 
-      <div class="flex items-center gap-2 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-full border border-gray-100 dark:border-gray-700">
-        <input
-          type="color"
-          :value="backgroundColor"
-          @input="emit('update:backgroundColor', ($event.target as HTMLInputElement).value)"
-          class="w-7 h-7 rounded-xl overflow-hidden cursor-pointer border-0 p-0 bg-transparent"
-          :title="lang === 'zh' ? '文章背景色' : 'Article Background Color'"
-        />
+      <div class="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-7 h-7 rounded-xl border border-gray-200 dark:border-gray-600"
+            :style="{ backgroundColor: backgroundColor || rgbPreviewColor }"
+          ></div>
+          <div class="text-[10px] text-gray-400 leading-tight">
+            <div>RGB</div>
+            <div class="font-mono">{{ rValue }} , {{ gValue }} , {{ bValue }}</div>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1 flex-1 min-w-[120px]">
+          <div class="flex items-center gap-1">
+            <span class="w-3 text-[10px] text-red-500">R</span>
+            <input
+              type="range"
+              min="0"
+              max="255"
+              :value="rValue"
+              @input="onRChange(($event.target as HTMLInputElement).value)"
+              class="flex-1 h-1"
+            />
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="w-3 text-[10px] text-green-500">G</span>
+            <input
+              type="range"
+              min="0"
+              max="255"
+              :value="gValue"
+              @input="onGChange(($event.target as HTMLInputElement).value)"
+              class="flex-1 h-1"
+            />
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="w-3 text-[10px] text-blue-500">B</span>
+            <input
+              type="range"
+              min="0"
+              max="255"
+              :value="bValue"
+              @input="onBChange(($event.target as HTMLInputElement).value)"
+              class="flex-1 h-1"
+            />
+          </div>
+        </div>
         <button
           v-if="backgroundColor"
           @click="onResetBackgroundColor"
           class="text-xs text-gray-400 hover:text-red-500"
-          title="Reset"
+          :title="lang === 'zh' ? '重置背景色' : 'Reset background color'"
         >
           ✕
         </button>
@@ -113,6 +151,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+
 type LinkStyle = Record<string, string>
 type BadgeStyle = Record<string, string>
 
@@ -147,4 +187,86 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:backgroundColor'])
+
+const rValue = ref(255)
+const gValue = ref(255)
+const bValue = ref(255)
+
+const clampChannel = (value: number) => {
+  if (Number.isNaN(value)) return 0
+  if (value < 0) return 0
+  if (value > 255) return 255
+  return Math.round(value)
+}
+
+const parseColorToRgb = (color: string) => {
+  if (!color) {
+    return { r: 255, g: 255, b: 255 }
+  }
+  if (color.startsWith('#')) {
+    const hex = color.slice(1)
+    if (hex.length === 3) {
+      const r = parseInt(hex[0] + hex[0], 16)
+      const g = parseInt(hex[1] + hex[1], 16)
+      const b = parseInt(hex[2] + hex[2], 16)
+      if (Number.isFinite(r) && Number.isFinite(g) && Number.isFinite(b)) {
+        return { r, g, b }
+      }
+    }
+    if (hex.length === 6) {
+      const r = parseInt(hex.slice(0, 2), 16)
+      const g = parseInt(hex.slice(2, 4), 16)
+      const b = parseInt(hex.slice(4, 6), 16)
+      if (Number.isFinite(r) && Number.isFinite(g) && Number.isFinite(b)) {
+        return { r, g, b }
+      }
+    }
+  }
+  if (color.startsWith('rgb')) {
+    const matches = color.match(/\d+/g)
+    if (matches && matches.length >= 3) {
+      const r = clampChannel(Number(matches[0]))
+      const g = clampChannel(Number(matches[1]))
+      const b = clampChannel(Number(matches[2]))
+      return { r, g, b }
+    }
+  }
+  return { r: 255, g: 255, b: 255 }
+}
+
+const rgbPreviewColor = computed(() => `rgb(${rValue.value}, ${gValue.value}, ${bValue.value})`)
+
+const syncFromBackground = (color: string) => {
+  const { r, g, b } = parseColorToRgb(color)
+  rValue.value = clampChannel(r)
+  gValue.value = clampChannel(g)
+  bValue.value = clampChannel(b)
+}
+
+watch(
+  () => props.backgroundColor,
+  (color) => {
+    syncFromBackground(color)
+  },
+  { immediate: true }
+)
+
+const emitCurrentColor = () => {
+  emit('update:backgroundColor', rgbPreviewColor.value)
+}
+
+const onRChange = (value: string) => {
+  rValue.value = clampChannel(Number(value))
+  emitCurrentColor()
+}
+
+const onGChange = (value: string) => {
+  gValue.value = clampChannel(Number(value))
+  emitCurrentColor()
+}
+
+const onBChange = (value: string) => {
+  bValue.value = clampChannel(Number(value))
+  emitCurrentColor()
+}
 </script>

@@ -80,28 +80,6 @@
         </div>
 
         <div class="mb-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '文章背景' : 'Article Background' }}</div>
-          <div class="flex items-center gap-2">
-            <label class="flex-1 flex items-center gap-3 px-3 py-2 border rounded-xl text-sm transition-colors border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-gray-800/60">
-              <input
-                type="color"
-                v-model="articleBackgroundColor"
-                class="w-10 h-10 rounded-xl overflow-hidden cursor-pointer border-0 p-0 bg-transparent"
-                :title="lang === 'zh' ? '文章背景色' : 'Article Background Color'"
-              />
-              <span class="text-xs">{{ lang === 'zh' ? '选择颜色（按明/暗分别保存）' : 'Pick color (saved per light/dark)' }}</span>
-            </label>
-            <button
-              v-if="articleBackgroundColor"
-              @click="resetArticleBackgroundColor"
-              class="px-3 py-2 border rounded-xl text-xs transition-colors border-gray-200 dark:border-gray-700 text-gray-500 hover:text-red-500"
-            >
-              {{ lang === 'zh' ? '重置' : 'Reset' }}
-            </button>
-          </div>
-        </div>
-
-        <div class="mb-4">
           <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '主题模式' : 'Mode' }}</div>
           <div class="flex items-center gap-2 flex-wrap">
             <button
@@ -513,25 +491,6 @@ const themeColors = THEME_COLOR_LIST
 
 const setThemeColor = (id: ThemeColorId) => {
   appStore.setThemeColor(id)
-}
-
-const articleBackgroundColor = computed({
-  get: () => (appStore.isDark ? appStore.userSettings.articleBackgroundColorDark : appStore.userSettings.articleBackgroundColorLight),
-  set: (value: string) => {
-    if (appStore.isDark) {
-      appStore.userSettings.articleBackgroundColorDark = value
-    } else {
-      appStore.userSettings.articleBackgroundColorLight = value
-    }
-  }
-})
-
-const resetArticleBackgroundColor = () => {
-  if (appStore.isDark) {
-    appStore.userSettings.articleBackgroundColorDark = ''
-  } else {
-    appStore.userSettings.articleBackgroundColorLight = ''
-  }
 }
 
 const primaryButtonStyle = computed(() => ({
