@@ -209,7 +209,7 @@ const { handleImageClick } = lightbox;
 // =====================
 // Selection Menu
 // =====================
-const { selectionMenu, applyFormat, hideSelectionMenu, handleSelectionChange } = useSelectionMenu(markdownViewerRef, showToast);
+const { selectionMenu, applyFormat, hideSelectionMenu, handleSelectionChange, handleSelectionContextMenu } = useSelectionMenu(markdownViewerRef, showToast);
 
 const applyFormatHandler = (format: string) => {
   const errorMsg = lang.value === 'zh' ? '应用格式失败' : 'Format failed';
@@ -598,6 +598,7 @@ useAppInit(
 // =====================
 onMounted(async () => {
   document.addEventListener('selectionchange', handleSelectionChange);
+  document.addEventListener('contextmenu', handleSelectionContextMenu, { capture: true });
   // 捕获阶段拦截内部链接点击
   document.addEventListener('click', handleLinkCapture, { capture: true });
   window.addEventListener('sakura:open-lab-note', handleOpenLabNoteEvent as EventListener);
@@ -607,6 +608,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   document.removeEventListener('selectionchange', handleSelectionChange);
+  document.removeEventListener('contextmenu', handleSelectionContextMenu, { capture: true });
   document.removeEventListener('click', handleLinkCapture, { capture: true });
   window.removeEventListener('sakura:open-lab-note', handleOpenLabNoteEvent as EventListener);
   window.removeEventListener('sakura:open-lab-source', handleOpenLabSourceEvent as EventListener);

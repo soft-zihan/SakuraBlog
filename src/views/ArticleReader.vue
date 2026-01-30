@@ -53,10 +53,6 @@
            v-html="renderedHtml" 
            class="markdown-body"
            @click="handleContentClickEvent"
-           @mousedown="selectionMenuComposable.lockSelectionMenu()"
-           @mouseup="handleSelectionEvent"
-           @touchend="handleSelectionEvent"
-           @contextmenu="handleSelectionContextMenuEvent"
          ></div>
 
          <!-- Source Code / Raw Mode (Editable) -->
@@ -129,7 +125,6 @@
          />
          
          <!-- Selection Menu -->
-         <FloatingSelectionMenu :selection-menu="selectionMenu" @apply-format="applyFormatHandler" />
        </div>
      </div>
 
@@ -255,7 +250,6 @@ import { useSearchJump } from '../composables/useSearchJump';
 import { useViewCounter } from '../composables/useViewCounter';
 import GiscusComments from '../components/GiscusComments.vue';
 import ArticleInfoBar from '../components/ArticleInfoBar.vue';
-import FloatingSelectionMenu from '../components/FloatingSelectionMenu.vue';
 
 const props = defineProps<{
   file: FileNode;
@@ -555,28 +549,8 @@ watch([currentFile, isRawMode], () => {
 const showToast = (msg: string) => appStore.showToast(msg);
 const rawEditor = useRawEditor(currentFile, isRawMode, updateRenderedContent, showToast, toRef(props, 'lang'));
 
-// Selection Menu
-const selectionMenuComposable = useSelectionMenu(markdownViewerRef, showToast);
-const { selectionMenu, handleSelection, handleSelectionContextMenu, applyFormat } = selectionMenuComposable;
-
-const handleSelectionEvent = (e?: MouseEvent | TouchEvent) => {
-  if (e && 'button' in e && e.button === 2) return
-  handleSelection()
-}
-const handleSelectionContextMenuEvent = (e: MouseEvent) => handleSelectionContextMenu(e);
-const applyFormatHandler = (format: string) => applyFormat(format, props.lang === 'zh' ? '应用格式失败' : 'Format failed');
-
 // Content Click
 const handleContentClickEvent = (e: MouseEvent) => {
-  const selection = window.getSelection()
-  const viewer = markdownViewerRef.value
-  const hasSelectionInViewer = (() => {
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false
-    const range = selection.getRangeAt(0)
-    if (!viewer) return false
-    return viewer.contains(range.startContainer) && viewer.contains(range.endContainer)
-  })()
-  if (!hasSelectionInViewer) selectionMenuComposable.hideSelectionMenu()
   props.onContentClick(e);
 };
 
