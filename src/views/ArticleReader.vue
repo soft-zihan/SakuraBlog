@@ -129,17 +129,7 @@
          />
          
          <!-- Selection Menu -->
-         <div 
-           v-show="selectionMenu.show" 
-           class="fixed z-50 flex bg-gray-900/95 text-white rounded-2xl shadow-2xl backdrop-blur-xl transform -translate-x-1/2 -translate-y-full mb-2 p-1.5 gap-0.5 border border-white/10"
-           :style="{ top: selectionMenu.y + 'px', left: selectionMenu.x + 'px' }"
-           @mousedown.prevent
-         >
-           <button @click="applyFormatHandler('highlight-yellow')" class="p-2 hover:bg-white/20 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all" title="Yellow Highlight">
-             <span class="w-4 h-4 bg-yellow-400 rounded-full inline-block ring-2 ring-yellow-300/50"></span>
-           </button>
-           <!-- ... other buttons ... -->
-         </div>
+         <FloatingSelectionMenu :selection-menu="selectionMenu" @apply-format="applyFormatHandler" />
        </div>
      </div>
 
@@ -265,6 +255,7 @@ import { useSearchJump } from '../composables/useSearchJump';
 import { useViewCounter } from '../composables/useViewCounter';
 import GiscusComments from '../components/GiscusComments.vue';
 import ArticleInfoBar from '../components/ArticleInfoBar.vue';
+import FloatingSelectionMenu from '../components/FloatingSelectionMenu.vue';
 
 const props = defineProps<{
   file: FileNode;

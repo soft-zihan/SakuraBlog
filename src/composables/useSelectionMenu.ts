@@ -27,6 +27,43 @@ const formatClassMap: Record<string, string> = {
   'highlight-block': 'sakura-block-highlight'
 }
 
+const BLOCK_HIGHLIGHT_SELECTOR = 'p, li, blockquote, pre, h1, h2, h3, h4, h5, h6, table'
+
+const getNearestHighlightBlock = (node: Node | null, viewer: HTMLElement) => {
+  if (!node) return null
+  const el = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement
+  if (!el) return null
+  const block = el.closest(BLOCK_HIGHLIGHT_SELECTOR)
+  if (block && viewer.contains(block)) return block as HTMLElement
+  return null
+}
+
+const applyBlockHighlight = (range: Range, viewer: HTMLElement) => {
+  const startBlock = getNearestHighlightBlock(range.startContainer, viewer)
+  const endBlock = getNearestHighlightBlock(range.endContainer, viewer)
+  if (!startBlock || !endBlock) return
+
+  const blocks: HTMLElement[] = []
+  const walker = document.createTreeWalker(viewer, NodeFilter.SHOW_ELEMENT, {
+    acceptNode: (node) => {
+      if (!(node instanceof HTMLElement)) return NodeFilter.FILTER_SKIP
+      if (!node.matches(BLOCK_HIGHLIGHT_SELECTOR)) return NodeFilter.FILTER_SKIP
+      return NodeFilter.FILTER_ACCEPT
+    }
+  })
+  while (walker.nextNode()) blocks.push(walker.currentNode as HTMLElement)
+
+  const startIndex = blocks.indexOf(startBlock)
+  const endIndex = blocks.indexOf(endBlock)
+  if (startIndex === -1 || endIndex === -1) return
+
+  const from = Math.min(startIndex, endIndex)
+  const to = Math.max(startIndex, endIndex)
+  for (let i = from; i <= to; i++) {
+    blocks[i].classList.add(formatClassMap['highlight-block'])
+  }
+}
+
 /**
  * 获取 viewer 中的选区
  */
@@ -160,6 +197,14 @@ const applyFormat = (type: string, errorMsg: string) => {
   const { range, viewer } = info
 
   try {
+    if (type === 'highlight-block') {
+      applyBlockHighlight(range, viewer)
+      selection.removeAllRanges()
+      selectionMenu.value.show = false
+      selectionMenu.value.locked = false
+      return
+    }
+
     const walker = document.createTreeWalker(viewer, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => {
         if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT

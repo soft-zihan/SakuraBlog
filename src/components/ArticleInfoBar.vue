@@ -136,14 +136,14 @@
         </Transition>
       </div>
 
-      <span v-if="typeof visitors === 'number'" class="text-xs text-gray-400 flex items-center gap-1">
+      <span class="text-xs text-gray-400 flex items-center gap-1">
         <span class="text-sm">👨‍💻</span>
-        {{ visitors }} {{ visitorsLabel }}
+        {{ visitorsDisplay }} {{ visitorsLabel }}
       </span>
 
-      <span v-if="typeof views === 'number'" class="text-xs text-gray-400 flex items-center gap-1">
+      <span class="text-xs text-gray-400 flex items-center gap-1">
         <span class="text-sm">📖</span>
-        {{ views }} {{ viewsLabel }}
+        {{ viewsDisplay }} {{ viewsLabel }}
       </span>
 
       <button
@@ -216,6 +216,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:backgroundColor'])
+
+const visitorsDisplay = computed(() => (typeof props.visitors === 'number' ? String(props.visitors) : '--'))
+const viewsDisplay = computed(() => (typeof props.views === 'number' ? String(props.views) : '--'))
 
 const rValue = ref(255)
 const gValue = ref(255)
