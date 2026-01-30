@@ -31,15 +31,12 @@
             :favorite-text="t.favorite"
             :on-toggle-favorite="() => articleStore.toggleFavorite(file.path)"
             v-model:backgroundColor="articleBackgroundColor"
-            :on-reset-background-color="resetArticleBackgroundColor"
             :visitors="getArticleVisitors(file.path)"
             :visitors-label="lang === 'zh' ? '人' : 'readers'"
             :views="getArticleViews(file.path)"
             :views-label="lang === 'zh' ? '次' : 'views'"
             :comments="getArticleComments(file.path)"
             :comments-label="lang === 'zh' ? '条评论' : 'comments'"
-            :word-count="currentWordCount"
-            :words-label="t.words"
             :updated-label="t.updated"
             :updated-date="formatDate(file.lastModified)"
             :tags="currentTags"
@@ -571,13 +568,24 @@ const rawEditor = useRawEditor(currentFile, isRawMode, updateRenderedContent, sh
 const selectionMenuComposable = useSelectionMenu(markdownViewerRef, showToast);
 const { selectionMenu, handleSelection, handleSelectionContextMenu, applyFormat } = selectionMenuComposable;
 
-const handleSelectionEvent = () => handleSelection();
+const handleSelectionEvent = (e?: MouseEvent | TouchEvent) => {
+  if (e && 'button' in e && e.button === 2) return
+  handleSelection()
+}
 const handleSelectionContextMenuEvent = (e: MouseEvent) => handleSelectionContextMenu(e);
 const applyFormatHandler = (format: string) => applyFormat(format, props.lang === 'zh' ? '应用格式失败' : 'Format failed');
 
 // Content Click
 const handleContentClickEvent = (e: MouseEvent) => {
-  selectionMenuComposable.hideSelectionMenu();
+  const selection = window.getSelection()
+  const viewer = markdownViewerRef.value
+  const hasSelectionInViewer = (() => {
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false
+    const range = selection.getRangeAt(0)
+    if (!viewer) return false
+    return viewer.contains(range.startContainer) && viewer.contains(range.endContainer)
+  })()
+  if (!hasSelectionInViewer) selectionMenuComposable.hideSelectionMenu()
   props.onContentClick(e);
 };
 

@@ -374,7 +374,10 @@
             </div>
             <div v-else-if="appStore.wallpaperApiSettings.baiduKeyword !== undefined" class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无结果' : 'No results' }}</div>
 
-            <div class="flex items-center gap-2 mb-2">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                {{ lang === 'zh' ? '美女壁纸' : 'Beauty Wallpapers' }}
+              </div>
               <button @click="refreshBeauty" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)] disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ isApiLoading ? (lang === 'zh' ? '加载中' : 'Loading') : (lang === 'zh' ? '刷新' : 'Refresh') }}
               </button>
@@ -393,7 +396,10 @@
             </div>
             <div v-else class="text-xs text-gray-400">{{ lang === 'zh' ? '暂无结果' : 'No results' }}</div>
 
-            <div class="flex items-center gap-2 mb-2">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                {{ lang === 'zh' ? '动漫壁纸' : 'Anime Wallpapers' }}
+              </div>
               <button @click="refreshAnime" :disabled="isApiLoading" class="px-2 py-1 text-xs border rounded-lg border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)] disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ isApiLoading ? (lang === 'zh' ? '加载中' : 'Loading') : (lang === 'zh' ? '刷新' : 'Refresh') }}
               </button>

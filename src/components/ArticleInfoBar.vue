@@ -46,60 +46,94 @@
         <span>{{ favoriteText }}</span>
       </button>
 
-      <div class="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+      <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
-          <div
-            class="w-7 h-7 rounded-xl border border-gray-200 dark:border-gray-600"
-            :style="{ backgroundColor: backgroundColor || rgbPreviewColor }"
-          ></div>
-          <div class="text-[10px] text-gray-400 leading-tight">
-            <div>RGB</div>
-            <div class="font-mono">{{ rValue }} , {{ gValue }} , {{ bValue }}</div>
-          </div>
+          <button
+            type="button"
+            class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:bg-white/80 dark:hover:bg-gray-700/60 transition-colors"
+            @click="colorPickerOpen = !colorPickerOpen"
+          >
+            <div
+              class="w-7 h-7 rounded-xl border border-gray-200 dark:border-gray-600"
+              :style="{ backgroundColor: backgroundColor || rgbPreviewColor }"
+            ></div>
+            <div class="text-[10px] text-gray-400 leading-tight text-left">
+              <div>{{ lang === 'zh' ? '背景色' : 'Background' }}</div>
+              <div class="font-mono">RGB {{ rValue }},{{ gValue }},{{ bValue }}</div>
+            </div>
+            <svg
+              class="w-4 h-4 text-gray-400 transition-transform"
+              :class="colorPickerOpen ? 'rotate-180' : ''"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
         </div>
-        <div class="flex flex-col gap-1 flex-1 min-w-[120px]">
-          <div class="flex items-center gap-1">
-            <span class="w-3 text-[10px] text-red-500">R</span>
-            <input
-              type="range"
-              min="0"
-              max="255"
-              :value="rValue"
-              @input="onRChange(($event.target as HTMLInputElement).value)"
-              class="flex-1 h-1"
-            />
-          </div>
-          <div class="flex items-center gap-1">
-            <span class="w-3 text-[10px] text-green-500">G</span>
-            <input
-              type="range"
-              min="0"
-              max="255"
-              :value="gValue"
-              @input="onGChange(($event.target as HTMLInputElement).value)"
-              class="flex-1 h-1"
-            />
-          </div>
-          <div class="flex items-center gap-1">
-            <span class="w-3 text-[10px] text-blue-500">B</span>
-            <input
-              type="range"
-              min="0"
-              max="255"
-              :value="bValue"
-              @input="onBChange(($event.target as HTMLInputElement).value)"
-              class="flex-1 h-1"
-            />
-          </div>
-        </div>
-        <button
-          v-if="backgroundColor"
-          @click="onResetBackgroundColor"
-          class="text-xs text-gray-400 hover:text-red-500"
-          :title="lang === 'zh' ? '重置背景色' : 'Reset background color'"
+        <Transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0 -translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-1"
         >
-          ✕
-        </button>
+          <div
+            v-if="colorPickerOpen"
+            class="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700"
+          >
+            <div class="flex items-center gap-2">
+              <div
+                class="w-7 h-7 rounded-xl border border-gray-200 dark:border-gray-600"
+                :style="{ backgroundColor: backgroundColor || rgbPreviewColor }"
+              ></div>
+              <div class="text-[10px] text-gray-400 leading-tight">
+                <div>RGB</div>
+                <div class="font-mono">{{ rValue }} , {{ gValue }} , {{ bValue }}</div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1 flex-1 min-w-[120px]">
+              <div class="flex items-center gap-1">
+                <span class="w-3 text-[10px] text-red-500">R</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="255"
+                  :value="rValue"
+                  @input="onRChange(($event.target as HTMLInputElement).value)"
+                  class="flex-1 h-1"
+                />
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="w-3 text-[10px] text-green-500">G</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="255"
+                  :value="gValue"
+                  @input="onGChange(($event.target as HTMLInputElement).value)"
+                  class="flex-1 h-1"
+                />
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="w-3 text-[10px] text-blue-500">B</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="255"
+                  :value="bValue"
+                  @input="onBChange(($event.target as HTMLInputElement).value)"
+                  class="flex-1 h-1"
+                />
+              </div>
+            </div>
+          </div>
+        </Transition>
       </div>
 
       <span v-if="typeof visitors === 'number'" class="text-xs text-gray-400 flex items-center gap-1">
@@ -128,8 +162,6 @@
         </svg>
         {{ comments }} {{ commentsLabel }}
       </span>
-
-      <span class="text-xs text-gray-400">📝 {{ wordCount }} {{ wordsLabel }}</span>
 
       <span class="text-xs text-gray-400 flex items-center gap-1">🕐 {{ updatedLabel }}: {{ updatedDate }}</span>
 
@@ -169,15 +201,12 @@ const props = defineProps<{
   favoriteText: string
   onToggleFavorite: () => void
   backgroundColor: string
-  onResetBackgroundColor: () => void
   visitors?: number
   visitorsLabel: string
   views?: number
   viewsLabel: string
   comments: number
   commentsLabel: string
-  wordCount: number
-  wordsLabel: string
   updatedLabel: string
   updatedDate: string
   tags: string[]
@@ -191,6 +220,7 @@ const emit = defineEmits(['update:backgroundColor'])
 const rValue = ref(255)
 const gValue = ref(255)
 const bValue = ref(255)
+const colorPickerOpen = ref(false)
 
 const clampChannel = (value: number) => {
   if (Number.isNaN(value)) return 0
