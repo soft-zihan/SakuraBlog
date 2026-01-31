@@ -285,6 +285,13 @@ obj.name = 'new value'</pre>
           <div class="flex items-center gap-2 mb-2">
             <span class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 px-2 py-1 rounded">stores/appStore.ts</span>
             <span class="text-xs text-gray-500">{{ lang === 'zh' ? '全局状态管理' : 'Global state management' }}</span>
+            <button
+              type="button"
+              class="ml-auto text-xs px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+              @click="openCode('src/stores/appStore.ts', 'useAppStore')"
+            >
+              {{ lang === 'zh' ? '打开源码' : 'Open code' }}
+            </button>
           </div>
           <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto">{{ appStoreCode }}</pre>
         </div>
@@ -294,6 +301,13 @@ obj.name = 'new value'</pre>
           <div class="flex items-center gap-2 mb-2">
             <span class="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 px-2 py-1 rounded">composables/useSearch.ts</span>
             <span class="text-xs text-gray-500">{{ lang === 'zh' ? '搜索功能状态' : 'Search state' }}</span>
+            <button
+              type="button"
+              class="ml-auto text-xs px-2 py-1 rounded bg-green-600 hover:bg-green-700 text-white font-bold"
+              @click="openCode('src/composables/useSearch.ts', 'useSearch')"
+            >
+              {{ lang === 'zh' ? '打开源码' : 'Open code' }}
+            </button>
           </div>
           <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto">{{ useSearchCode }}</pre>
         </div>
@@ -303,6 +317,13 @@ obj.name = 'new value'</pre>
           <div class="flex items-center gap-2 mb-2">
             <span class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 px-2 py-1 rounded">stores/musicStore.ts</span>
             <span class="text-xs text-gray-500">{{ lang === 'zh' ? '音乐播放器状态' : 'Music player state' }}</span>
+            <button
+              type="button"
+              class="ml-auto text-xs px-2 py-1 rounded bg-purple-600 hover:bg-purple-700 text-white font-bold"
+              @click="openCode('src/stores/musicStore.ts', 'useMusicStore')"
+            >
+              {{ lang === 'zh' ? '打开源码' : 'Open code' }}
+            </button>
           </div>
           <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto">{{ musicStoreCode }}</pre>
         </div>
@@ -326,6 +347,16 @@ const props = defineProps<{
 
 const t = computed(() => I18N[props.lang]);
 const isZh = computed(() => props.lang === 'zh');
+
+const openCode = (path: string, token?: string) => {
+  const raw = (token || '').trim()
+  const isLineRange = !!raw && /^L?\d+(-L?\d+)?$/i.test(raw)
+  const isFind = raw.toLowerCase().startsWith('find:')
+  const range = isLineRange ? raw : undefined
+  const anchor = !isLineRange && !isFind && raw ? raw : undefined
+  const find = isFind ? raw.slice('find:'.length).trim() : undefined
+  window.dispatchEvent(new CustomEvent('sakura-open-code', { detail: { path, range, anchor, find } }));
+};
 
 const arrayDemoCode = computed(() =>
   isZh.value

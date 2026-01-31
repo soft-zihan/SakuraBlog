@@ -63,14 +63,15 @@ export function useViewCounter() {
 
   const incrementAndGetViews = async (path: string): Promise<number | undefined> => {
     const normalizedPath = normalizePath(path)
-    const cached = articleStore.getCachedStats(path);
-    if (cached) return cached.views;
+    const cachedViews = getCachedViews(path)
+    const cachedVisitors = getCachedVisitors(path)
+    if (typeof cachedViews === 'number') return cachedViews
 
-    if (VIEW_COUNTER_CONFIG.provider !== 'countapi') return cached?.views;
+    if (VIEW_COUNTER_CONFIG.provider !== 'countapi') return cachedViews
 
     const namespace = getNamespace();
     if (!namespace) {
-      return cached?.views;
+      return cachedViews;
     }
 
     try {
@@ -78,7 +79,7 @@ export function useViewCounter() {
       const visitorsKey = toCountApiKey('visitors', normalizedPath);
 
       const views = await hitCounter(namespace, viewsKey);
-      let visitors = cached?.visitors;
+      let visitors = cachedVisitors;
 
       if (!articleStore.hasVisited(normalizedPath)) {
         const v = await hitCounter(namespace, visitorsKey);
@@ -98,10 +99,10 @@ export function useViewCounter() {
       } else {
         console.warn('CountAPI hit error', { error })
       }
-      return cached?.views;
+      return cachedViews;
     }
 
-    return cached?.views;
+    return cachedViews;
   };
 
   return {

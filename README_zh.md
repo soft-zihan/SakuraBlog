@@ -8,11 +8,11 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/soft-zihan/soft-zihan.github.io)
-[![DeepWiki](https://img.shields.io/badge/DeepWiki-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTY)](https://deepwiki.com/soft-zihan/soft-zihan.github.io)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTY)](https://deepwiki.com/soft-zihan/SakuraBlog)
 
 **一个为 GitHub Pages 设计的纯静态个人博客系统**
 
-[🌐 在线演示](https://soft-zihan.github.io/) · [🐛 报告问题](https://github.com/soft-zihan/soft-zihan.github.io/issues)
+[🌐 在线演示](https://soft-zihan.github.io/SakuraBlog/) · [🐛 报告问题](https://github.com/soft-zihan/SakuraBlog/issues)
 
 </div>
 
@@ -71,9 +71,16 @@
 
 | 特性                     | 描述                                   |
 | ------------------------ | -------------------------------------- |
-| **7 阶段学习路径** | 从 Web 基础到 Vue 3 进阶的完整学习路线 |
+| **8 阶段学习路径** | 从 Web 基础到 Vue 3 进阶的完整学习路线（含综合挑战） |
 | **交互式组件**     | 可视化教学组件，实时代码演示           |
 | **源码查看器**     | 查看本站组件源码；支持“预置笔记/用户笔记”，并按当前语言显示说明 |
+
+#### 学习实验室：给小白的完整读法
+
+- **Stage（阶段）**：站内的学习路线图，强调“边看边玩边验证”（交互组件 + 即时反馈）。当前共有 8 个 Stage：HTML → CSS → JS → TS/异步 → 工程化 → Vue 核心 → Vue 进阶 → 综合挑战。
+- **笔记（notes/VUE学习笔记）**：配套的“系统讲解材料”（7 篇章节），更适合从头到尾顺着读，解决“为什么/背景/概念体系”。实验室各 Stage 会反复引用它们作为主线讲解。
+- **源码查看器（Source Viewer）**：把“站内 UI 表现”映射到“真实项目源码”。你可以打开具体文件，结合预置笔记理解：某段代码对应本站哪个组件、触发哪个交互、为什么这么写。
+- **推荐学习法**：先读对应笔记（尤其 1-4），再回到实验室做交互实验与对照源码；遇到不理解的 UI 效果，就用“打开源码/预置笔记”回溯实现细节。
 
 ### 🔐 安全特性
 
@@ -108,8 +115,8 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/soft-zihan/soft-zihan.github.io.git
-cd soft-zihan.github.io
+git clone https://github.com/soft-zihan/SakuraBlog.git
+cd SakuraBlog
 
 # 安装依赖
 npm install
@@ -123,7 +130,7 @@ npm run build
 
 ### 方式三：在线发布
 
-直接访问 [Sakura Notes](https://soft-zihan.github.io/)，点击右上角设置按钮：
+直接访问 [Sakura Notes](https://soft-zihan.github.io/SakuraBlog/)，点击右上角设置按钮：
 
 1. 输入你的 GitHub Token（需要 `repo` 权限）
 2. 配置目标仓库信息
@@ -382,7 +389,7 @@ notes/
 
 **方式一：网页端发布**
 
-1. 访问 [Sakura Notes](https://soft-zihan.github.io/)
+1. 访问 [Sakura Notes](https://soft-zihan.github.io/SakuraBlog/)
 2. 配置你的 GitHub Token
 3. 使用发布工作台撰写并发布
 4. 系统会自动为你创建 PR
@@ -398,8 +405,8 @@ notes/
 1. **Fork & Clone**
 
    ```bash
-   git clone https://github.com/你的用户名/soft-zihan.github.io.git
-   cd soft-zihan.github.io
+   git clone https://github.com/你的用户名/SakuraBlog.git
+   cd SakuraBlog
    npm install
    ```
 2. **创建功能分支**

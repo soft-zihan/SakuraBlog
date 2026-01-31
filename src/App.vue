@@ -22,7 +22,7 @@
     @copy-link="copyLink"
     @open-theme-panel="handleThemePanelChange"
     @update:petal-speed="handlePetalSpeedChange"
-    @toggle-dual-column="dualColumnMode = !dualColumnMode; if(dualColumnMode && !appStore.currentTool) appStore.currentTool = 'dashboard'"
+    @toggle-dual-column="toggleDualColumnMode"
   >
     <!-- Dynamic Petals Container (Front layer) -->
     <PetalBackground v-if="appStore.showParticles && appStore.userSettings.petalLayer === 'front'" :speed="appStore.userSettings.petalSpeed" :isDark="appStore.isDark" layer="front" />
@@ -325,6 +325,23 @@ const handleOpenLabNoteEvent = (evt: Event) => {
   const e = evt as CustomEvent<{ path?: string }>
   const path = e.detail?.path
   if (!path) return
+  const isMobile = !!layoutRef.value?.isMobile || window.innerWidth < 768
+  if (isMobile) {
+    const normalized = path.replace(/^\/+/, '')
+    const node = findNodeByPath(appStore.fileSystem, normalized)
+    if (node && node.type === NodeType.FILE) {
+      dualColumnMode.value = false
+      dualColumnOpenNotePath.value = null
+      appStore.viewMode = 'lab'
+      appStore.currentTool = null
+      void openFile(node)
+    } else {
+      dualColumnMode.value = false
+      dualColumnOpenNotePath.value = null
+      openLabDashboard(labDashboardTab.value)
+    }
+    return
+  }
   appStore.viewMode = 'lab'
   appStore.currentTool = 'dashboard'
   dualColumnMode.value = true
@@ -334,6 +351,16 @@ const handleOpenLabNoteEvent = (evt: Event) => {
 }
 
 const handleOpenLabSourceEvent = () => {
+  const isMobile = !!layoutRef.value?.isMobile || window.innerWidth < 768
+  if (isMobile) {
+    dualColumnMode.value = false
+    dualColumnOpenNotePath.value = null
+    appStore.viewMode = 'lab'
+    appStore.currentTool = 'source-code'
+    appStore.currentFile = null
+    appStore.currentFolder = null
+    return
+  }
   appStore.viewMode = 'lab'
   appStore.currentTool = 'dashboard'
   dualColumnMode.value = true
@@ -343,6 +370,17 @@ const handleOpenLabSourceEvent = () => {
 }
 
 const layoutRef = ref();
+
+const toggleDualColumnMode = () => {
+  const isMobile = !!layoutRef.value?.isMobile || window.innerWidth < 768
+  if (isMobile) {
+    dualColumnMode.value = false
+    dualColumnOpenNotePath.value = null
+    return
+  }
+  dualColumnMode.value = !dualColumnMode.value
+  if (dualColumnMode.value && !appStore.currentTool) appStore.currentTool = 'dashboard'
+}
 
 const selectTool = (tool: string) => {
   appStore.currentTool = tool as any;
@@ -484,6 +522,7 @@ const { handleContentClick } = useContentClick(
   openFile,
   codeModal.openCodeModal,
   codeModal.setCodeModalContent,
+  codeModal.setHighlightRange,
   codeModal.fetchSourceCodeFile,
   handleImageClick,
   hideSelectionMenu,

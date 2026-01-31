@@ -238,7 +238,16 @@
                 <span class="text-gray-300 text-sm font-mono">{{ example.file }}</span>
                 <span class="text-gray-500 text-xs">{{ example.desc }}</span>
               </div>
-              <span class="text-gray-400">{{ example.expanded ? '▼' : '▶' }}</span>
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  class="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
+                  @click.stop="openCode(`src/${example.file}`, example.anchor || undefined)"
+                >
+                  {{ isZh ? '打开源码' : 'Open code' }}
+                </button>
+                <span class="text-gray-400">{{ example.expanded ? '▼' : '▶' }}</span>
+              </div>
             </div>
             <div v-if="example.expanded" class="p-4 overflow-x-auto">
               <pre class="text-sm text-gray-100 font-mono"><code>{{ example.code }}</code></pre>
@@ -258,6 +267,16 @@ import { I18N } from '../../../constants'
 const props = defineProps<{ lang: 'en' | 'zh' }>()
 const t = computed(() => I18N[props.lang])
 const isZh = computed(() => props.lang === 'zh')
+
+const openCode = (path: string, token?: string) => {
+  const raw = (token || '').trim()
+  const isLineRange = !!raw && /^L?\d+(-L?\d+)?$/i.test(raw)
+  const isFind = raw.toLowerCase().startsWith('find:')
+  const range = isLineRange ? raw : undefined
+  const anchor = !isLineRange && !isFind && raw ? raw : undefined
+  const find = isFind ? raw.slice('find:'.length).trim() : undefined
+  window.dispatchEvent(new CustomEvent('sakura-open-code', { detail: { path, range, anchor, find } }))
+}
 
 const activeTab = ref('promise')
 const tabs = computed(() => [
@@ -417,6 +436,7 @@ const realCodeExamples = reactive([
     file: 'composables/useSearch.ts',
     desc: isZh.value ? '搜索索引初始化' : 'Search index init',
     expanded: true,
+    anchor: 'initSearchIndex',
     code: `// 搜索功能：异步加载和索引文件
 const initSearchIndex = async () => {
   if (searchIndexReady.value) return
@@ -448,6 +468,7 @@ const initSearchIndex = async () => {
     file: 'composables/useWallpapers.ts',
     desc: isZh.value ? '壁纸列表加载' : 'Wallpaper list loading',
     expanded: false,
+    anchor: 'loadWallpapers',
     code: `// 壁纸管理：异步加载壁纸配置
 export function useWallpapers() {
   const wallpapers = ref<WallpaperList>({ light: [], dark: [] })
@@ -474,32 +495,20 @@ export function useWallpapers() {
     file: 'composables/useGitHubPublish.ts',
     desc: isZh.value ? 'GitHub API 调用' : 'GitHub API calls',
     expanded: false,
+    anchor: 'publishArticle',
     code: `// GitHub 发布：多个异步操作串联
-const publishToGitHub = async (content: string, path: string) => {
-  // 1. 获取当前文件 SHA（如果存在）
-  const sha = await getFileSha(path)
+const publishArticle = async (options, title, content) => {
+  // 1) 可能需要先上传图片（多个 await 串联）
+  const imageUrl = await uploadImage(options, file)
   
-  // 2. 创建或更新文件
-  const response = await fetch(\`\${GITHUB_API}/contents/\${path}\`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': \`token \${token}\`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: \`Update \${path}\`,
-      content: btoa(content),
-      sha  // 更新时需要提供旧文件的 SHA
-    })
-  })
+  // 2) 处理 markdown 内容（替换本地图片占位符）
+  const processedContent = content.replace('local-image:xxx', imageUrl)
   
-  if (!response.ok) {
-    throw new Error(\`GitHub API Error: \${response.status}\`)
-  }
-  
-  return await response.json()
+  // 3) 最后提交文件（内部仍包含若干 fetch/await）
+  const result = await createOrUpdateFile(options, processedContent)
+  return result
 }`
-  }
+  },
 ])
 </script>
 

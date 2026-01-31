@@ -1,7 +1,7 @@
 
 // Giscus Configuration (get values from https://giscus.app)
 export const GISCUS_CONFIG = {
-  repo: import.meta.env.VITE_GISCUS_REPO || 'soft-zihan/soft-zihan.github.io',
+  repo: import.meta.env.VITE_GISCUS_REPO || 'soft-zihan/SakuraBlog',
   repoId: import.meta.env.VITE_GISCUS_REPO_ID || 'R_kgDOQ1b8-A',
   category: import.meta.env.VITE_GISCUS_CATEGORY || 'Announcements',
   categoryId: import.meta.env.VITE_GISCUS_CATEGORY_ID || 'DIC_kwDOQ1b8-M4C1Ezk'

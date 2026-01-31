@@ -1,0 +1,10 @@
+{
+  "version": "2026.02.01",
+  "intro": "构建前置脚本：复制 notes/、导出 raw/、生成 files.json（笔记树 + 源码树）。",
+  "notes": [
+    {
+      "match": "Generating File Tree",
+      "content": "这是构建前置脚本：\n- 复制 notes/ → public/notes/（运行时可 fetch）\n- 重建 public/raw/（把源码导出为 .txt 便于静态站点读取）\n- 生成 public/data/files.json（笔记树 + 源码树）\n- lastModified 优先使用 git log，避免 CI 中文件 mtime 不可靠"
+    }
+  ]
+}

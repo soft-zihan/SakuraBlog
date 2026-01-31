@@ -82,6 +82,7 @@ export function useContentClick(
   openFile: (file: FileNode) => Promise<void>,
   openCodeModal: (title: string, content: string, path: string) => Promise<void>,
   setCodeModalContent: (content: string) => void,
+  setCodeModalHighlightRange: ((startLine?: number, endLine?: number) => void) | undefined,
   fetchSourceCodeFile: (filePath: string) => Promise<string>,
   handleImageClick: (target: HTMLElement) => boolean,
   hideSelectionMenu: () => void,
@@ -280,16 +281,6 @@ export function useContentClick(
     return { startLine: contextBefore + 1, endLine: contextAfter }
   }
 
-  const buildLineSnippet = (content: string, startLine?: number, endLine?: number) => {
-    if (!startLine) return content
-    const lines = content.split(/\r?\n/)
-    const safeStart = Math.max(1, startLine)
-    const safeEnd = Math.min(lines.length, endLine && endLine >= safeStart ? endLine : safeStart)
-    const width = String(safeEnd).length
-    const slice = lines.slice(safeStart - 1, safeEnd)
-    return slice.map((line, idx) => `${String(safeStart + idx).padStart(width, ' ')} | ${line}`).join('\n')
-  }
-
   /**
    * 解析目标路径
    */
@@ -397,8 +388,8 @@ export function useContentClick(
             }
           }
 
-          const finalContent = startLine ? buildLineSnippet(content, startLine, endLine) : content
-          setCodeModalContent(finalContent)
+          setCodeModalContent(content)
+          if (setCodeModalHighlightRange) setCodeModalHighlightRange(startLine, endLine)
           hideSelectionMenu()
           return
         }
@@ -438,6 +429,7 @@ export function useContentClick(
           }
 
           setCodeModalContent(content)
+          if (setCodeModalHighlightRange) setCodeModalHighlightRange(undefined, undefined)
           hideSelectionMenu()
           return
         }
@@ -454,6 +446,7 @@ export function useContentClick(
               node.content = await fetchFileContent(node)
             }
             setCodeModalContent(node.content)
+            if (setCodeModalHighlightRange) setCodeModalHighlightRange(undefined, undefined)
           } else {
             // Open normal Markdown file
             await openFile(node)

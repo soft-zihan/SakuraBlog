@@ -1,0 +1,76 @@
+{
+  "version": "2026.02.01",
+  "intro": "应用整体布局：Header/Sidebars/Main 的组合与响应式行为。",
+  "notes": [
+    {
+      "match": "class=\"flex flex-col md:flex-row",
+      "content": "模板 class 里大量 Tailwind 工具类，直接控制布局与样式。\n:class 支持数组与对象，动态拼接字体/暗黑模式类名。\n理解为：静态样式写在 class，动态样式写在 :class。"
+    },
+    {
+      "matchRegex": "Left Sidebar: Navigation",
+      "content": "左侧边栏通过 v-if 控制是否渲染。\nv-model:viewMode 是“具名双向绑定”，等价于 :view-mode + @update:viewMode。\n子组件 emit update:viewMode，父组件同步更新状态。"
+    },
+    {
+      "matchRegex": "@logo-click=\"showToast",
+      "occurrence": 1,
+      "content": "事件表达式可以写多条语句，用分号分隔。\n还能直接加条件判断，例如“如果是移动端就收起”。\n这是模板表达式，不需要写完整的函数体。"
+    },
+    {
+      "matchRegex": "<main\\s+class=\"flex-1",
+      "content": "<main> 是语义标签，表示页面主要内容。\nslot 是插槽，父组件会把内容塞进这里。\n这样 AppLayout 只管布局，不关心具体页面内容。"
+    },
+    {
+      "matchRegex": "WallpaperLayer\\s+v-if",
+      "content": "背景层通过 v-if 控制显示，只在需要时渲染。\n避免在阅读模式下创建多余 DOM，减少性能消耗。\n这属于“状态驱动渲染”的基本思路。"
+    },
+    {
+      "matchRegex": "ref=\"mobileShellRef\"",
+      "content": "ref 可以绑定到 DOM 元素，获取真实节点。\n这里用于滚动/尺寸计算，支持移动端横向滑动。\n理解为：ref 是拿到 DOM 的“句柄”。"
+    },
+    {
+      "matchRegex": "scroll-snap-type",
+      "content": "scroll-snap 是 CSS 的“吸附滚动”。\n滚动到接近的位置会自动贴齐一页。\n配合 JS 计算页码，就能实现横向分页体验。"
+    },
+    {
+      "matchRegex": "v-if=\"appStore\\.rightSidebarOpen\"",
+      "content": "RightSidebar 也用 v-if 控制创建/销毁。\n移动端不需要时直接不渲染，避免遮挡。\n比单纯隐藏更省性能。"
+    },
+    {
+      "matchRegex": "defineProps<\\{",
+      "content": "script setup 里用 defineProps 声明 props 结构。\n配合 TypeScript 能提示字段类型与必填项。\n等于给组件写一份“输入参数说明书”。"
+    },
+    {
+      "matchRegex": "defineEmits\\(",
+      "content": "defineEmits 声明组件会发出的事件。\n父组件只需监听这些事件，就能接收到子组件操作。\n这是父子通信的“事件协议”。"
+    },
+    {
+      "matchRegex": "const\\s+lang\\s*=\\s*computed",
+      "content": "computed 把 store 里的状态映射成本地变量。\n模板统一用 t/lang 读取，入口集中更好维护。\n依赖变化时会自动刷新。"
+    },
+    {
+      "matchRegex": "const\\s+mobileShellTouch\\s*=\\s*ref",
+      "content": "ref 也可以包裹对象，用来存手势过程中的状态。\n对象属性可以直接改，但不要替换整个对象引用。\n这样才能保持响应式追踪。"
+    },
+    {
+      "matchRegex": "const\\s+scrollToMobilePage\\s*=",
+      "content": "函数把滚动逻辑封装起来，便于多处复用。\n参数默认值是 ES6 语法：behavior = 'smooth'。\n不传参数时就自动使用平滑滚动。"
+    },
+    {
+      "matchRegex": "window\\.requestAnimationFrame",
+      "occurrence": 1,
+      "content": "requestAnimationFrame 会在浏览器下一帧执行。\n用它合并多次 scroll 计算，减少主线程压力。\n这是动画/滚动性能优化的基础手法。"
+    },
+    {
+      "matchRegex": "provide\\('layoutIsMobile'",
+      "content": "provide/inject 用于跨层级传递数据。\n不必一层层 props 往下传，结构更简洁。\n适合“布局级状态”这种全局需求。"
+    },
+    {
+      "matchRegex": "watch\\(\\(\\)\\s*=>\\s*props\\.scrollContainer",
+      "content": "watch 监听 prop 变化，再动态绑定/解绑事件。\n{ immediate: true } 让初始值也执行一次。\n这样组件一创建就有正确的事件绑定。"
+    },
+    {
+      "matchRegex": "defineExpose\\(",
+      "content": "defineExpose 允许父组件通过 ref 调用内部方法。\n这属于“受控组件”的高级用法。\n需要跨组件控制时才使用，避免滥用。"
+    }
+  ]
+}

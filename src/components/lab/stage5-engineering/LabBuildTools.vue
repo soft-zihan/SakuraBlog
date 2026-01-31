@@ -59,7 +59,7 @@ const modes = computed<{ id: 'development' | 'production'; label: string }[]>(()
 const mode = ref<'development' | 'production'>('development')
 
 const configSnippet = computed(() => {
-  const base = mode.value === 'production' ? "'/soft-zihan.github.io/'" : "'/'"
+  const base = mode.value === 'production' ? "'/SakuraBlog/'" : "'/'"
   const sourcemap = mode.value === 'production' ? 'false' : 'true'
   return `// vite.config.ts\nimport { defineConfig } from 'vite'\nimport vue from '@vitejs/plugin-vue'\n\nexport default defineConfig(({ mode }) => ({\n  plugins: [vue()],\n  base: ${base},\n  build: {\n    sourcemap: ${sourcemap}\n  },\n  define: {\n    __APP_ENV__: JSON.stringify(mode)\n  }\n}))`
 })

@@ -1,15 +1,10 @@
 <template>
   <div class="space-y-8">
-    <LabStageBanner :is-zh="isZh" :active-tab-info="activeTabInfo" />
-
-    <LabProgressOverview
-      v-if="activeStageId"
+    <LabStageBanner
       :is-zh="isZh"
-      :active-stage-id="activeStageId"
+      :active-tab-info="activeTabInfo"
       :overall-progress="learningStore.overallProgress"
-      :stage-progress-items="stageProgressItems"
-      :next-recommended-lab="learningStore.nextRecommendedLab"
-      :skill-radar-items="skillRadarItems"
+      :active-stage-progress="activeStageProgress"
       @complete-stage="completeCurrentStage"
       @reset="resetLearningProgress"
     />
@@ -26,7 +21,6 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useLearningStore, LEARNING_STAGES, LABS, type StageId } from '../../stores/learningStore'
 import { LAB_TABS } from '../../labs/labCatalog'
 import LabStageBanner from './dashboard/LabStageBanner.vue'
-import LabProgressOverview from './dashboard/LabProgressOverview.vue'
 import StageFoundation from './stages/StageFoundation.vue'
 import StageCssLayout from './stages/StageCssLayout.vue'
 import StageJsBasics from './stages/StageJsBasics.vue'
@@ -60,31 +54,19 @@ const stageMetaById = computed(() => {
   return map
 })
 
-const stageProgressItems = computed(() => {
-  return learningStore.stageProgress.map(p => ({
-    ...p,
-    label: isZh.value ? stageMetaById.value[p.stageId]?.nameZh : stageMetaById.value[p.stageId]?.name
-  }))
-})
-
 const activeStageId = computed<StageId | null>(() => {
   if (LEARNING_STAGES.some(s => s.id === activeTab.value)) return activeTab.value as StageId
   return null
 })
 
-const skillRadarItems = computed(() => {
-  const byId = new Map(stageProgressItems.value.map(p => [p.stageId, p.percent]))
-  const js = Math.round(((byId.get('js-basics') || 0) + (byId.get('js-advanced') || 0)) / 2)
-  const vue = Math.round(((byId.get('vue-core') || 0) + (byId.get('vue-advanced') || 0)) / 2)
-  const ts = learningStore.completedLabs.includes('LabTypeScript') ? 100 : 0
-  return [
-    { name: isZh.value ? 'HTML 语义化' : 'HTML Semantics', value: byId.get('foundation') || 0 },
-    { name: isZh.value ? 'CSS 布局' : 'CSS Layout', value: byId.get('css-layout') || 0 },
-    { name: isZh.value ? 'JS 核心' : 'JS Core', value: js },
-    { name: 'TypeScript', value: ts },
-    { name: isZh.value ? 'Vue 生态' : 'Vue Ecosystem', value: vue },
-    { name: isZh.value ? '工程化' : 'Engineering', value: byId.get('engineering') || 0 }
-  ]
+const activeStageProgress = computed(() => {
+  if (!activeStageId.value) return null
+  const p = learningStore.stageProgress.find(x => x.stageId === activeStageId.value) || null
+  if (!p) return null
+  return {
+    ...p,
+    label: isZh.value ? stageMetaById.value[p.stageId]?.nameZh : stageMetaById.value[p.stageId]?.name
+  }
 })
 
 function completeStage(stageId: StageId) {

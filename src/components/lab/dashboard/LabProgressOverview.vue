@@ -1,7 +1,6 @@
 <template>
   <div class="max-w-6xl mx-auto px-4">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 bg-white/90 dark:bg-gray-800/70 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+    <div class="bg-white/90 dark:bg-gray-800/70 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
         <div class="flex items-center justify-between gap-3 mb-4">
           <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
             <span class="text-base">📈</span> {{ isZh ? '学习进度' : 'Learning Progress' }}
@@ -40,48 +39,17 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-          <div
-            v-for="p in stageProgressItems"
-            :key="p.stageId"
-            class="p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/20"
-          >
-            <div class="flex items-center justify-between text-xs">
-              <div class="font-bold text-gray-700 dark:text-gray-200">
-                {{ p.label }}
-              </div>
-              <div class="font-mono text-gray-500 dark:text-gray-400">
-                {{ p.percent }}%
-              </div>
-            </div>
-            <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mt-2">
-              <div class="h-full bg-[var(--primary-500)] rounded-full transition-[width] duration-500" :style="{ width: `${p.percent}%` }"></div>
-            </div>
-          </div>
-        </div>
-
       </div>
-
-      <div class="bg-white/90 dark:bg-gray-800/70 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-        <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2 mb-3">
-          <span class="text-base">🧭</span> {{ isZh ? '技能雷达' : 'Skill Radar' }}
-        </h3>
-        <SkillRadar :skills="skillRadarItems" :size="240" />
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import SkillRadar from '../SkillRadar.vue'
-
 defineProps<{
   isZh: boolean
   activeStageId: string | null
   overallProgress: { percent: number; completed: number; total: number }
   stageProgressItems: Array<{ stageId: string; percent: number; label: string }>
   nextRecommendedLab?: any
-  skillRadarItems: Array<{ name: string; value: number }>
 }>()
 
 defineEmits<{

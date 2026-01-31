@@ -13,7 +13,11 @@
           </button>
         </div>
         <div>
-          <button @click="$emit('toggle-sidebar')" class="w-8 h-8 rounded-lg border shadow-sm flex items-center justify-center transition-colors" :style="languageButtonStyle">
+          <!-- GitHub Link -->
+          <a href="https://github.com/soft-zihan/SakuraBlog" target="_blank" class="mr-2 text-xs font-bold px-2 py-1 rounded transition-colors shadow-sm border dark:border-gray-700" :style="languageButtonStyle">
+            GitHub
+          </a>
+          <button @click="$emit('toggle-sidebar')" class="w-8 h-8 rounded-lg border shadow-sm inline-flex items-center justify-center transition-colors" :style="languageButtonStyle">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -51,7 +55,7 @@
           @click="$emit('update:viewMode', mode)"
           class="flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1 z-10"
           :class="viewMode === mode 
-            ? (mode === 'lab' ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-300 shadow-sm ring-1 ring-purple-100 dark:ring-purple-900' : 'shadow-sm ring-1') 
+            ? 'bg-gradient-to-r from-[var(--primary-100)] to-white dark:from-[var(--primary-900)]/40 dark:to-gray-800 text-[var(--primary-800)] dark:text-white shadow-lg ring-2 ring-[var(--primary-400)] dark:ring-[var(--primary-500)] scale-[1.02]'
             : 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-700/50'"
           :style="getViewModeStyle(mode)"
         >
@@ -95,11 +99,22 @@
                       {{ tab.tag }}
                     </span>
                   </div>
-                  <div v-if="tab.noteNum" class="text-[10px] text-gray-400 dark:text-gray-500">{{ lang === 'zh' ? `笔记 ${tab.noteNum}` : `Note ${tab.noteNum}` }}</div>
                 </div>
-                <span v-if="activeLabTab === tab.id && currentTool === 'dashboard'" class="w-1.5 h-1.5 rounded-full bg-[var(--primary-500)]"></span>
+                <span
+                  class="w-3 h-3 rounded-sm border transition-all"
+                  :class="[
+                    stageProgressById[tab.id]?.percent === 100
+                      ? 'bg-[var(--primary-500)] border-[var(--primary-500)] shadow-sm'
+                      : 'bg-transparent border-gray-300 dark:border-gray-600',
+                    activeLabTab === tab.id && currentTool === 'dashboard'
+                      ? 'ring-2 ring-[var(--primary-200)] dark:ring-[var(--primary-700)]'
+                      : ''
+                  ]"
+                  :title="`${lang === 'zh' ? '完成度' : 'Progress'}: ${stageProgressById[tab.id]?.percent ?? 0}%`"
+                ></span>
               </div>
             </div>
+
 
             <!-- VUE Learning Notes Section -->
             <div v-if="labFolder" class="mb-4">
@@ -189,7 +204,7 @@
     
     <!-- Footer Info -->
     <div class="p-4 border-t flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md" :style="softBorderStyle">
-        <a href="https://github.com/soft-zihan/soft-zihan.github.io" target="_blank" class="text-xs text-[var(--primary-400)] hover:text-[var(--primary-600)] dark:text-gray-500 dark:hover:text-[var(--primary-400)] flex items-center gap-2 transition-colors group">
+        <a href="https://github.com/soft-zihan/SakuraBlog" target="_blank" class="text-xs text-[var(--primary-400)] hover:text-[var(--primary-600)] dark:text-gray-500 dark:hover:text-[var(--primary-400)] flex items-center gap-2 transition-colors group">
           <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
           <span>Code</span>
         </a>
@@ -207,9 +222,11 @@ import type { FileNode } from '../types';
 import { NodeType } from '../types';
 import { useArticleStore } from '../stores/articleStore';
 import { useAppStore } from '../stores/appStore';
+import { useLearningStore } from '../stores/learningStore'
 
 const articleStore = useArticleStore();
 const appStore = useAppStore();
+const learningStore = useLearningStore()
 
 const props = defineProps<{
   lang: string;
@@ -238,6 +255,12 @@ const labFolderFiles = computed(() => {
     .filter(node => node.type === NodeType.FILE && node.name.endsWith('.md'))
     .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN', { numeric: true }));
 });
+
+const stageProgressById = computed(() => {
+  const map: Record<string, { percent: number; completed: number; total: number }> = {}
+  for (const p of learningStore.stageProgress) map[p.stageId] = p
+  return map
+})
 
 const emit = defineEmits([
   'toggle-lang',
@@ -301,13 +324,8 @@ const tabContainerStyle = computed(() => ({
 }))
 
 const getViewModeStyle = (mode: string) => {
-  if (mode === 'lab') return {}
   if (props.viewMode === mode) {
-    return {
-      color: appStore.isDark ? 'var(--primary-300)' : 'var(--primary-600)',
-      backgroundColor: appStore.isDark ? 'var(--primary-900-30)' : 'var(--primary-50)',
-      '--tw-ring-color': appStore.isDark ? 'var(--primary-700)' : 'var(--primary-100)'
-    }
+    return {}
   }
   return {
     color: appStore.isDark ? 'rgba(255,255,255,0.6)' : 'var(--primary-400)'

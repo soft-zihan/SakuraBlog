@@ -1,0 +1,20 @@
+{
+  "version": "2026.02.01",
+  "intro": "Download modal exporting notes/source code (optionally embedding preset + user notes).",
+  "notes": [
+    {
+      "line": 537,
+      "matchRegex": "^const downloadSourceCodeWithNotes\\s*=\\s*async\\b",
+      "content": "Source download fetches flattened raw/*.txt files and can embed preset + user notes as comments."
+    },
+    {
+      "line": 588,
+      "match": "Embed notes as comments",
+      "content": "Inserts notes from bottom to top to avoid shifting subsequent line numbers."
+    },
+    {
+      "matchRegex": "const resolvedPresetMap\\s*=\\s*buildPresetNoteMap\\(",
+      "content": "Preset notes are resolved against the current file content via match/matchRegex first, then merged with user notes into a single insertion list."
+    }
+  ]
+}

@@ -74,7 +74,7 @@
         </button>
         <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <span>🧪</span>
-          {{ isZh ? '可视化实验室' : 'Visual Lab' }}
+          {{ isZh ? '可视化学习中心' : 'Learning Lab' }}
         </h4>
       </div>
       
@@ -102,7 +102,7 @@
         </div>
         
         <!-- Lab Content -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
+        <div ref="labScrollRef" class="flex-1 overflow-y-auto custom-scrollbar">
           <LabDashboard 
             :lang="lang" 
             :initial-tab="selectedLabTab" 
@@ -122,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { marked } from 'marked'
 import type { FileNode } from '../../types'
 import { NodeType } from '../../types'
@@ -146,6 +146,8 @@ const emit = defineEmits<{
 
 const isZh = computed(() => props.lang === 'zh')
 
+const labScrollRef = ref<HTMLElement | null>(null)
+
 // Show/hide folder tree sidebar
 const showFolderTree = ref(true)
 
@@ -168,6 +170,15 @@ const selectedLabTab = ref(props.labDashboardTab || 'foundation')
 watch(() => props.labDashboardTab, (val) => {
   if (val) selectedLabTab.value = val
 }, { immediate: true })
+
+watch(
+  () => selectedLabTab.value,
+  async () => {
+    if (props.type !== 'lab') return
+    await nextTick()
+    labScrollRef.value?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+)
 
 // Notes list from labFolder
 const notesList = computed(() => {

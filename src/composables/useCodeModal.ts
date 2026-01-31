@@ -7,12 +7,30 @@ const showCodeModal = ref(false)
 const codeModalContent = ref('')
 const codeModalTitle = ref('')
 const codeModalPath = ref('')
+const highlightStartLine = ref<number | undefined>(undefined)
+const highlightEndLine = ref<number | undefined>(undefined)
 const previousUrl = ref<string | null>(null)
 
 /**
  * 代码弹窗管理 composable
  */
 export function useCodeModal() {
+  const wrapHighlightedLines = (highlightedHtml: string, startLine?: number, endLine?: number) => {
+    const lines = highlightedHtml.split('\n')
+    const safeStart = startLine && startLine >= 1 ? startLine : undefined
+    const safeEnd = endLine && safeStart && endLine >= safeStart ? endLine : safeStart
+
+    return lines
+      .map((lineHtml, idx) => {
+        const lineNo = idx + 1
+        const isTarget = !!safeStart && lineNo >= safeStart && lineNo <= (safeEnd || safeStart)
+        const cls = isTarget ? 'code-line is-target' : 'code-line'
+        const body = lineHtml && lineHtml.length > 0 ? lineHtml : '&#8203;'
+        return `<span class="${cls}" data-line="${lineNo}">${body}</span>`
+      })
+      .join('\n')
+  }
+
 
   /**
    * 根据文件扩展名获取语言
@@ -21,20 +39,20 @@ export function useCodeModal() {
     const cleaned = fileName.split('?')[0].split('#')[0]
     const ext = cleaned.split('.').pop()?.toLowerCase() || ''
     const langMap: Record<string, string> = {
-      'vue': 'html',
-      'ts': 'typescript',
-      'tsx': 'typescript',
-      'js': 'javascript',
-      'jsx': 'javascript',
-      'json': 'json',
-      'html': 'html',
-      'css': 'css',
-      'scss': 'scss',
-      'md': 'markdown',
-      'py': 'python',
-      'sh': 'bash',
-      'yml': 'yaml',
-      'yaml': 'yaml'
+      vue: 'html',
+      ts: 'typescript',
+      tsx: 'typescript',
+      js: 'javascript',
+      jsx: 'javascript',
+      json: 'json',
+      html: 'html',
+      css: 'css',
+      scss: 'scss',
+      md: 'markdown',
+      py: 'python',
+      sh: 'bash',
+      yml: 'yaml',
+      yaml: 'yaml'
     }
     return langMap[ext] || 'plaintext'
   }
@@ -49,11 +67,17 @@ export function useCodeModal() {
     const lang = getLanguageFromFileName(codeModalPath.value || codeModalTitle.value)
     try {
       if (hljs.getLanguage(lang)) {
-        return hljs.highlight(codeModalContent.value, { language: lang }).value
+        const html = hljs.highlight(codeModalContent.value, { language: lang }).value
+        return wrapHighlightedLines(html, highlightStartLine.value, highlightEndLine.value)
       }
-      return hljs.highlightAuto(codeModalContent.value).value
+      const html = hljs.highlightAuto(codeModalContent.value).value
+      return wrapHighlightedLines(html, highlightStartLine.value, highlightEndLine.value)
     } catch {
-      return codeModalContent.value
+      const escaped = codeModalContent.value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+      return wrapHighlightedLines(escaped, highlightStartLine.value, highlightEndLine.value)
     }
   })
 
@@ -89,12 +113,19 @@ export function useCodeModal() {
   /**
    * 打开代码弹窗并更新 URL
    */
-  const openCodeModal = async (title: string, content: string, path: string, options?: { syncUrl?: boolean }) => {
+  const openCodeModal = async (
+    title: string,
+    content: string,
+    path: string,
+    options?: { syncUrl?: boolean; highlight?: { startLine?: number; endLine?: number } }
+  ) => {
     if (options?.syncUrl !== false) previousUrl.value = window.location.href
 
     codeModalTitle.value = title
     codeModalContent.value = content
     codeModalPath.value = path
+    highlightStartLine.value = options?.highlight?.startLine
+    highlightEndLine.value = options?.highlight?.endLine
     showCodeModal.value = true
 
     if (options?.syncUrl !== false) {
@@ -112,6 +143,8 @@ export function useCodeModal() {
     codeModalContent.value = ''
     codeModalTitle.value = ''
     codeModalPath.value = ''
+    highlightStartLine.value = undefined
+    highlightEndLine.value = undefined
 
     // 恢复 URL
     const url = new URL(window.location.href)
@@ -138,12 +171,19 @@ export function useCodeModal() {
     codeModalContent.value = content
   }
 
+  const setHighlightRange = (startLine?: number, endLine?: number) => {
+    highlightStartLine.value = startLine
+    highlightEndLine.value = endLine
+  }
+
   return {
     // 状态
     showCodeModal,
     codeModalContent,
     codeModalTitle,
     codeModalPath,
+    highlightStartLine,
+    highlightEndLine,
     highlightedCodeContent,
     // 方法
     getLanguageFromFileName,
@@ -151,6 +191,7 @@ export function useCodeModal() {
     openCodeModal,
     closeCodeModal,
     copyCodeContent,
-    setCodeModalContent
+    setCodeModalContent,
+    setHighlightRange
   }
 }

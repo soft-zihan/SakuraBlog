@@ -40,7 +40,7 @@ const loaded = ref(false)
 // Default config - 用户需要替换这些值
 // 获取步骤:
 // 1. 访问 https://giscus.app/zh-CN
-// 2. 输入你的仓库名 (如 soft-zihan/soft-zihan.github.io)
+// 2. 输入你的仓库名 (如 soft-zihan/SakuraBlog)
 // 3. 选择 Discussion 分类 (建议使用 Announcements)
 // 4. 复制生成的 data-repo-id 和 data-category-id
 const config = {
@@ -144,7 +144,7 @@ onMounted(() => {
           </p>
           <ol class="text-left text-sm text-gray-600 dark:text-gray-400 space-y-2 max-w-md mx-auto">
             <li>1️⃣ ${props.lang === 'zh' ? '访问' : 'Visit'} <a href="https://giscus.app/zh-CN" target="_blank" class="text-sakura-500 hover:underline">giscus.app</a></li>
-            <li>2️⃣ ${props.lang === 'zh' ? '输入仓库名（如 soft-zihan/soft-zihan.github.io）' : 'Enter your repo name (e.g., username/repo)'}</li>
+            <li>2️⃣ ${props.lang === 'zh' ? '输入仓库名（如 soft-zihan/SakuraBlog）' : 'Enter your repo name (e.g., username/repo)'}</li>
             <li>3️⃣ ${props.lang === 'zh' ? '在仓库设置中启用 Discussions 功能' : 'Enable Discussions in your repo settings'}</li>
             <li>4️⃣ ${props.lang === 'zh' ? '选择 Discussion 分类（推荐 Announcements）' : 'Select a Discussion category (Announcements recommended)'}</li>
             <li>5️⃣ ${props.lang === 'zh' ? '复制 data-repo-id 和 data-category-id' : 'Copy data-repo-id and data-category-id'}</li>

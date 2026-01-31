@@ -1,0 +1,51 @@
+{
+  "version": "2026.02.01",
+  "intro": "UI 组件：页面功能块与交互入口。",
+  "notes": [
+    {
+      "matchRegex": "v-if=\"currentFile \\|\\| \\(viewMode === 'lab'",
+      "content": "顶层容器用 v-if 做“有内容才显示”的总判断。\n条件包含：当前文件、实验室工具、当前文件夹。\n只要有一个为真就渲染主区域，否则走欢迎页。\n这是“状态决定视图”的核心思想。"
+    },
+    {
+      "matchRegex": "LabDashboard\\s+",
+      "occurrence": 1,
+      "content": "LabDashboard 是独立组件，props 传入语言与当前 tab。\n:model-value + @update:model-value 组成 v-model 双向绑定。\n子组件只发更新事件，父组件统一管理当前 tab。\n这样状态集中管理，组件只负责显示与交互。"
+    },
+    {
+      "matchRegex": "SourceCodeViewer",
+      "occurrence": 1,
+      "content": "当 viewMode 为 lab 且 currentTool 为 source-code 时，显示源码查看器。\n这就是“状态驱动视图切换”：UI 只看状态，不直接操作 DOM。\n优点是逻辑清晰，缺点是需要设计好状态。"
+    },
+    {
+      "matchRegex": "FolderView",
+      "occurrence": 1,
+      "content": "FolderView 只负责展示与发事件，不直接改全局状态。\n@open-folder / @open-file 把操作交给父组件处理。\n这样数据流清晰：父组件管状态，子组件管交互。"
+    },
+    {
+      "matchRegex": "ArticleReader",
+      "occurrence": 1,
+      "content": "ArticleReader 是内容渲染核心。\n通过 props 传入文件、加载状态、语言与统计函数。\n滚动容器与 Viewer 的 ref 通过事件向上同步，方便联动。\n这样阅读器只关注“显示”，其他逻辑由父组件处理。"
+    },
+    {
+      "matchRegex": "WelcomeScreen",
+      "occurrence": 1,
+      "content": "没有文件/工具时显示欢迎页。\n这是典型的空状态 UI：给用户可操作入口，而不是空白。\n能降低新手迷茫感，提高可探索性。"
+    },
+    {
+      "matchRegex": "defineProps<\\{",
+      "content": "defineProps 声明组件输入的数据结构。\nTypeScript 会做类型校验与自动补全。\n相当于给组件写了一份“输入参数说明”。"
+    },
+    {
+      "matchRegex": "defineEmits<\\{",
+      "content": "defineEmits 声明组件会向外发出的事件。\n事件名与参数类型清楚，父组件接收更安全。\n这是父子通信的“事件合同”。"
+    },
+    {
+      "matchRegex": "watch\\(scrollContainerRef",
+      "content": "watch 监听 scrollContainerRef。\n当它变化时把最新 DOM 节点传给父组件。\n{ immediate: true } 让初始值也触发一次。\n这样父组件一开始就能拿到滚动容器。"
+    },
+    {
+      "matchRegex": "scrollContainerRef\\.value\\?\\.scrollTo",
+      "content": "切换实验室 tab 时，用 nextTick 等待 DOM 更新。\n更新完成后再滚动到顶部，避免滚动无效。\n这是“先渲染，再操作 DOM”的标准流程。"
+    }
+  ]
+}

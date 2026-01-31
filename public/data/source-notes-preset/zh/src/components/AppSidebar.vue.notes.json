@@ -1,0 +1,46 @@
+{
+  "version": "2026.02.01",
+  "intro": "UI 组件：页面功能块与交互入口。",
+  "notes": [
+    {
+      "matchRegex": "<aside\\s+class=\"w-full",
+      "content": "侧边栏根容器负责整体布局与背景效果。\nTailwind 类名组合出尺寸、背景、阴影、边框与过渡动画。\n这种“样式即配置”的写法结构清晰，但需要理解类名含义。\n新手可以先把它看成“很多小型 CSS 拼在一起”。"
+    },
+    {
+      "matchRegex": "@click=\"\\$emit\\('toggle-lang'\\)\"",
+      "content": "点击语言切换按钮后触发父组件事件。\n子组件不直接改全局语言状态，而是通知父组件去处理。\n这是单向数据流：父组件管数据，子组件管交互。\n这样更容易追踪状态变化来源。"
+    },
+    {
+      "matchRegex": "v-for=\"mode in \\['latest', 'files', 'lab'\\]\"",
+      "content": "v-for 渲染三个视图按钮，数组决定按钮数量。\n@click 里触发 update:viewMode，对应父组件的 v-model:viewMode。\n这样点击按钮就能更新父组件状态。\n选中态样式由 :class/:style 动态控制。"
+    },
+    {
+      "matchRegex": "v-else-if=\"viewMode === 'lab'\"",
+      "content": "实验室模式下渲染学习阶段、学习笔记与源码入口。\n多层 v-if/v-else-if 根据 viewMode 切换视图。\n只要切换模式，整块 UI 就跟着变。\n这是“用状态统一控制 UI”的常见写法。"
+    },
+    {
+      "matchRegex": "v-for=\"note in labFolderFiles\"",
+      "content": "学习笔记列表来自 computed 计算出的 labFolderFiles。\n点击后发出 select-file 事件，父组件负责打开文件。\n显示名称时用 replace('.md','') 去掉后缀。\n子组件不处理打开逻辑，只负责发事件。"
+    },
+    {
+      "matchRegex": "v-if=\"viewMode === 'latest'\"",
+      "content": "最新视图展示扁平文章列表，文件树视图展示层级结构。\n同一组件里用条件渲染实现多种列表形态。\n这样复用侧边栏框架，避免拆成多个页面。\n代价是模板更长，但结构更集中。"
+    },
+    {
+      "matchRegex": "defineProps<\\{",
+      "content": "props 声明了侧边栏依赖的所有输入：文件树、当前选中、统计信息等。\n对新手来说，这就像组件的“输入参数表”。\n只要参数齐全，组件就能正常工作。"
+    },
+    {
+      "matchRegex": "defineEmits\\(",
+      "content": "事件列表声明了侧边栏能向外发出的操作。\n父组件只需要监听这些事件，就能完成状态更新。\n事件就是“子组件对外输出”的通道。"
+    },
+    {
+      "matchRegex": "const labFolderFiles = computed",
+      "content": "computed 负责从文件树筛出 .md 文件并排序。\nlocaleCompare + numeric 可以让“1、2、10”按人类习惯排序。\n这是“计算属性做数据加工”的典型用法。"
+    },
+    {
+      "matchRegex": "const avatarSrc = ref\\(",
+      "content": "头像地址用 ref 保存，方便动态替换。\n图片加载失败时触发 @error，切换到本地图片。\n这是前端常见的“兜底图片”策略。\n目的就是避免出现破图图标。"
+    }
+  ]
+}

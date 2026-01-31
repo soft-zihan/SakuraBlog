@@ -45,17 +45,17 @@
             
             <div class="space-y-4">
               <div>
-                <label class="text-xs text-gray-500 flex justify-between">
+                <label class="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
                   <span>flex-direction</span>
-                  <span class="font-mono text-purple-600">{{ flexDemo.direction }}</span>
+                  <span class="font-mono text-purple-600 dark:text-purple-300">{{ flexDemo.direction }}</span>
                 </label>
                 <div class="flex gap-2 mt-1">
                   <button
                     v-for="dir in ['row', 'row-reverse', 'column', 'column-reverse']"
                     :key="dir"
                     @click="flexDemo.direction = dir"
-                    class="px-2 py-1 rounded text-xs border"
-                    :class="flexDemo.direction === dir ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : 'border-gray-300'"
+                    class="px-2 py-1 rounded text-xs border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white/70 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800/50"
+                    :class="flexDemo.direction === dir ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : ''"
                   >
                     {{ dir }}
                   </button>
@@ -63,17 +63,17 @@
               </div>
 
               <div>
-                <label class="text-xs text-gray-500 flex justify-between">
+                <label class="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
                   <span>justify-content</span>
-                  <span class="font-mono text-purple-600">{{ flexDemo.justify }}</span>
+                  <span class="font-mono text-purple-600 dark:text-purple-300">{{ flexDemo.justify }}</span>
                 </label>
                 <div class="flex flex-wrap gap-2 mt-1">
                   <button
                     v-for="j in ['flex-start', 'center', 'flex-end', 'space-between', 'space-around']"
                     :key="j"
                     @click="flexDemo.justify = j"
-                    class="px-2 py-1 rounded text-xs border"
-                    :class="flexDemo.justify === j ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : 'border-gray-300'"
+                    class="px-2 py-1 rounded text-xs border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white/70 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800/50"
+                    :class="flexDemo.justify === j ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : ''"
                   >
                     {{ j.replace('flex-', '') }}
                   </button>
@@ -81,17 +81,17 @@
               </div>
 
               <div>
-                <label class="text-xs text-gray-500 flex justify-between">
+                <label class="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
                   <span>align-items</span>
-                  <span class="font-mono text-purple-600">{{ flexDemo.align }}</span>
+                  <span class="font-mono text-purple-600 dark:text-purple-300">{{ flexDemo.align }}</span>
                 </label>
                 <div class="flex gap-2 mt-1">
                   <button
                     v-for="a in ['flex-start', 'center', 'flex-end', 'stretch']"
                     :key="a"
                     @click="flexDemo.align = a"
-                    class="px-2 py-1 rounded text-xs border"
-                    :class="flexDemo.align === a ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : 'border-gray-300'"
+                    class="px-2 py-1 rounded text-xs border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white/70 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800/50"
+                    :class="flexDemo.align === a ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : ''"
                   >
                     {{ a.replace('flex-', '') }}
                   </button>
@@ -99,9 +99,9 @@
               </div>
 
               <div>
-                <label class="text-xs text-gray-500 flex justify-between">
+                <label class="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
                   <span>gap</span>
-                  <span class="font-mono text-purple-600">{{ flexDemo.gap }}px</span>
+                  <span class="font-mono text-purple-600 dark:text-purple-300">{{ flexDemo.gap }}px</span>
                 </label>
                 <input type="range" v-model.number="flexDemo.gap" min="0" max="32" step="4" class="w-full accent-purple-500" />
               </div>
@@ -130,6 +130,22 @@
           <!-- Sakura Notes Example -->
           <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
             <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '本站 Flex 应用' : 'Flex Usage in This Site' }}</p>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-sakura-200 dark:border-sakura-700 text-sakura-700 dark:text-sakura-300 font-bold hover:opacity-90"
+                @click="openCode('src/components/AppHeader.vue', 'find:flex items-center justify-between')"
+              >
+                {{ isZh ? '打开 AppHeader.vue' : 'Open AppHeader.vue' }}
+              </button>
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-sakura-200 dark:border-sakura-700 text-sakura-700 dark:text-sakura-300 font-bold hover:opacity-90"
+                @click="openCode('src/App.vue', 'template')"
+              >
+                {{ isZh ? '打开 App.vue（整体布局）' : 'Open App.vue (layout)' }}
+              </button>
+            </div>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- AppHeader.vue - 头部布局 -->
 &lt;header class="flex items-center justify-between px-4"&gt;
   &lt;Logo /&gt;
@@ -157,17 +173,17 @@
             
             <div class="space-y-4">
               <div>
-                <label class="text-xs text-gray-500 flex justify-between">
+                <label class="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
                   <span>grid-template-columns</span>
-                  <span class="font-mono text-purple-600">{{ gridDemo.cols }} {{ isZh ? '列' : 'cols' }}</span>
+                  <span class="font-mono text-purple-600 dark:text-purple-300">{{ gridDemo.cols }} {{ isZh ? '列' : 'cols' }}</span>
                 </label>
                 <div class="flex gap-2 mt-1">
                   <button
                     v-for="n in [1, 2, 3, 4]"
                     :key="n"
                     @click="gridDemo.cols = n"
-                    class="px-3 py-1 rounded text-xs border"
-                    :class="gridDemo.cols === n ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : 'border-gray-300'"
+                    class="px-3 py-1 rounded text-xs border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white/70 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800/50"
+                    :class="gridDemo.cols === n ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : ''"
                   >
                     {{ n }}
                   </button>
@@ -175,9 +191,9 @@
               </div>
 
               <div>
-                <label class="text-xs text-gray-500 flex justify-between">
+                <label class="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
                   <span>gap</span>
-                  <span class="font-mono text-purple-600">{{ gridDemo.gap }}px</span>
+                  <span class="font-mono text-purple-600 dark:text-purple-300">{{ gridDemo.gap }}px</span>
                 </label>
                 <input type="range" v-model.number="gridDemo.gap" min="0" max="24" step="4" class="w-full accent-purple-500" />
               </div>
@@ -215,6 +231,15 @@
 
           <div class="p-4 rounded-2xl border border-sakura-200 dark:border-sakura-700 bg-sakura-50/50 dark:bg-sakura-900/20">
             <p class="text-xs font-bold text-sakura-700 dark:text-sakura-300 mb-2">🌸 {{ isZh ? '本站 Grid 应用' : 'Grid Usage in This Site' }}</p>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-sakura-200 dark:border-sakura-700 text-sakura-700 dark:text-sakura-300 font-bold hover:opacity-90"
+                @click="openCode('src/components/FolderView.vue', 'find:grid-cols-1')"
+              >
+                {{ isZh ? '打开 FolderView.vue（卡片网格）' : 'Open FolderView.vue (card grid)' }}
+              </button>
+            </div>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- FolderView.vue - 文章卡片网格 -->
 &lt;div class="grid grid-cols-1 md:grid-cols-2 
             lg:grid-cols-3 gap-4"&gt;
@@ -342,6 +367,16 @@ import { computed, ref, reactive, onMounted, onUnmounted, type CSSProperties } f
 
 const props = defineProps<{ lang: 'en' | 'zh' }>();
 const isZh = computed(() => props.lang === 'zh');
+
+const openCode = (path: string, token?: string) => {
+  const raw = (token || '').trim()
+  const isLineRange = !!raw && /^L?\d+(-L?\d+)?$/i.test(raw)
+  const isFind = raw.toLowerCase().startsWith('find:')
+  const range = isLineRange ? raw : undefined
+  const anchor = !isLineRange && !isFind && raw ? raw : undefined
+  const find = isFind ? raw.slice('find:'.length).trim() : undefined
+  window.dispatchEvent(new CustomEvent('sakura-open-code', { detail: { path, range, anchor, find } }));
+};
 
 const tabs = computed(() => [
   { id: 'flex', label: 'Flexbox' },

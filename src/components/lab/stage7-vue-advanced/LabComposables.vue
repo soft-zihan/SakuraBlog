@@ -69,6 +69,15 @@
           </div>
           <div class="ml-auto text-right">
             <span class="text-xs text-gray-400">📍 composables/{{ currentComposable.name }}.ts</span>
+            <div class="mt-2">
+              <button
+                type="button"
+                class="text-xs px-2.5 py-1 rounded bg-green-600 hover:bg-green-700 text-white font-bold"
+                @click="openCode(`src/composables/${currentComposable.name}.ts`)"
+              >
+                {{ isZh ? '打开源码' : 'Open code' }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -206,6 +215,10 @@ const props = defineProps<{
 }>()
 
 const isZh = computed(() => props.lang === 'zh')
+
+const openCode = (path: string, range?: string) => {
+  window.dispatchEvent(new CustomEvent('sakura-open-code', { detail: { path, range } }))
+}
 
 const selectedComposable = ref('useSearch')
 const activeSection = ref(0)

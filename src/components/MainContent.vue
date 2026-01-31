@@ -89,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, type Ref } from 'vue';
+import { ref, watch, nextTick, type Ref } from 'vue';
 import type { FileNode } from '../types';
 import type { GuwenItem } from '../composables/usePoem';
 
@@ -102,7 +102,7 @@ import FolderView from './FolderView.vue';
 import ArticleReader from '../views/ArticleReader.vue';
 import WelcomeScreen from './WelcomeScreen.vue';
 
-defineProps<{
+const props = defineProps<{
   viewMode: 'latest' | 'files' | 'lab';
   currentTool: string | null;
   currentFile: FileNode | null;
@@ -148,6 +148,16 @@ const scrollContainerRef = ref<HTMLElement | null>(null);
 watch(scrollContainerRef, (el) => {
   emit('scroll-container-change', el);
 }, { immediate: true });
+
+watch(
+  () => [props.viewMode, props.currentTool, props.labDashboardTab] as const,
+  async ([viewMode, currentTool, tab], [prevViewMode, prevTool, prevTab]) => {
+    if (viewMode !== 'lab' || currentTool !== 'dashboard') return;
+    if (tab === prevTab && viewMode === prevViewMode && currentTool === prevTool) return;
+    await nextTick();
+    scrollContainerRef.value?.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+);
 
 const handleScrollContainerFromArticleReader = (el: HTMLElement | null) => {
   scrollContainerRef.value = el

@@ -51,7 +51,7 @@
         <div v-if="authorName.trim()" class="mb-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-500">
           <p class="mb-1">📎 {{ t.auto_links || '自动生成链接' }}:</p>
           <p class="truncate">👤 https://github.com/{{ authorName }}</p>
-          <p class="truncate">📂 https://github.com/{{ authorName }}/soft-zihan.github.io</p>
+          <p class="truncate">📂 https://github.com/{{ authorName }}/SakuraBlog</p>
         </div>
         
         <button 
@@ -277,9 +277,9 @@ const isSavingConfig = ref(false)
 
 // 根据 authorName 自动计算仓库信息
 const repoOwner = computed(() => 'soft-zihan')
-const repoName = computed(() => 'soft-zihan.github.io')
+const repoName = computed(() => 'SakuraBlog')
 const authorUrl = computed(() => authorName.value.trim() ? `https://github.com/${authorName.value.trim()}` : '')
-const userForkRepo = computed(() => authorName.value.trim() ? `${authorName.value.trim()}/soft-zihan.github.io` : '')
+const userForkRepo = computed(() => authorName.value.trim() ? `${authorName.value.trim()}/SakuraBlog` : '')
 
 const hasToken = ref(false)
 

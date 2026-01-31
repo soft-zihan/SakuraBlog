@@ -69,6 +69,15 @@
                 : 'In App.vue, we use const for state because ref objects should not be reassigned:' 
               }}
             </p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-[var(--primary-200)] dark:border-[var(--primary-700)] text-[var(--primary-700)] dark:text-[var(--primary-300)] font-bold hover:opacity-90"
+                @click="openCode('src/App.vue', 'find:const activeTab')"
+              >
+                {{ isZh ? '打开 App.vue 对照' : 'Open App.vue' }}
+              </button>
+            </div>
             <pre class="mt-2 text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto">const activeTab = ref('latest');
 const isDark = ref(false);
 // ✅ 修改 .value 是响应式的
@@ -159,6 +168,15 @@ activeTab.value = 'files';
                 : 'In composables, arrow functions are the most common pattern:' 
               }}
             </p>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-[var(--primary-200)] dark:border-[var(--primary-700)] text-[var(--primary-700)] dark:text-[var(--primary-300)] font-bold hover:opacity-90"
+                @click="openCode('src/composables/useSearch.ts', 'useSearch')"
+              >
+                {{ isZh ? '打开 useSearch.ts 对照' : 'Open useSearch.ts' }}
+              </button>
+            </div>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto">// composables/useSearch.ts
 export function useSearch() {
   const buildIndex = () => {
@@ -216,6 +234,27 @@ export function useSearch() {
           <!-- Destructuring -->
           <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
             <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '解构赋值 - 本站示例' : 'Destructuring - From This Site' }}</p>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mb-2 leading-relaxed">
+              {{ isZh
+                ? '解构常用来“从对象里拿出你关心的字段”，让代码更短更清晰。本项目里最常见的是：从 store/composable 的返回值里取出状态与方法。'
+                : 'Destructuring helps pick only what you need from objects. In this project it’s commonly used to pull state/methods from stores/composables.' }}
+            </p>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-[var(--primary-200)] dark:border-[var(--primary-700)] text-[var(--primary-700)] dark:text-[var(--primary-300)] font-bold hover:opacity-90"
+                @click="openCode('src/stores/appStore.ts', 'useAppStore')"
+              >
+                {{ isZh ? '打开 appStore.ts' : 'Open appStore.ts' }}
+              </button>
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-[var(--primary-200)] dark:border-[var(--primary-700)] text-[var(--primary-700)] dark:text-[var(--primary-300)] font-bold hover:opacity-90"
+                @click="openCode('src/composables/useContentRenderer.ts', 'find:renderMarkdown')"
+              >
+                {{ isZh ? '打开 useContentRenderer.ts' : 'Open useContentRenderer.ts' }}
+              </button>
+            </div>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto">// stores/appStore.ts
 const { isDark, lang, fontSize } = storeToRefs(appStore);
 
@@ -299,6 +338,16 @@ import { computed, ref } from 'vue';
 
 const props = defineProps<{ lang: 'en' | 'zh' }>();
 const isZh = computed(() => props.lang === 'zh');
+
+const openCode = (path: string, token?: string) => {
+  const raw = (token || '').trim()
+  const isLineRange = !!raw && /^L?\d+(-L?\d+)?$/i.test(raw)
+  const isFind = raw.toLowerCase().startsWith('find:')
+  const range = isLineRange ? raw : undefined
+  const anchor = !isLineRange && !isFind && raw ? raw : undefined
+  const find = isFind ? raw.slice('find:'.length).trim() : undefined
+  window.dispatchEvent(new CustomEvent('sakura-open-code', { detail: { path, range, anchor, find } }));
+};
 
 const tabs = computed(() => [
   { id: 'variables', label: isZh.value ? '变量声明' : 'Variables' },

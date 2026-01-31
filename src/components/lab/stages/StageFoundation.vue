@@ -1,5 +1,46 @@
 <template>
   <div class="space-y-12">
+    <StageLearningGuide :lang="lang" stage-id="foundation" />
+
+    <section class="max-w-4xl mx-auto px-4">
+      <div class="bg-gradient-to-r from-orange-50 to-sakura-50 dark:from-orange-900/20 dark:to-[var(--primary-900)]/20 rounded-2xl p-5 border border-orange-100 dark:border-orange-800/30">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl">📚</div>
+          <div class="flex-1">
+            <div class="font-bold text-gray-800 dark:text-gray-100">
+              {{ isZh ? '先读笔记，再做实验（推荐）' : 'Read the note first, then do the labs (recommended)' }}
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+              {{ isZh ? '主线材料来自 VUE 学习笔记 1：HTML & CSS。读完“网页骨架/标签/语义化/表单”后，再回来看本 Stage 的可视化组件，会更不迷路。' : 'The main narrative is in Vue Notes #1 (HTML & CSS). Read it first, then come back to these interactive labs.' }}
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <button
+                type="button"
+                class="text-xs px-3 py-1.5 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-orange-200 dark:border-orange-800/40 text-orange-700 dark:text-orange-200 font-bold hover:opacity-90"
+                @click="openLabNote('/notes/VUE学习笔记/1、HTML-CSS.md')"
+              >
+                {{ isZh ? '打开：笔记1（HTML & CSS）' : 'Open: Note 1 (HTML & CSS)' }}
+              </button>
+              <button
+                type="button"
+                class="text-xs px-3 py-1.5 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-indigo-200 dark:border-indigo-800/40 text-indigo-700 dark:text-indigo-200 font-bold hover:opacity-90"
+                @click="openCode('src/index.html', 'find:<!DOCTYPE html')"
+              >
+                {{ isZh ? '对照源码：src/index.html（网页骨架）' : 'Compare: src/index.html (skeleton)' }}
+              </button>
+              <button
+                type="button"
+                class="text-xs px-3 py-1.5 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-indigo-200 dark:border-indigo-800/40 text-indigo-700 dark:text-indigo-200 font-bold hover:opacity-90"
+                @click="openCode('src/App.vue', 'template')"
+              >
+                {{ isZh ? '对照源码：App.vue（页面结构）' : 'Compare: App.vue (layout)' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="max-w-4xl mx-auto">
       <div class="bg-white/90 dark:bg-gray-800/90 rounded-3xl p-8 border border-[var(--primary-100)] dark:border-gray-700 shadow-xl relative overflow-hidden">
         <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 dark:bg-blue-900/30 rounded-full blur-3xl opacity-50"></div>
@@ -98,6 +139,18 @@
       <LabHtmlBasics :lang="lang" />
     </section>
 
+    <section class="max-w-4xl mx-auto px-4">
+      <details class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/30 p-5">
+        <summary class="cursor-pointer font-bold text-gray-800 dark:text-gray-100">
+          {{ isZh ? '扩展：浏览器解析与代码演进（可选）' : 'Extras: browser pipeline & code evolution (optional)' }}
+        </summary>
+        <div class="mt-5 space-y-12">
+          <LabCodeEvolution :lang="lang" />
+          <LabBrowserPipeline :lang="lang" />
+        </div>
+      </details>
+    </section>
+
     <NextStageGuide
       :is-zh="isZh"
       :next-text="isZh ? '你已经理解了网页的基本结构！接下来深入学习 CSS 布局。' : 'You understand web structure! Next, dive into CSS layout.'"
@@ -110,9 +163,12 @@
 import { computed, reactive } from 'vue'
 import { I18N } from '../../../constants'
 import NextStageGuide from '../NextStageGuide.vue'
+import StageLearningGuide from './StageLearningGuide.vue'
 import LabHtml from '../stage1-foundation/LabHtml.vue'
 import LabHtmlBasics from '../stage1-foundation/LabHtmlBasics.vue'
 import LabHtmlSemantic from '../stage1-foundation/LabHtmlSemantic.vue'
+import LabCodeEvolution from '../stage1-foundation/LabCodeEvolution.vue'
+import LabBrowserPipeline from '../stage1-foundation/LabBrowserPipeline.vue'
 
 const props = defineProps<{
   lang: 'en' | 'zh'
@@ -131,4 +187,18 @@ const standards = reactive({
   css: false,
   js: false
 })
+
+const openLabNote = (path: string) => {
+  window.dispatchEvent(new CustomEvent('sakura:open-lab-note', { detail: { path } }))
+}
+
+const openCode = (path: string, token?: string) => {
+  const raw = (token || '').trim()
+  const isLineRange = !!raw && /^L?\d+(-L?\d+)?$/i.test(raw)
+  const isFind = raw.toLowerCase().startsWith('find:')
+  const range = isLineRange ? raw : undefined
+  const anchor = !isLineRange && !isFind && raw ? raw : undefined
+  const find = isFind ? raw.slice('find:'.length).trim() : undefined
+  window.dispatchEvent(new CustomEvent('sakura-open-code', { detail: { path, range, anchor, find } }))
+}
 </script>

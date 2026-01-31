@@ -1,0 +1,11 @@
+{
+  "version": "2026.02.01",
+  "intro": "Full-text search: build index, query, highlight and jump metadata.",
+  "notes": [
+    {
+      "line": 16,
+      "matchRegex": "^import MiniSearch from 'minisearch'",
+      "content": "Search uses MiniSearch fully in-browser, loads all Markdown for the current language, rebuilds a language-filtered index, and sorts with extra name exact/prefix priorities."
+    }
+  ]
+}

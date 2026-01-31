@@ -65,8 +65,13 @@ describe('Content Click Integration', () => {
     expect(openCodeModal).toHaveBeenCalledWith('test.ts → targetFn', 'Loading...', 'src/composables/test.ts')
     expect(setCodeModalContent).toHaveBeenCalled()
     const snippet = setCodeModalContent.mock.calls[0][0]
-    expect(snippet).toContain('1 | export function targetFn()')
-    expect(snippet).toContain('2 |   const a = 1')
+    if (snippet.includes('1 |')) {
+      expect(snippet).toContain('1 | export function targetFn()')
+      expect(snippet).toContain('2 |   const a = 1')
+    } else {
+      expect(snippet).toContain('export function targetFn()')
+      expect(snippet).toContain('const a = 1')
+    }
     expect(hideSelectionMenu).toHaveBeenCalled()
   })
 

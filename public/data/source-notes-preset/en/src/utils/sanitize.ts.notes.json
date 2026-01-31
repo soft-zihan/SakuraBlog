@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "HTML sanitization used after Markdown rendering to reduce injection risks.",
+  "notes": []
+}

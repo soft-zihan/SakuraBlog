@@ -327,6 +327,18 @@ interface FoldedState {
   [filePath: string]: number[] // array of folded start line numbers
 }
 
+interface PresetMeta {
+  version: string
+  format?: string
+  basePath?: string
+}
+
+interface PerFilePreset {
+  version: string
+  intro?: string
+  notes: CodeNote[]
+}
+
 const props = defineProps<{
   lang: 'en' | 'zh'
   compact?: boolean // Compact mode for dual-column view: hide minimap, collapse file tree by default
@@ -438,6 +450,21 @@ const getPresetNotesUrl = () => {
   return `${baseUrl}data/source-notes-preset.${props.lang}.json`
 }
 
+const normalizeBasePath = (basePath: string) => {
+  const trimmed = basePath.replace(/^\/+/, '')
+  return trimmed.endsWith('/') ? trimmed : `${trimmed}/`
+}
+
+const presetMeta = ref<PresetMeta | null>(null)
+const presetBasePath = ref<string>('')
+const presetFileLoadState = ref<Record<string, 'loaded' | 'missing'>>({})
+
+const getPresetFileUrl = (filePath: string) => {
+  const baseUrl = (import.meta as any).env?.BASE_URL || '/'
+  const basePath = presetBasePath.value || `data/source-notes-preset/${props.lang}/`
+  return `${baseUrl}${normalizeBasePath(basePath)}${filePath}.notes.json`
+}
+
 // Preset notes (from server)
 const presetNotes = ref<FileNotes>({})
 const presetIntros = ref<FileIntros>({})
@@ -460,12 +487,26 @@ const loadPresetNotes = async () => {
     
     if (data) {
       const serverVersion = data.version || '1.0.0'
-      
-      // Store preset notes and intros
+
       presetNotes.value = {}
+      presetIntros.value = {}
+      presetFileLoadState.value = {}
+      presetMeta.value = {
+        version: serverVersion,
+        format: data.format,
+        basePath: data.basePath
+      }
+
+      if (data.format === 'per-file') {
+        presetBasePath.value = normalizeBasePath(data.basePath || `data/source-notes-preset/${props.lang}/`)
+        localStorage.setItem(getPresetVersionKey(), serverVersion)
+        if (selectedFile.value) await loadPresetNotesForFile(selectedFile.value.path)
+        return
+      }
+
+      presetBasePath.value = ''
       presetIntros.value = data.intros || {}
-      
-      // Convert notes format: filter out line 0 (now stored as intro)
+
       if (data.notes) {
         for (const [filePath, notes] of Object.entries(data.notes)) {
           const filteredNotes = (notes as CodeNote[]).filter((n: CodeNote) => n.line !== 0)
@@ -474,12 +515,32 @@ const loadPresetNotes = async () => {
           }
         }
       }
-      
-      // Update version marker
+
       localStorage.setItem(getPresetVersionKey(), serverVersion)
     }
   } catch (e) {
     console.error('Failed to load preset notes:', e)
+  }
+}
+
+async function loadPresetNotesForFile(filePath: string) {
+  if (presetMeta.value?.format !== 'per-file') return
+  if (presetFileLoadState.value[filePath]) return
+  const url = getPresetFileUrl(filePath)
+
+  try {
+    const res = await fetch(url)
+    if (!res.ok) {
+      presetFileLoadState.value[filePath] = 'missing'
+      return
+    }
+    const data = await res.json() as PerFilePreset
+    presetIntros.value[filePath] = data.intro || ''
+    presetNotes.value[filePath] = Array.isArray(data.notes) ? data.notes : []
+    presetFileLoadState.value[filePath] = 'loaded'
+  } catch (e) {
+    presetFileLoadState.value[filePath] = 'missing'
+    console.error('Failed to load preset notes for file:', filePath, e)
   }
 }
 
@@ -1159,6 +1220,7 @@ const selectFile = async (file: SourceFile) => {
   if (file.type !== 'file') return
   selectedFile.value = file
   if (isMobile.value) mobileFileTreeOpen.value = false
+  await loadPresetNotesForFile(file.path)
   
   try {
     const rawFileName = file.path.replace(/\//g, '_') + '.txt'
@@ -1204,7 +1266,7 @@ const submitNotesToGitHub = async () => {
     }
     
     const repoOwner = 'soft-zihan'
-    const repoName = 'soft-zihan.github.io'
+    const repoName = 'SakuraBlog'
     const authorName = localStorage.getItem('author_name') || 'Anonymous'
     
     const mergedNotes: FileNotes = { ...presetNotes.value }

@@ -1,0 +1,65 @@
+{
+  "version": "2026.02.01",
+  "intro": "顶部导航栏：面包屑、动作入口、移动端自动收起等。",
+  "notes": [
+    {
+      "match": "<header",
+      "content": "根节点同时使用 class 与 :class。\nclass 放固定样式，:class 根据状态拼接条件样式。\n适合处理“移动端/收起/主题面板打开”等多种情况。"
+    },
+    {
+      "matchRegex": "v-if=\"!isMobile\"",
+      "content": "v-if / v-else 直接切换两套 DOM 结构。\n桌面与移动端差异大时，这比写大量 CSS 更清晰。\n缺点是结构重复，但逻辑更直观。"
+    },
+    {
+      "matchRegex": "@click=\"\\$emit\\('toggle-sidebar'\\)\"",
+      "content": "子组件用 $emit 发事件，父组件用 @toggle-sidebar 监听。\n这种方式不直接改父组件状态，符合单向数据流。\n把它理解成“按钮发信号，父组件做决定”。"
+    },
+    {
+      "matchRegex": "v-for=\"\\(item, index\\) in breadcrumbs\"",
+      "occurrence": 1,
+      "content": "v-for 用来循环渲染面包屑。\n:key 要稳定，最好用路径而不是 index。\n这样列表更新时 Vue 才能正确复用 DOM。"
+    },
+    {
+      "matchRegex": "ActionDockGroup",
+      "occurrence": 1,
+      "content": "操作区被拆成子组件，Header 保持简洁。\n状态通过 props 传入，操作通过事件回传。\n这种拆分让组件更容易维护与复用。"
+    },
+    {
+      "matchRegex": "v-model:open=\"themeOpenModel\"",
+      "content": "v-model:open 等价于 :open + @update:open。\n当子组件 emit update:open 时，父组件状态同步更新。\n适合控制弹层“开关”这种布尔状态。"
+    },
+    {
+      "matchRegex": "import\\s+type\\s+\\{\\s*BreadcrumbItem",
+      "content": "用 @ 作为路径别名，写法更短。\nimport type 只导入类型，编译后会被移除。\n好处是类型清晰且不会增加运行时体积。"
+    },
+    {
+      "matchRegex": "storeToRefs",
+      "occurrence": 2,
+      "content": "storeToRefs 用于解构 Pinia store。\n直接解构 store 会丢失响应式，storeToRefs 不会。\n新手记住：要解构就用 storeToRefs。"
+    },
+    {
+      "matchRegex": "defineProps<\\{",
+      "content": "defineProps 的泛型声明 props 的结构与类型。\n编辑器会给出补全与错误提示。\n这相当于写了一份“参数类型约束”。"
+    },
+    {
+      "matchRegex": "defineEmits\\(",
+      "content": "defineEmits 列出组件能发出的事件名。\n模板里的 $emit 只能发这些事件。\n这样父子通信更清晰、也更安全。"
+    },
+    {
+      "matchRegex": "const\\s+isPdf\\s*=\\s*computed",
+      "content": "computed 根据 currentFile 计算出 isPdf。\nendsWith('.pdf') 是字符串判断后缀的方法。\n这是“派生状态”，不用手动同步。"
+    },
+    {
+      "matchRegex": "const\\s+themeOpenModel\\s*=\\s*computed",
+      "content": "computed 可以写 getter 与 setter。\n配合 v-model 使用时，setter 会在更新时被调用。\n这就是“受控组件”的常见模式。"
+    },
+    {
+      "matchRegex": "defineExpose\\(",
+      "content": "defineExpose 把内部方法暴露给父组件。\n父组件通过 ref 可以直接调用这些方法。\n只有在确实需要外部控制时才这样做。"
+    },
+    {
+      "matchRegex": "onMounted\\(",
+      "content": "onMounted 注册 resize 监听。\nonUnmounted 里移除，避免重复绑定或内存泄漏。\n生命周期配对是编写稳定组件的关键。"
+    }
+  ]
+}

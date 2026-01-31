@@ -1,5 +1,7 @@
 <template>
   <div class="space-y-12">
+    <StageLearningGuide :lang="lang" stage-id="vue-core" />
+
     <section>
       <div class="max-w-3xl mx-auto px-4 mb-6">
         <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-sakura-400">
@@ -78,6 +80,7 @@
 import { computed } from 'vue'
 import { I18N } from '../../../constants'
 import NextStageGuide from '../NextStageGuide.vue'
+import StageLearningGuide from './StageLearningGuide.vue'
 import LabProjectTour from '../LabProjectTour.vue'
 import LabReactivity from '../stage6-vue-core/LabReactivity.vue'
 import LabDirectives from '../stage6-vue-core/LabDirectives.vue'

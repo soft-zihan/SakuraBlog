@@ -374,6 +374,27 @@
           <!-- z-index explanation -->
           <div class="p-4 rounded-2xl border border-[var(--primary-200)] dark:border-[var(--primary-700)] bg-[var(--primary-50)]/50 dark:bg-[var(--primary-900)]/20">
             <p class="text-xs font-bold text-[var(--primary-700)] dark:text-[var(--primary-300)] mb-2">🌸 {{ isZh ? '本站定位示例' : 'From This Site' }}</p>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-[var(--primary-200)] dark:border-[var(--primary-700)] text-[var(--primary-700)] dark:text-[var(--primary-300)] font-bold hover:opacity-90"
+                @click="openCode('src/components/SearchModal.vue', 'find:fixed inset-0')"
+              >
+                {{ isZh ? '打开 SearchModal.vue（模态遮罩）' : 'Open SearchModal.vue (modal overlay)' }}
+              </button>
+              <button
+                type="button"
+                class="text-[11px] px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-900/40 border border-[var(--primary-200)] dark:border-[var(--primary-700)] text-[var(--primary-700)] dark:text-[var(--primary-300)] font-bold hover:opacity-90"
+                @click="openCode('src/components/AppHeader.vue', 'find:sticky')"
+              >
+                {{ isZh ? '打开 AppHeader.vue（顶部吸顶）' : 'Open AppHeader.vue (sticky header)' }}
+              </button>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
+              {{ isZh
+                ? '把“定位”想成：元素相对谁来摆放。fixed 相对视口；sticky 在滚动时吸顶；z-index 负责层级。下面这几段代码分别对应：点击顶部搜索按钮出现的遮罩层、以及页面顶部导航条的吸顶效果。'
+                : 'Think positioning as: “relative to what?”. fixed is viewport-based; sticky sticks while scrolling; z-index controls stacking. These snippets map to the search overlay and the sticky header.' }}
+            </p>
             <pre class="text-xs font-mono bg-gray-900 text-green-300 p-3 rounded-lg overflow-x-auto"><!-- SearchModal.vue - 模态框 -->
 &lt;div class="fixed inset-0 z-50"&gt;
   <!-- fixed: 相对视口定位 -->
@@ -407,6 +428,16 @@ import { computed, ref, reactive } from 'vue';
 const props = defineProps<{ lang: 'en' | 'zh' }>();
 const isZh = computed(() => props.lang === 'zh');
 
+const openCode = (path: string, token?: string) => {
+  const raw = (token || '').trim()
+  const isLineRange = !!raw && /^L?\d+(-L?\d+)?$/i.test(raw)
+  const isFind = raw.toLowerCase().startsWith('find:')
+  const range = isLineRange ? raw : undefined
+  const anchor = !isLineRange && !isFind && raw ? raw : undefined
+  const find = isFind ? raw.slice('find:'.length).trim() : undefined
+  window.dispatchEvent(new CustomEvent('sakura-open-code', { detail: { path, range, anchor, find } }));
+};
+
 const tabs = computed(() => [
   { id: 'selectors', label: isZh.value ? '选择器' : 'Selectors' },
   { id: 'box', label: isZh.value ? '盒模型' : 'Box Model' },
@@ -434,10 +465,10 @@ div {
   margin: 10px;
 }
 
-/* Tailwind 不直接支持，需用 @layer */
-@layer base {
-  h1 { font-size: 2rem; }
-}`,
+/* 提示：构建型 Tailwind 可以用 @layer 注入基础样式 */
+/* 本项目使用 Tailwind CDN，更推荐： */
+/* 1) 用工具类组合样式；2) 少量全局 CSS 写在 src/styles/app.css 或 src/index.html 的 <style> */
+/* @layer base { h1 { font-size: 2rem; } } */`,
     class: `/* 类选择器 - 最常用 ✨ */
 .btn {
   padding: 0.5rem 1rem;

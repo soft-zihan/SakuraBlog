@@ -484,7 +484,7 @@ const importImageUrlCache = ref(new Map<string, string>())
 
 // 从设置中读取配置
 const repoOwner = ref('soft-zihan')
-const repoName = ref('soft-zihan.github.io')
+const repoName = ref('SakuraBlog')
 
 // 默认的发布目录列表（按语言）
 const defaultFoldersByLang: Record<'zh' | 'en', string[]> = {
@@ -1665,7 +1665,7 @@ onMounted(() => {
   loadDraft()
   updateTokenStatus() // 检查 token 状态
   repoOwner.value = localStorage.getItem('github_repo_owner') || 'soft-zihan'
-  repoName.value = localStorage.getItem('github_repo_name') || 'soft-zihan.github.io'
+  repoName.value = localStorage.getItem('github_repo_name') || 'SakuraBlog'
 
   const savedTags = localStorage.getItem(`publish_tags_${props.lang}`)
   if (savedTags) {
