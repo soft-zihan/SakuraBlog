@@ -13,10 +13,6 @@
           </button>
         </div>
         <div>
-          <!-- GitHub Link -->
-          <a href="https://github.com/soft-zihan/SakuraBlog" target="_blank" class="mr-2 text-xs font-bold px-2 py-1 rounded transition-colors shadow-sm border dark:border-gray-700" :style="languageButtonStyle">
-            GitHub
-          </a>
           <button @click="$emit('toggle-sidebar')" class="w-8 h-8 rounded-lg border shadow-sm inline-flex items-center justify-center transition-colors" :style="languageButtonStyle">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -183,6 +179,7 @@
           :isActive="currentFile?.path === file.path"
           :showPath="true"
           :lang="lang as 'en' | 'zh'"
+          :visitorCount="getArticleVisitors(file.path)"
           :viewCount="getArticleViews(file.path)"
           :commentCount="commentCounts[file.path] || 0"
           @click="$emit('select-file', file)"
@@ -214,7 +211,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import FileTree from './FileTree.vue';
 import ArticleCard from './ArticleCard.vue';
 import SidebarFilterPanel from './SidebarFilterPanel.vue';
@@ -223,10 +220,12 @@ import { NodeType } from '../types';
 import { useArticleStore } from '../stores/articleStore';
 import { useAppStore } from '../stores/appStore';
 import { useLearningStore } from '../stores/learningStore'
+import { useViewCounter } from '../composables/useViewCounter'
 
 const articleStore = useArticleStore();
 const appStore = useAppStore();
 const learningStore = useLearningStore()
+const { fetchAndCacheStats } = useViewCounter()
 
 const props = defineProps<{
   lang: string;
@@ -245,8 +244,21 @@ const props = defineProps<{
   labTabs?: any[]; // Lab dashboard tabs from parent
   activeLabTab?: string; // Current active lab tab
   getArticleViews: (path: string) => number | undefined;
+  getArticleVisitors: (path: string) => number | undefined;
   commentCounts: Record<string, number>;
 }>();
+
+watch(
+  () => `${props.viewMode}|${props.loading ? 1 : 0}|${props.filteredFlatFiles.slice(0, 24).map(f => f.path).join(',')}`,
+  () => {
+    if (props.loading) return
+    if (props.viewMode !== 'latest') return
+    for (const file of props.filteredFlatFiles.slice(0, 24)) {
+      void fetchAndCacheStats(file.path)
+    }
+  },
+  { immediate: true }
+)
 
 // Compute files in labFolder (VUE学习笔记 or VUE Learning)
 const labFolderFiles = computed(() => {

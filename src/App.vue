@@ -8,6 +8,7 @@
     :lab-dashboard-tab="labDashboardTab"
     :comment-counts="commentCounts"
     :get-article-views="getArticleViews"
+    :get-article-visitors="getArticleVisitors"
     :current-path="currentPath"
     :breadcrumbs="breadcrumbs"
     :dual-column-mode="dualColumnMode"

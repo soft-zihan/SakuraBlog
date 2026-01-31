@@ -25,14 +25,6 @@
         {{ formatDate(file.lastModified) }}
       </span>
       
-      <!-- Word Count -->
-      <span v-if="wordCount > 0" class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        {{ formatNumber(wordCount) }}
-      </span>
-      
       <!-- Like Count -->
       <span v-if="likeCount > 0" class="text-[10px] bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 px-2 py-0.5 rounded-md flex items-center gap-1">
         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -41,9 +33,14 @@
         {{ likeCount }}
       </span>
 
-      <span v-if="typeof viewCount === 'number'" class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
+      <span class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
+        <span class="text-[10px]">👨‍💻</span>
+        {{ visitorCountDisplay }}
+      </span>
+
+      <span class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
         <span class="text-[10px]">📖</span>
-        {{ formatNumber(viewCount) }}
+        {{ viewCountDisplay }}
       </span>
 
       <span v-if="typeof commentCount === 'number'" class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
@@ -83,6 +80,7 @@ const props = defineProps<{
   showPath?: boolean
   lang?: 'en' | 'zh'
   viewCount?: number
+  visitorCount?: number
   commentCount?: number
 }>()
 
@@ -96,6 +94,8 @@ const appStore = useAppStore()
 const isLiked = computed(() => articleStore.isLiked(props.file.path))
 const isFavorite = computed(() => articleStore.isFavorite(props.file.path))
 const likeCount = computed(() => articleStore.getLikes(props.file.path))
+const viewCountDisplay = computed(() => (typeof props.viewCount === 'number' ? formatNumber(props.viewCount) : '--'))
+const visitorCountDisplay = computed(() => (typeof props.visitorCount === 'number' ? formatNumber(props.visitorCount) : '--'))
 
 const activeRingStyle = computed(() => ({
   '--tw-ring-color': appStore.isDark ? 'var(--primary-700)' : 'var(--primary-300)'
@@ -118,15 +118,6 @@ const secondaryBadgeStyle = computed(() => ({
   backgroundColor: appStore.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
   color: appStore.isDark ? 'var(--primary-400)' : 'var(--primary-500)'
 }))
-
-// Calculate word count from content
-const wordCount = computed(() => {
-  if (typeof props.file.wordCount === 'number') return props.file.wordCount
-  if (!props.file.content) return 0
-  const chineseChars = (props.file.content.match(/[\u4e00-\u9fa5]/g) || []).length
-  const englishWords = (props.file.content.match(/[a-zA-Z]+/g) || []).length
-  return chineseChars + englishWords
-})
 
 const parentPath = computed(() => {
   const parts = props.file.path.split('/')

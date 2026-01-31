@@ -24,6 +24,7 @@
       :lab-tabs="labTabs"
       :active-lab-tab="labDashboardTab"
       :get-article-views="getArticleViews"
+      :get-article-visitors="getArticleVisitors"
       :comment-counts="commentCounts"
       @toggle-lang="appStore.toggleLang"
       @reset="$emit('reset')"
@@ -119,6 +120,7 @@
                 :lab-tabs="labTabs"
                 :active-lab-tab="labDashboardTab"
                 :get-article-views="getArticleViews"
+                :get-article-visitors="getArticleVisitors"
                 :comment-counts="commentCounts"
                 @toggle-lang="appStore.toggleLang"
                 @reset="$emit('reset'); scrollToMobilePage(1)"
@@ -266,6 +268,7 @@ const props = defineProps<{
   labDashboardTab: string;
   commentCounts: Record<string, number>;
   getArticleViews: (path: string) => number | undefined;
+  getArticleVisitors: (path: string) => number | undefined;
   currentPath: string;
   breadcrumbs: BreadcrumbItem[];
   dualColumnMode: boolean;

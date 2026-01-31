@@ -6,6 +6,7 @@ interface CountApiResponse {
 }
 
 const warnedUrls = new Set<string>()
+const COUNTAPI_BASE_URLS = ['https://api.countapi.xyz', 'https://countapi.xyz']
 
 export function useViewCounter() {
   const articleStore = useArticleStore();
@@ -45,20 +46,46 @@ export function useViewCounter() {
     return namespace;
   };
 
-  const hitCounter = async (namespace: string, key: string): Promise<number | undefined> => {
+  const fetchWithTimeout = async (url: string, timeoutMs: number) => {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      return await fetch(url, { signal: controller.signal })
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+
+  const requestCounter = async (mode: 'hit' | 'get', namespace: string, key: string): Promise<number | undefined> => {
     const encodedNamespace = encodeURIComponent(namespace);
     const encodedKey = encodeURIComponent(key);
-    const url = `https://api.countapi.xyz/hit/${encodedNamespace}/${encodedKey}`
-    const response = await fetch(url);
-    if (!response.ok) {
-      if (!warnedUrls.has(url)) {
-        warnedUrls.add(url)
-        console.warn('CountAPI hit failed', { status: response.status, url })
+
+    for (const baseUrl of COUNTAPI_BASE_URLS) {
+      const url = `${baseUrl}/${mode}/${encodedNamespace}/${encodedKey}`
+      try {
+        const response = await fetchWithTimeout(url, 5000);
+        if (!response.ok) {
+          if (!warnedUrls.has(url)) {
+            warnedUrls.add(url)
+            console.warn(`CountAPI ${mode} failed`, { status: response.status, url })
+          }
+          continue
+        }
+        const data = (await response.json()) as CountApiResponse;
+        if (typeof data.value === 'number') return data.value
+      } catch (error) {
+        if (!warnedUrls.has(url)) {
+          warnedUrls.add(url)
+          if (error instanceof Error) {
+            console.warn(`CountAPI ${mode} error`, { message: error.message, url })
+          } else {
+            console.warn(`CountAPI ${mode} error`, { error, url })
+          }
+        }
       }
-      return undefined;
     }
-    const data = (await response.json()) as CountApiResponse;
-    return typeof data.value === 'number' ? data.value : undefined;
+
+    return undefined
   };
 
   const incrementAndGetViews = async (path: string): Promise<number | undefined> => {
@@ -67,22 +94,22 @@ export function useViewCounter() {
     const cachedVisitors = getCachedVisitors(path)
     if (typeof cachedViews === 'number') return cachedViews
 
-    if (VIEW_COUNTER_CONFIG.provider !== 'countapi') return cachedViews
-
     const namespace = getNamespace();
     if (!namespace) {
       return cachedViews;
     }
 
-    try {
-      const viewsKey = toCountApiKey('views', normalizedPath);
-      const visitorsKey = toCountApiKey('visitors', normalizedPath);
+    const viewsKey = toCountApiKey('views', normalizedPath);
+    const visitorsKey = toCountApiKey('visitors', normalizedPath);
 
-      const views = await hitCounter(namespace, viewsKey);
+    if (VIEW_COUNTER_CONFIG.provider !== 'countapi') return cachedViews
+
+    try {
+      const views = await requestCounter('hit', namespace, viewsKey);
       let visitors = cachedVisitors;
 
       if (!articleStore.hasVisited(normalizedPath)) {
-        const v = await hitCounter(namespace, visitorsKey);
+        const v = await requestCounter('hit', namespace, visitorsKey);
         if (typeof v === 'number') {
           visitors = v;
           articleStore.markVisited(normalizedPath);
@@ -99,15 +126,41 @@ export function useViewCounter() {
       } else {
         console.warn('CountAPI hit error', { error })
       }
-      return cachedViews;
     }
 
     return cachedViews;
   };
 
+  const fetchAndCacheStats = async (path: string): Promise<{ views: number; visitors: number } | null> => {
+    const cached = articleStore.getCachedStats(path)
+    if (cached) return cached
+
+    const normalizedPath = normalizePath(path)
+    const namespace = getNamespace()
+    if (!namespace) return null
+
+    const viewsKey = toCountApiKey('views', normalizedPath);
+    const visitorsKey = toCountApiKey('visitors', normalizedPath);
+
+    if (VIEW_COUNTER_CONFIG.provider !== 'countapi') return null
+
+    const [views, visitors] = await Promise.all([
+      requestCounter('get', namespace, viewsKey),
+      requestCounter('get', namespace, visitorsKey)
+    ])
+
+    if (typeof views === 'number' || typeof visitors === 'number') {
+      articleStore.setCachedStats(path, views ?? 0, visitors ?? 0)
+      return { views: views ?? 0, visitors: visitors ?? 0 }
+    }
+
+    return null
+  }
+
   return {
     getCachedViews,
     getCachedVisitors,
-    incrementAndGetViews
+    incrementAndGetViews,
+    fetchAndCacheStats
   };
 }
