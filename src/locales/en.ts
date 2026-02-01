@@ -3,7 +3,7 @@ export default {
     subtitle: "For every reader",
     tab_latest: "Latest",
     tab_files: "Files",
-    tab_lab: "Laboratory",
+    tab_lab: "Lab",
     lab_dashboard: "Visual Learning Center",
     lab_dashboard_desc: "Front-end magic",
     lab_tools: "Visual Playground",

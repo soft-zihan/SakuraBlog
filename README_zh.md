@@ -177,6 +177,8 @@ sakura-notes/
 │   │
 │   ├── 📁 components/       # Vue 组件
 │   │   ├── AppHeader.vue      # 顶部导航栏
+│   │   ├── ArticleInfoBar.vue  # 文章信息/操作栏
+│   │   ├── ArticleToc.vue      # 文章目录（TOC）
 │   │   ├── ThemePanel.vue     # 主题面板
 │   │   ├── AppSidebar.vue     # 侧边栏
 │   │   ├── SidebarFilterPanel.vue # 侧边栏筛选区
@@ -187,17 +189,21 @@ sakura-notes/
 │   │   └── 📁 lab/            # 学习实验室系统
 │   │       ├── LabDashboard.vue
 │   │       ├── SourceCodeViewer.vue
-│   │       └── 📁 stage1-foundation/ ... 📁 stage8-challenge/
+│   │       ├── 📁 stage1-foundation/ ... 📁 stage8-challenge/
+│   │       └── 📁 stages/        # Lab Stage 包装页
+│   │           └── StageLearningGuide.vue
 │   │
 │   ├── 📁 composables/      # 组合式函数
 │   │   ├── useArticleMeta.ts
 │   │   ├── useContentRenderer.ts
 │   │   ├── useSearch.ts
+│   │   ├── useUmamiViewStats.ts # Umami Share Token 阅读统计
 │   │   └── ...
 │   │
 │   ├── 📁 stores/           # Pinia 状态管理
 │   │   ├── appStore.ts
 │   │   ├── articleStore.ts
+│   │   ├── articleNavStore.ts   # 文章目录/导航状态
 │   │   ├── learningStore.ts
 │   │   └── musicStore.ts
 │   │
@@ -211,13 +217,18 @@ sakura-notes/
 │   ├── 📁 utils/            # 工具函数
 │   │   ├── fileUtils.ts
 │   │   ├── i18nText.ts
-│   │   └── sanitize.ts
+│   │   ├── sanitize.ts
+│   │   ├── storage.ts
+│   │   └── wallhavenApi.ts
 │   │
 ├── 📁 public/              # 静态资源（生成数据）
 │   ├── 📁 data/
 │   │   ├── files.json
 │   │   ├── music.json
 │   │   ├── wallpapers.json
+│   │   ├── 📁 source-notes-preset/  # 源码查看器的“逐文件”预置笔记
+│   │   │   ├── 📁 zh/
+│   │   │   └── 📁 en/
 │   │   ├── source-notes-preset.zh.json
 │   │   └── source-notes-preset.en.json
 │   ├── 📁 raw/              # 源码查看器用的 raw 文本（由脚本导出）

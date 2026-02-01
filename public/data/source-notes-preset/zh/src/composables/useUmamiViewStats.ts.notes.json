@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "组合式函数：接入 Umami Share API，缓存并展示浏览量/访客数。",
+  "notes": []
+}

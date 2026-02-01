@@ -181,6 +181,8 @@ sakura-notes/
 │   │
 │   ├── 📁 components/       # Vue components
 │   │   ├── AppHeader.vue      # Top navigation bar
+│   │   ├── ArticleInfoBar.vue  # Article info / actions bar
+│   │   ├── ArticleToc.vue      # Article table of contents (TOC)
 │   │   ├── ThemePanel.vue     # Theme settings panel
 │   │   ├── AppSidebar.vue     # Sidebar navigation
 │   │   ├── SidebarFilterPanel.vue # Sidebar filters
@@ -191,17 +193,21 @@ sakura-notes/
 │   │   └── 📁 lab/            # Learning Lab system
 │   │       ├── LabDashboard.vue
 │   │       ├── SourceCodeViewer.vue
-│   │       └── 📁 stage1-foundation/ ... 📁 stage8-challenge/
+│   │       ├── 📁 stage1-foundation/ ... 📁 stage8-challenge/
+│   │       └── 📁 stages/        # Lab stage wrapper pages
+│   │           └── StageLearningGuide.vue
 │   │
 │   ├── 📁 composables/      # Vue 3 Composables (Logic Reuse)
 │   │   ├── useArticleMeta.ts  # Metadata extraction
 │   │   ├── useContentRenderer.ts # Markdown rendering
 │   │   ├── useFile.ts         # File operations
+│   │   ├── useUmamiViewStats.ts # Umami Share Token stats
 │   │   └── ...
 │   │
 │   └── 📁 stores/           # Pinia state management
 │       ├── appStore.ts        # Global app settings
 │       ├── articleStore.ts    # Article interactions
+│       ├── articleNavStore.ts # Article TOC & navigation
 │       ├── learningStore.ts   # Learning progress
 │       └── musicStore.ts      # Music player state
 │
@@ -215,13 +221,18 @@ sakura-notes/
 │   ├── 📁 utils/            # Utility functions
 │   │   ├── fileUtils.ts
 │   │   ├── i18nText.ts
-│   │   └── sanitize.ts
+│   │   ├── sanitize.ts
+│   │   ├── storage.ts
+│   │   └── wallhavenApi.ts
 │
 ├── 📁 public/              # Static assets (generated data)
 │   ├── 📁 data/
 │   │   ├── files.json
 │   │   ├── music.json
 │   │   ├── wallpapers.json
+│   │   ├── 📁 source-notes-preset/  # Per-file notes preset (Source Viewer)
+│   │   │   ├── 📁 zh/
+│   │   │   └── 📁 en/
 │   │   ├── source-notes-preset.zh.json
 │   │   └── source-notes-preset.en.json
 │   ├── 📁 raw/              # Generated raw source files for Source Viewer

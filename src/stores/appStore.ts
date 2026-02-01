@@ -37,7 +37,26 @@ export const useAppStore = defineStore('app', () => {
     bingLastDate: '',
     bingLastUrl: '',
     baiduKeyword: '',
-    baiduLimit: 8
+    baiduLimit: 8,
+    wallhaven: {
+      apiKey: '',
+      q: '',
+      categories: '111',
+      purity: '100',
+      sorting: 'date_added',
+      order: 'desc',
+      topRange: '1M',
+      atleast: '',
+      resolutions: '',
+      ratios: '',
+      colors: '',
+      page: 1,
+      seed: '',
+      collectionsUsername: '',
+      selectedCollectionId: null as number | null,
+      collectionPage: 1,
+      collectionPurity: '100'
+    }
   })
   
   // User Settings
@@ -57,7 +76,7 @@ export const useAppStore = defineStore('app', () => {
     articleBackgroundColorLight: '',
     articleBackgroundColorDark: '',
     wallpaperFill: 'cover' as 'cover' | 'contain' | 'fill',
-    autoChangeMode: 'off' as 'off' | 'custom' | 'preset' | 'anime' | 'beauty' | 'search',
+    autoChangeMode: 'off' as 'off' | 'custom' | 'preset' | 'anime' | 'beauty' | 'bing' | 'search' | 'wallhaven',
     autoChangeTimer: 0,
     musicPlayer: 'new' as 'new' | 'old' | 'off'
   })

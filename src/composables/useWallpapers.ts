@@ -1,5 +1,18 @@
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, reactive } from 'vue'
 import { useAppStore } from '../stores/appStore'
+import {
+  WallhavenApiError,
+  wallhavenCollectionWallpapers,
+  wallhavenCollections,
+  wallhavenSearch,
+  wallhavenSettings,
+  wallhavenTag,
+  wallhavenWallpaper,
+  type WallhavenCollection,
+  type WallhavenSearchMeta,
+  type WallhavenSettings,
+  type WallhavenTag as WallhavenTagInfo
+} from '../utils/wallhavenApi'
 
 // Simple IndexedDB wrapper for caching blobs
 const DB_NAME = 'sakura-wallpapers';
@@ -56,6 +69,7 @@ export interface WallpaperItem {
   name: string
   id?: string
   source?: 'preset' | 'custom' | 'api'
+  url?: string
 }
 
 export interface WallpapersData {
@@ -70,8 +84,26 @@ const bingWallpapers = ref<WallpaperItem[]>([])
 const beautyWallpapers = ref<WallpaperItem[]>([])
 const animeWallpapers = ref<WallpaperItem[]>([])
 const searchWallpapers = ref<WallpaperItem[]>([])
+const wallhavenWallpapers = ref<WallpaperItem[]>([])
+const wallhavenMeta = ref<WallhavenSearchMeta | null>(null)
+const wallhavenCollectionsList = ref<WallhavenCollection[]>([])
+const wallhavenCollectionListWallpapers = ref<WallpaperItem[]>([])
+const wallhavenCollectionMeta = ref<WallhavenSearchMeta | null>(null)
 const hasSearched = ref(false)
-const isApiLoading = ref(false)
+const apiLoading = reactive({
+  bing: false,
+  baidu: false,
+  beauty: false,
+  anime: false,
+  search: false,
+  wallhavenSearch: false,
+  wallhavenWallpaper: false,
+  wallhavenTag: false,
+  wallhavenSettings: false,
+  wallhavenCollections: false,
+  wallhavenCollection: false
+})
+const isApiLoading = computed(() => (Object.values(apiLoading) as boolean[]).some(Boolean))
 const resolvedWallpaper = ref('')
 let cachedWallpaperKey: string | null = null
 let wallpaperKeyPromise: Promise<string> | null = null
@@ -280,8 +312,8 @@ export function useWallpapers() {
   }
 
   const fetchBingWallpapers = async (country: string, count: number) => {
-    if (isApiLoading.value) return
-    isApiLoading.value = true
+    if (apiLoading.bing) return
+    apiLoading.bing = true
     try {
       const response = await fetch(`https://peapix.com/bing/feed?country=${country}&n=${count}`)
       if (response.ok) {
@@ -296,7 +328,7 @@ export function useWallpapers() {
     } catch (e) {
       console.warn('Failed to load Bing wallpapers:', e)
     } finally {
-      isApiLoading.value = false
+      apiLoading.bing = false
     }
   }
   
@@ -383,8 +415,8 @@ export function useWallpapers() {
   }
 
   const fetchBeautyWallpapers = async (count: number) => {
-    if (isApiLoading.value) return
-    isApiLoading.value = true
+    if (apiLoading.beauty) return
+    apiLoading.beauty = true
     try {
       // Crawl twice each time (fetch at least 2 candidates)
       const targetCount = Math.max(count, 2)
@@ -395,13 +427,13 @@ export function useWallpapers() {
     } catch (e) {
       console.warn('Failed to load beauty wallpapers:', e)
     } finally {
-      isApiLoading.value = false
+      apiLoading.beauty = false
     }
   }
 
   const fetchAnimeWallpapers = async (count: number) => {
-    if (isApiLoading.value) return
-    isApiLoading.value = true
+    if (apiLoading.anime) return
+    apiLoading.anime = true
     try {
       // Crawl twice each time (fetch at least 2 candidates)
       const targetCount = Math.max(count, 2)
@@ -414,7 +446,7 @@ export function useWallpapers() {
     } catch (e) {
       console.warn('Failed to load anime wallpapers:', e)
     } finally {
-      isApiLoading.value = false
+      apiLoading.anime = false
     }
   }
 
@@ -432,8 +464,8 @@ export function useWallpapers() {
   }
 
   const fetchSearchWallpapers = async (keyword: string, limit: number) => {
-    if (isApiLoading.value) return
-    isApiLoading.value = true
+    if (apiLoading.search) return
+    apiLoading.search = true
     try {
       // const key = await getWallpaperKey() // No longer needed
       const userLimit = appStore.wallpaperApiSettings.baiduLimit || limit || 8
@@ -497,13 +529,13 @@ export function useWallpapers() {
     } catch (e) {
       console.warn('Failed to load search wallpapers:', e)
     } finally {
-      isApiLoading.value = false
+      apiLoading.search = false
     }
   }
 
   const fetchBaiduWallpaper = async (keyword?: string, targetCount?: number) => {
-    if (isApiLoading.value) return
-    isApiLoading.value = true
+    if (apiLoading.baidu) return
+    apiLoading.baidu = true
     
     // Default settings
     const kw = keyword || appStore.wallpaperApiSettings.baiduKeyword || '小姐姐'
@@ -568,7 +600,226 @@ export function useWallpapers() {
     } catch (e) {
       console.warn('Failed to load Baidu wallpapers:', e)
     } finally {
-      isApiLoading.value = false
+      apiLoading.baidu = false
+    }
+  }
+
+  const ensureWallhavenSettings = () => {
+    const root: any = appStore.wallpaperApiSettings as any
+    if (!root.wallhaven) {
+      root.wallhaven = {
+        apiKey: '',
+        q: '',
+        categories: '111',
+        purity: '100',
+        sorting: 'date_added',
+        order: 'desc',
+        topRange: '1M',
+        atleast: '',
+        resolutions: '',
+        ratios: '',
+        colors: '',
+        page: 1,
+        seed: '',
+        collectionsUsername: '',
+        selectedCollectionId: null,
+        collectionPage: 1,
+        collectionPurity: '100'
+      }
+    }
+    return root.wallhaven as {
+      apiKey: string
+      q: string
+      categories: string
+      purity: string
+      sorting: string
+      order: string
+      topRange: string
+      atleast: string
+      resolutions: string
+      ratios: string
+      colors: string
+      page: number
+      seed: string
+      collectionsUsername: string
+      selectedCollectionId: number | null
+      collectionPage: number
+      collectionPurity: string
+    }
+  }
+
+  const showWallhavenErrorToast = (e: unknown) => {
+    const lang = appStore.lang
+    if (e instanceof WallhavenApiError) {
+      if (e.status === 0) {
+        appStore.showToast(lang === 'zh' ? 'Wallhaven：网络/跨域/代理异常（本地请启用 Vite 代理；线上需自建代理）' : 'Wallhaven: Network/CORS/proxy issue (enable Vite proxy locally; use your own proxy in production)')
+        return
+      }
+      if (e.status === 401) {
+        appStore.showToast(lang === 'zh' ? 'Wallhaven：API Key 无效或无权限（含 NSFW）' : 'Wallhaven: Invalid API key or unauthorized')
+        return
+      }
+      if (e.status === 404) {
+        appStore.showToast(lang === 'zh' ? 'Wallhaven：资源不存在或无权限（404）' : 'Wallhaven: Not found or unauthorized (404)')
+        return
+      }
+      if (e.status === 429) {
+        appStore.showToast(lang === 'zh' ? 'Wallhaven：请求过快（45 次/分钟）' : 'Wallhaven: Too many requests (45/min)')
+        return
+      }
+      appStore.showToast(lang === 'zh' ? `Wallhaven：请求失败（${e.status}）` : `Wallhaven: Request failed (${e.status})`)
+      return
+    }
+    appStore.showToast(lang === 'zh' ? 'Wallhaven：请求失败' : 'Wallhaven: Request failed')
+  }
+
+  const fetchWallhavenSearch = async (override?: Partial<ReturnType<typeof ensureWallhavenSettings>>) => {
+    if (apiLoading.wallhavenSearch) return
+    apiLoading.wallhavenSearch = true
+    try {
+      const cfg = ensureWallhavenSettings()
+      const effective = { ...cfg, ...(override || {}) }
+      const apiKey = (effective.apiKey || '').trim()
+
+      let purity = String(effective.purity || '100')
+      if (!apiKey && purity !== '100') {
+        purity = '100'
+      }
+
+      const page = Number.isFinite(Number(effective.page)) ? Number(effective.page) : 1
+
+      const res = await wallhavenSearch(
+        {
+          q: effective.q,
+          categories: effective.categories,
+          purity,
+          sorting: effective.sorting,
+          order: effective.order,
+          topRange: effective.topRange,
+          atleast: effective.atleast,
+          resolutions: effective.resolutions,
+          ratios: effective.ratios,
+          colors: effective.colors,
+          page,
+          seed: effective.seed
+        },
+        apiKey
+      )
+
+      wallhavenMeta.value = res.meta
+
+      if (effective.sorting === 'random' && res.meta?.seed && !override?.seed) {
+        cfg.seed = res.meta.seed || ''
+      }
+
+      wallhavenWallpapers.value = (Array.isArray(res.data) ? res.data : []).map((item, idx) => ({
+        filename: item.path,
+        url: item.path,
+        path: item.thumbs?.small || item.thumbs?.large || item.path,
+        name: item.id ? `${item.id} ${item.resolution || ''}`.trim() : `Wallhaven ${idx + 1}`,
+        id: item.id,
+        source: 'api' as const
+      }))
+
+      return res
+    } catch (e) {
+      showWallhavenErrorToast(e)
+      throw e
+    } finally {
+      apiLoading.wallhavenSearch = false
+    }
+  }
+
+  const fetchWallhavenWallpaperById = async (id: string) => {
+    apiLoading.wallhavenWallpaper = true
+    try {
+      const cfg = ensureWallhavenSettings()
+      const apiKey = (cfg.apiKey || '').trim()
+      const res = await wallhavenWallpaper(id.trim(), apiKey)
+      const item = res.data
+      const wp: WallpaperItem = {
+        filename: item.path,
+        url: item.path,
+        path: item.thumbs?.small || item.thumbs?.large || item.path,
+        name: item.id ? `${item.id} ${item.resolution || ''}`.trim() : item.path,
+        id: item.id,
+        source: 'api' as const
+      }
+      return { wallpaper: wp, info: item }
+    } finally {
+      apiLoading.wallhavenWallpaper = false
+    }
+  }
+
+  const fetchWallhavenTagInfo = async (tagId: number | string) => {
+    apiLoading.wallhavenTag = true
+    try {
+      const res = await wallhavenTag(tagId)
+      return res.data as WallhavenTagInfo
+    } finally {
+      apiLoading.wallhavenTag = false
+    }
+  }
+
+  const fetchWallhavenUserSettings = async () => {
+    apiLoading.wallhavenSettings = true
+    try {
+      const cfg = ensureWallhavenSettings()
+      const apiKey = (cfg.apiKey || '').trim()
+      if (!apiKey) throw new WallhavenApiError(401, 'Missing API key')
+      const res = await wallhavenSettings(apiKey)
+      return res.data as WallhavenSettings
+    } finally {
+      apiLoading.wallhavenSettings = false
+    }
+  }
+
+  const fetchWallhavenCollectionsList = async (opts?: { username?: string }) => {
+    if (apiLoading.wallhavenCollections) return
+    apiLoading.wallhavenCollections = true
+    try {
+      const cfg = ensureWallhavenSettings()
+      const apiKey = (cfg.apiKey || '').trim()
+      const username = (opts?.username || '').trim()
+      const res = await wallhavenCollections({ apiKey, username })
+      wallhavenCollectionsList.value = Array.isArray(res.data) ? res.data : []
+      return res.data
+    } catch (e) {
+      showWallhavenErrorToast(e)
+      throw e
+    } finally {
+      apiLoading.wallhavenCollections = false
+    }
+  }
+
+  const fetchWallhavenCollectionWallpapersList = async (opts: { username: string; id: number | string; page?: number; purity?: string }) => {
+    if (apiLoading.wallhavenCollection) return
+    apiLoading.wallhavenCollection = true
+    try {
+      const cfg = ensureWallhavenSettings()
+      const apiKey = (cfg.apiKey || '').trim()
+      const res = await wallhavenCollectionWallpapers({
+        username: opts.username,
+        id: opts.id,
+        page: opts.page ?? cfg.collectionPage,
+        purity: opts.purity ?? cfg.collectionPurity,
+        apiKey
+      })
+      wallhavenCollectionMeta.value = res.meta
+      wallhavenCollectionListWallpapers.value = (Array.isArray(res.data) ? res.data : []).map((item, idx) => ({
+        filename: item.path,
+        url: item.path,
+        path: item.thumbs?.small || item.thumbs?.large || item.path,
+        name: item.id ? `${item.id} ${item.resolution || ''}`.trim() : `Wallhaven ${idx + 1}`,
+        id: item.id,
+        source: 'api' as const
+      }))
+      return res
+    } catch (e) {
+      showWallhavenErrorToast(e)
+      throw e
+    } finally {
+      apiLoading.wallhavenCollection = false
     }
   }
   
@@ -596,6 +847,15 @@ export function useWallpapers() {
     if (searchWallpapers.value.some((w: WallpaperItem) => w.filename === current || normalizePath(w.path) === normalizedCurrent)) {
       return 'search'
     }
+
+    if (
+      wallhavenWallpapers.value.some((w: WallpaperItem) => w.filename === current || w.url === current || normalizePath(w.path) === normalizedCurrent) ||
+      current.includes('w.wallhaven.cc') ||
+      current.includes('wallhaven.cc/w/') ||
+      current.includes('wallhaven-')
+    ) {
+      return 'wallhaven'
+    }
     
     // Check Anime (by URL pattern)
     if (current.includes('seovx.com/d/') || current.includes('dmoe.cc') || current.includes('mtyqx.cn') || (current.includes('imgapi.cn') && current.includes('fl=dongman'))) {
@@ -612,12 +872,12 @@ export function useWallpapers() {
 
   const resolveWallpaperUrl = (wallpaper: WallpaperItem | null) => {
     if (!wallpaper) return ''
-    return wallpaper.path || wallpaper.filename || ''
+    return wallpaper.url || wallpaper.filename || wallpaper.path || ''
   }
 
   const isSameWallpaper = (wallpaper: WallpaperItem | null, current: string) => {
     if (!wallpaper) return false
-    return wallpaper.filename === current || wallpaper.path === current
+    return wallpaper.filename === current || wallpaper.url === current || wallpaper.path === current
   }
 
   const pickRandomWallpaper = (list: WallpaperItem[], current: string) => {
@@ -690,6 +950,19 @@ export function useWallpapers() {
         }
         if (bingWallpapers.value.length) {
            nextWallpaper = pickRandomWallpaper(bingWallpapers.value, current)
+        }
+      } else if (mode === 'wallhaven') {
+        const cfg = ensureWallhavenSettings()
+        if (forceRefresh || wallhavenWallpapers.value.length === 0) {
+          const baseSeed = (cfg.seed || '').trim()
+          await fetchWallhavenSearch({
+            sorting: cfg.sorting || 'random',
+            page: 1,
+            seed: baseSeed
+          } as any)
+        }
+        if (wallhavenWallpapers.value.length) {
+          nextWallpaper = pickRandomWallpaper(wallhavenWallpapers.value, current)
         }
       }
 
@@ -776,7 +1049,13 @@ export function useWallpapers() {
     animeWallpapers,
     searchWallpapers,
     baiduWallpapers: searchWallpapers,
+    wallhavenWallpapers,
+    wallhavenMeta,
+    wallhavenCollectionsList,
+    wallhavenCollectionListWallpapers,
+    wallhavenCollectionMeta,
     hasSearched,
+    apiLoading,
     isApiLoading,
     currentWallpaper: resolvedWallpaper,
     loadWallpapers,
@@ -790,6 +1069,12 @@ export function useWallpapers() {
     fetchBeautyWallpapers,
     fetchAnimeWallpapers,
     fetchSearchWallpapers,
+    fetchWallhavenSearch,
+    fetchWallhavenWallpaperById,
+    fetchWallhavenTagInfo,
+    fetchWallhavenUserSettings,
+    fetchWallhavenCollectionsList,
+    fetchWallhavenCollectionWallpapersList,
     updateBingDaily,
     autoChangeWallpaper,
     changeWallpaperSameSeries
