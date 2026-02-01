@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-222?logo=github)](https://soft-zihan.github.io/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-222?logo=github)](https://soft-zihan.github.io/SakuraBlog/)
 [![Vue 3](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
@@ -10,7 +10,15 @@
 [![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/soft-zihan/soft-zihan.github.io)
 [![DeepWiki](https://img.shields.io/badge/DeepWiki-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTY)](https://deepwiki.com/soft-zihan/SakuraBlog)
 
-**一个为 GitHub Pages 设计的纯静态个人博客系统**
+**为 GitHub Pages 设计的纯静态 Vue 知识库/博客（不依赖静态站点框架，也无需自建后端）**
+
+<p>
+  <b>它的差异化卖点</b><br/>
+  • 构建期生成：笔记索引、渲染产物、raw 源码等静态资产<br/>
+  • 网页端发布：直连 GitHub API；无写权限自动 Fork + PR<br/>
+  • 主题系统：运行时换肤（CSS 变量 + Tailwind），暗色支持系统/时间策略<br/>
+  • 学习实验室：8 阶段路线 + 可做“逐行笔记”的源码查看器
+</p>
 
 [🌐 在线演示](https://soft-zihan.github.io/SakuraBlog/) · [🐛 报告问题](https://github.com/soft-zihan/SakuraBlog/issues)
 
@@ -21,6 +29,7 @@
 ## 📑 目录
 
 - [✨ 特性概览](#-特性概览)
+- [🧠 为什么不需要后端也能工作](#-为什么不需要后端也能工作)
 - [🙏 致谢](#-致谢)
 - [🎯 快速开始](#-快速开始)
 - [🧪 测试](#-测试)
@@ -39,60 +48,100 @@
 
 ## ✨ 特性概览
 
-### 🎨 界面与交互
+### 🧩 天生为“纯静态托管”设计（无后端也能跑起来）
 
-| 特性                   | 描述                                                           |
-| ---------------------- | -------------------------------------------------------------- |
-| **双主题模式**   | 「日樱」浅色主题 + 「夜樱」深色主题，壁纸随主题切换            |
-| **动态樱花背景** | 可拖拽樱花花瓣系统，支持物理效果、网格堆叠、移动端触摸优化     |
-| **响应式设计**   | 完美适配桌面端和移动端                                         |
-| **多语言支持**   | 内置中/英双语切换 (i18n)，切换时保留当前标签页和实验室位置     |
-| **无后端个性化** | 使用 `localStorage` 存储字体、阅读密度、主题、花瓣速度等偏好设置 |
+| 特性 | 描述 |
+| -- | -- |
+| **构建期数据管线** | 在部署前生成 `public/data/files.json`、预渲染 HTML、raw 源码副本、音乐/壁纸清单等静态资产。 |
+| **运行时只读静态资源** | 上线后所有内容通过静态托管 `fetch()` 读取（GitHub Pages 友好）。 |
+| **本地优先的状态** | 偏好设置、阅读行为、学习进度等全部保存在浏览器（`localStorage` + Pinia）。 |
+| **可选外部能力** | 评论（Giscus）、阅读统计（Umami Share Token API）、云端备份（GitHub）都无需自建后端。 |
 
-### 📚 内容系统
+### ✍️ 不跑服务器也能发布（GitHub Native）
 
-| 特性                    | 描述                                                                   |
-| ----------------------- | ---------------------------------------------------------------------- |
-| **Markdown 渲染** | 完整 Markdown 支持，自动目录生成，代码语法高亮                         |
-| **全文搜索**      | 基于 MiniSearch 的快速全文检索，支持高亮显示                           |
-| **文章管理**      | 收藏、点赞、标签过滤、阅读历史                                         |
-| **阅读统计**      | 基于 Umami（Share Token API）展示单篇文章阅读量与阅读人数              |
-| **评论系统**      | 基于[Giscus](https://github.com/giscus/giscus) 的 GitHub Discussions 评论 |
-| **音乐播放器**    | 内置音乐播放器，支持歌词显示                                           |
+| 特性 | 描述 |
+| -- | -- |
+| **发布工作台** | 导入/预览文件、重命名、选择目录、注入标签/作者元数据，并从网页端发布。 |
+| **实时预览** | 编辑时实时 Markdown 预览。 |
+| **图片自动上传** | Markdown 里的本地图片可自动上传到 GitHub。 |
+| **智能 Fork + PR** | 无写权限用户自动 Fork 并创建 PR，上游仓库保持干净可控。 |
 
-### 🛠️ 发布功能
+### 🎨 主题系统是“第一特性”（不只是深色模式）
 
-| 特性                     | 描述                                                  |
-| ------------------------ | ----------------------------------------------------- |
-| **发布工作台**     | 文件导入预览、重命名、文件夹选择、标签/作者元数据注入 |
-| **实时预览**       | 编辑时实时 Markdown 预览                              |
-| **图片自动上传**   | Markdown 中的本地图片自动上传至 GitHub                |
-| **智能 Fork + PR** | 无写入权限用户自动 Fork 并提交 PR，自动同步最新代码   |
+| 特性 | 描述 |
+| -- | -- |
+| **运行时换肤** | 主题色写入 CSS 变量，并由 Tailwind 直接消费，实现整站级“换皮”。 |
+| **暗色策略** | 手动切换 / 跟随系统 / 按时间自动切换。 |
+| **氛围能力** | 壁纸层 + 音乐播放器，让阅读体验更像“个人空间”。 |
+| **樱花交互层** | 花瓣拖拽、长按旋涡等交互，且默认不遮挡页面点击。 |
 
-### 🧪 学习实验室
+### 📱 移动端适配（不是一句“响应式”糊弄）
 
-| 特性                     | 描述                                   |
-| ------------------------ | -------------------------------------- |
-| **8 阶段学习路径** | 从 Web 基础到 Vue 3 进阶的完整学习路线（含综合挑战） |
-| **交互式组件**     | 可视化教学组件，实时代码演示           |
-| **源码查看器**     | 查看本站组件源码；支持“预置笔记/用户笔记”，并按当前语言显示说明 |
+| 特性 | 描述 |
+| -- | -- |
+| **触摸原生交互** | 基于 pointer 事件统一鼠标/触摸；拖拽等交互在需要时关闭默认触摸行为。 |
+| **特效不挡阅读** | 背景特效默认不拦截点击，只有花瓣层开放指针事件。 |
+| **链接与资源兼容** | 对内部链接/图片/PDF 内嵌做了 GitHub Pages 友好的 base URL 解析策略。 |
+| **面板与阅读易用** | 搜索与面板采用视口高度限制与响应式布局，小屏也能舒适操作。 |
 
-#### 学习实验室：给小白的完整读法
+### 🧪 学习实验室 + 源码查看器（把 UI 映射回真实实现）
 
-- **Stage（阶段）**：站内的学习路线图，强调“边看边玩边验证”（交互组件 + 即时反馈）。当前共有 8 个 Stage：HTML → CSS → JS → TS/异步 → 工程化 → Vue 核心 → Vue 进阶 → 综合挑战。
-- **笔记（notes/VUE学习笔记）**：配套的“系统讲解材料”（7 篇章节），更适合从头到尾顺着读，解决“为什么/背景/概念体系”。实验室各 Stage 会反复引用它们作为主线讲解。
-- **源码查看器（Source Viewer）**：把“站内 UI 表现”映射到“真实项目源码”。你可以打开具体文件，结合预置笔记理解：某段代码对应本站哪个组件、触发哪个交互、为什么这么写。
-- **推荐学习法**：先读对应笔记（尤其 1-4），再回到实验室做交互实验与对照源码；遇到不理解的 UI 效果，就用“打开源码/预置笔记”回溯实现细节。
+| 特性 | 描述 |
+| -- | -- |
+| **8 阶段学习路径** | 从 Web 基础到 Vue 3 进阶与综合挑战的路线图。 |
+| **学习进度持久化** | 完成情况与推荐下一步学习内容保存在本地。 |
+| **源码查看器** | 读取本站真实源码，叠加“预置笔记 + 用户逐行笔记”。 |
+| **读码工具链** | 函数/类/Vue SFC 块等折叠解析；支持导入导出与提交笔记到 GitHub 共建。 |
 
-### 🔐 安全特性
+#### 学习实验室：推荐读法
 
-| 特性                     | 描述                                                   |
-| ------------------------ | ------------------------------------------------------ |
-| **Token 加密存储** | AES-256-GCM 加密，密钥基于浏览器指纹派生               |
-| **本地/云端备份**  | 支持本地备份（浏览器）和云端备份（GitHub），可导入导出 |
-| **隐私保护**       | 所有数据本地存储，不上传第三方服务器                   |
+- **Stage（阶段）**：强调“边看边玩边验证”（交互组件 + 即时反馈）。 
+- **笔记（notes/VUE学习笔记）**：配套的系统材料，更适合从头到尾建立概念主线。 
+- **源码查看器（Source Viewer）**：把站内 UI 对应到真实项目源码，顺着预置笔记读懂“为什么这么写”。 
+
+### 📚 核心阅读体验
+
+| 特性 | 描述 |
+| -- | -- |
+| **Markdown + 目录 + 高亮** | Markdown 渲染、自动目录（ToC）与代码语法高亮。 |
+| **全文搜索** | MiniSearch 检索，支持中英混合分词、增量补全与索引缓存。 |
+| **阅读工具** | 收藏、点赞、标签过滤、阅读历史。 |
+| **PDF 友好** | PDF 链接可内嵌阅读，并支持打开/下载。 |
+
+### 🔐 安全与数据（客户端侧的 best-effort）
+
+| 特性 | 描述 |
+| -- | -- |
+| **Token 加密存储** | AES-256-GCM + PBKDF2 派生的设备绑定密钥，Token 不以明文落地。 |
+| **备份排除 Token** | Token 明确不参与任何备份流程。 |
+| **本地/云端备份** | 支持备份/恢复偏好与进度到本地或 GitHub（可选）。 |
 
 ---
+
+## 🧠 为什么不需要后端也能工作
+
+Sakura Notes 通过“把动态需求前置到构建期 + 用户数据本地化 + 写入能力交给 GitHub API”的组合，让它能在 GitHub Pages 这类纯静态托管上跑出接近应用的体验。
+
+```text
+notes/（你的 Markdown 知识库）
+  │
+  ├─ 构建前置脚本（scripts/*）
+  │    ├─ 扫描 notes → public/data/files.json
+  │    ├─ 复制 notes → public/notes/**
+  │    ├─ 预渲染 → public/rendered/**（HTML + 目录）
+  │    └─ 导出源码 → public/raw/**（供源码查看器读取）
+  │
+  └─ vite build → dist/
+           │
+           ▼
+GitHub Pages（静态托管）
+           │
+           ▼
+浏览器运行时
+  ├─ fetch() 读取静态资源（notes/index/rendered/raw）
+  ├─ localStorage 持久化偏好/进度等状态
+  └─ 写入能力（可选）：GitHub API（Token）+ 无权限自动 Fork+PR
+```
 
 ## 🙏 致谢
 
@@ -285,7 +334,7 @@ sakura-notes/
 | **Vite**         | 4.4  | 构建工具                       |
 | **Pinia**        | 3.0  | 状态管理                       |
 | **Tailwind CSS** | 3.x  | 原子化 CSS                     |
-| **Shiki**        | 1.22 | 代码语法高亮                   |
+| **Highlight.js** | 11.9 | 代码语法高亮                   |
 | **MiniSearch**   | 7.1  | 全文搜索引擎                   |
 | **Marked**       | 12.0 | Markdown 解析                  |
 
@@ -294,10 +343,10 @@ sakura-notes/
 ```bash
 npm run build
 # 等价于:
-# 1. node scripts/generate-tree.js  → 扫描 notes/ 生成 public/files.json
-# 2. node scripts/generate-raw.js   → 生成源码文件供查看器使用
-# 3. node scripts/generate-music.js → 扫描 public/music/ 生成 music.json
-# 4. node scripts/generate-wallpapers.js → 生成壁纸配置
+# 1. tsx scripts/generate-tree.ts  → 扫描 notes/ 生成 public/data/files.json，并生成 rendered/raw 等静态产物
+# 2. tsx scripts/generate-raw.ts   → 兼容保留（generate-tree 已包含 raw 导出能力）
+# 3. tsx scripts/generate-music.ts → 扫描 public/music/ 生成 music.json
+# 4. tsx scripts/generate-wallpapers.ts → 生成 wallpapers.json
 # 5. vite build                     → 打包 Vue 应用
 ```
 
@@ -389,7 +438,7 @@ notes/
 | 文章交互 | `article-store`          | 收藏、点赞           |
 | 仓库配置 | `github_*`               | 仓库信息、作者名     |
 | 本地备份 | `backup_*`               | 备份数据             |
-| Token    | `encrypted_github_token` | 加密后的 Token       |
+| Token    | `github_pat_*`           | 加密 Token 材料（不参与备份） |
 
 > ⚠️ **警告**: 清除浏览器数据会丢失这些内容，请定期使用备份功能！
 
@@ -485,7 +534,7 @@ notes/
 - 🍴 智能 Fork + PR 系统，自动同步上游
 - 💾 本地备份系统，支持导入导出
 - 👁️ 发布工作台实时预览
-- 🧪 学习实验室 7 阶段完整路径
+- 🧪 学习实验室 8 阶段完整路径
 - 🌸 可拖拽樱花花瓣系统
 - 🎨 双主题模式（日樱/夜樱）
 - 🔍 全文搜索功能
@@ -563,42 +612,6 @@ notes/
   - GitHub API 有速率限制与权限边界，且 PR 流程意味着“发布不一定即时生效”（需合并）。
   - 图片上传/大文件的体验受 GitHub 生态限制（大小、速度、可用性）。
 
----
-
-## 🚀 改造成前后端项目（去除 Fork+PR 依赖）
-
-如果你希望彻底摆脱“提交到 GitHub → PR 合并 → Actions 构建”的迂回链路，可以把“写入/鉴权/存储”收回到自己的后端，前端继续保持 SPA。
-
-### 目标能力
-
-- 网页端直接“保存/发布”文章，**即时生效**（无需 PR、无需等待 CI 合并）。
-- 图片上传走自有存储（本地对象存储、OSS/S3、或任意 CDN）。
-- 账号体系可选：GitHub OAuth、邮箱密码、或内网账号。
-- 备份从“GitHub 仓库”升级为“数据库快照/对象存储版本”。
-
-### 推荐的最小改造方案（保持现有目录习惯）
-
-- **后端新增服务**（Node/NestJS、Go、Spring 都可）：
-  - `POST /auth/*`：登录/刷新（可接 GitHub OAuth 或自建账号）
-  - `GET /notes/tree`：返回目录树与元数据（替代 `public/data/files.json`）
-  - `GET /notes/:id`：按需拉取 Markdown（替代 `public/notes/**`）
-  - `POST /notes` / `PUT /notes/:id`：创建/更新文章
-  - `POST /upload`：图片上传，返回可访问 URL
-  - `POST /backup` / `GET /backup/:id`：备份与恢复
-- **存储层**：
-  - Markdown 内容：数据库（PostgreSQL/MySQL）或对象存储（按路径存）
-  - 索引：数据库表（title/tags/time/path），或定时重建缓存
-  - 图片：对象存储 + CDN
-- **前端改动点**：
-  - 把 “发布工作台” 的 GitHub API 写入替换为调用后端 API。
-  - 保留 `notes/` 目录与构建脚本作为“导入工具”，但线上读写走后端。
-  - 评论系统可继续用 Giscus，也可替换为自建评论 API。
-
-### 迁移路径建议
-
-1. 先把“图片上传”从 GitHub 切到后端（收益最大、改动可控）。
-2. 再把“文章写入”切到后端（去除 Fork+PR 依赖的核心一步）。
-3. 最后把“树索引/全文搜索索引”放到后端或由后端生成并缓存（改善大数据量性能）。
 
 ---
 

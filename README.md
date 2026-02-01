@@ -5,7 +5,7 @@
 [![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-222?logo=github)](https://soft-zihan.github.io/SakuraBlog/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue.js-3.x-4FC08D?logo=vue.js)](https://vuejs.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?logo=vite)](https://vitejs.dev/)
+[![Vite](https://img.shields.io/badge/Vite-4.4-646CFF?logo=vite)](https://vitejs.dev/)
 [![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTk4IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/soft-zihan/SakuraBlog)
 [![DeepWiki](https://img.shields.io/badge/DeepWiki-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTY)](https://deepwiki.com/soft-zihan/SakuraBlog)
 
@@ -13,7 +13,14 @@
 
 <div align="center">
   <h3>🌸 Sakura Notes (Sakura Blog)</h3>
-  <p>A minimalist, beautiful, and highly customizable personal knowledge base & blog system.</p>
+  <p><b>Backend-free, SSG-free</b> Vue knowledge base & static blog, designed for GitHub Pages.</p>
+  <p>
+    <b>What makes it different</b><br/>
+    • Build-time generates the notes index, rendered HTML, and raw sources<br/>
+    • Browser publishing via GitHub API (smart Fork + PR fallback)<br/>
+    • Runtime theming (CSS variables + Tailwind) with system/time-based dark mode<br/>
+    • Learning Lab: an 8-stage roadmap plus an annotated Source Viewer
+  </p>
   <p>
     <a href="https://soft-zihan.github.io/SakuraBlog/">🌐 Live Demo</a> · 
     <a href="README_zh.md">📖 中文</a> · 
@@ -29,14 +36,14 @@
 ## 📑 Table of Contents
 
 - [✨ Features Overview](#-features-overview)
+- [🧠 How Backend-free Works](#-how-backend-free-works)
 - [🙏 Credits](#-credits)
 - [🎯 Quick Start](#-quick-start)
 - [🧪 Testing](#-testing)
 - [📁 Project Structure](#-project-structure)
 - [🏗️ Technical Architecture](#️-technical-architecture)
 - [🔧 Configuration Guide](#-configuration-guide)
-- [📝 Content Management](#-content-management)
-- [🔐 Security &amp; Data](#-security--data)
+- [ Security &amp; Data](#-security--data)
 - [🤝 Contribution Guide](#-contribution-guide)
 - [📜 Changelog](#-changelog)
 - [🔬 Implementation Deep Dive](#-implementation-deep-dive)
@@ -47,60 +54,94 @@
 
 ## ✨ Features Overview
 
-### 🎨 UI & Interaction
+### 🧩 Backend-free by Design (Static Hosting First)
 
-| Feature                                | Description                                                                                      |
-| :------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| **Dual Theme Modes**             | "Day Sakura" (Light) + "Night Sakura" (Dark) themes, with wallpapers that switch accordingly.    |
-| **Dynamic Sakura Background**    | Draggable petal system with physics effects, grid stacking, and mobile touch optimization.       |
-| **Responsive Design**            | Perfectly adapted for both desktop and mobile devices.                                           |
-| **Multilingual Support**         | Built-in Chinese/English (i18n) switching; preserves current tab and Lab position when toggling. |
-| **Backend-less Personalization** | Uses `localStorage` to save preferences like fonts, reader density, theme, and petal speed.      |
+| Feature | Description |
+| :-- | :-- |
+| **Build-time data pipeline** | Generates `public/data/files.json`, pre-rendered HTML, raw source copies, and media manifests before deployment. |
+| **Runtime = static fetch** | Notes and generated artifacts are loaded via `fetch()` from static hosting (GitHub Pages friendly). |
+| **Local-first state** | Preferences, reading actions, and Lab progress persist in the browser (`localStorage` + Pinia). |
+| **Optional integrations** | Comments (Giscus), reading stats (Umami Share Token API), and cloud backup (GitHub) without running your own backend. |
 
-### 📚 Content System
+### ✍️ Publishing Without a Server (GitHub-native)
 
-| Feature                      | Description                                                                                   |
-| :--------------------------- | :-------------------------------------------------------------------------------------------- |
-| **Markdown Rendering** | Full Markdown support, automatic Table of Contents (ToC) generation, and syntax highlighting. |
-| **Full-text Search**   | Fast search based on MiniSearch with hit highlighting.                                        |
-| **Article Management** | Favorites, Likes, Tag filtering, and Reading History.                                         |
-| **Reading Stats**      | Pageviews + unique visitors powered by Umami (Share Token API).                               |
-| **Comment System**     | Powered by[Giscus](https://github.com/giscus/giscus) via GitHub Discussions.                     |
-| **Music Player**       | Built-in player with synchronized lyric display.                                              |
+| Feature | Description |
+| :-- | :-- |
+| **Publishing workbench** | Import/preview files, rename, choose folder, inject tags/author metadata, and publish from the browser. |
+| **Real-time preview** | Live Markdown preview while editing. |
+| **Auto image upload** | Local images referenced in Markdown can be uploaded to GitHub automatically. |
+| **Smart Fork + PR** | Contributors without write access can fork and open a PR automatically (upstream stays protected). |
 
-### 🛠️ Publishing Features
+### 🎨 Theme System (Runtime Skins, Not Just Dark Mode)
 
-| Feature                        | Description                                                                                    |
-| :----------------------------- | :--------------------------------------------------------------------------------------------- |
-| **Publishing Workbench** | File import preview, renaming, folder selection, and tag/author metadata injection.            |
-| **Real-time Preview**    | Live Markdown preview while editing.                                                           |
-| **Auto Image Upload**    | Local images in Markdown are automatically uploaded to GitHub.                                 |
-| **Smart Fork + PR**      | Users without write access can automatically Fork and submit PRs; auto-syncs with latest code. |
+| Feature | Description |
+| :-- | :-- |
+| **Runtime palette switching** | Theme colors are CSS variables, consumed by Tailwind for a real “change-the-whole-skin” experience. |
+| **Dark mode strategies** | Manual toggle, follow system, or auto-switch by time schedule. |
+| **Wallpaper & ambience** | Wallpaper layers + music player; visual ambience is part of the reading experience. |
+| **Sakura interaction layer** | Draggable petals and long-press vortex interaction, designed not to block page clicks. |
 
-### 🧪 Learning Lab
+### 📱 Mobile Polish
 
-| Feature                          | Description                                                            |
-| :------------------------------- | :--------------------------------------------------------------------- |
-| **8-Stage Path**           | A complete learning roadmap from Web basics to advanced Vue 3, plus a final Challenge stage. |
-| **Interactive Components** | Visual teaching components with real-time code demonstrations.         |
-| **Source Viewer**          | View project source with preset/user notes; file intros follow UI language. |
+| Feature | Description |
+| :-- | :-- |
+| **Touch-native interactions** | Uses pointer events for both mouse and touch; drag interactions disable default touch actions when needed. |
+| **Effects that don’t block reading** | Background effects default to non-interactive layers; only petals are pointer-enabled. |
+| **Mobile-safe links & assets** | Resolves internal links/images/PDF embeds with a GitHub Pages-friendly base URL strategy. |
+| **Modal & reader ergonomics** | Search and panels use viewport-based heights and responsive layout to stay usable on small screens. |
 
-#### How the Lab is organized
+### 🧪 Learning Lab & Source Viewer
 
-- **Stages** are the interactive roadmap inside the site (HTML → CSS → JS → TS → Engineering → Vue → Challenge).
-- **Notes** under `notes/VUE学习笔记/` are the companion learning materials (7 chapters). They are not 1:1 with stages, but they provide the “full narrative” that the interactive labs refer back to.
-- **Source Viewer** is the bridge: you can open real project files and read preset notes that explain how each UI feature is implemented.
+| Feature | Description |
+| :-- | :-- |
+| **8-stage roadmap** | A staged learning path (from Web basics to Vue 3 advanced and a final challenge). |
+| **Progress persistence** | Tracks completion and recommends what to learn next, stored locally. |
+| **Annotated source viewer** | Read real project files with preset notes and your own per-line notes. |
+| **Productive reading tools** | Folding for functions/classes/Vue SFC blocks, plus import/export and GitHub submission for notes. |
 
-### 🔐 Security Features
+### 📚 Core Reading Experience
 
+| Feature | Description |
+| :-- | :-- |
+| **Markdown + ToC + highlighting** | Markdown rendering with automatic ToC and syntax highlighting. |
+| **Full-text search** | MiniSearch-based search with mixed CN/EN tokenization, incremental indexing, and cached index. |
+| **Reader utilities** | Favorites, likes, tag filtering, and reading history. |
+| **PDF friendly** | PDF links can be embedded for in-page reading and open/download actions. |
 
-| Feature                           | Description                                                                     |
-| :-------------------------------- | :------------------------------------------------------------------------------ |
-| **Encrypted Token Storage** | AES-256-GCM encryption with keys derived from browser fingerprints.             |
-| **Local/Cloud Backup**      | Supports local backups (browser) and cloud backups (GitHub) with import/export. |
-| **Privacy Protection**      | All data is stored locally; no data is uploaded to third-party servers.         |
+### 🔐 Security & Data (Best-effort on the Client)
+
+| Feature | Description |
+| :-- | :-- |
+| **Encrypted token storage** | AES-256-GCM with PBKDF2-derived device-bound key; tokens are never stored in plaintext. |
+| **Backup exclusion** | Tokens are explicitly excluded from all backup flows. |
+| **Local & cloud backups** | Backup/restore preferences and progress locally, or to GitHub (optional). |
 
 ---
+
+## 🧠 How Backend-free Works
+
+Sakura Notes runs as a static app by moving “dynamic needs” to build time and keeping user data local.
+
+```text
+notes/ (Markdown knowledge base)
+  │
+  ├─ build prep (scripts/*)
+  │    ├─ scan notes → public/data/files.json
+  │    ├─ copy notes → public/notes/**
+  │    ├─ pre-render → public/rendered/** (HTML + ToC)
+  │    └─ export source → public/raw/** (for Source Viewer)
+  │
+  └─ vite build → dist/
+           │
+           ▼
+GitHub Pages (static hosting)
+           │
+           ▼
+Browser runtime
+  ├─ fetch() static assets (notes/index/rendered/raw)
+  ├─ persist state in localStorage (preferences/progress)
+  └─ write operations (optional): GitHub API (token) + Fork+PR fallback
+```
 
 ## 🙏 Credits
 
@@ -255,7 +296,7 @@ sakura-notes/
 | **Vite**         | 4.4     | Build tool                           |
 | **Pinia**        | 3.0     | State management                     |
 | **Tailwind CSS** | 3.x     | Utility-first CSS                    |
-| **Shiki**        | 1.22    | Code syntax highlighting             |
+| **Highlight.js** | 11.9    | Code syntax highlighting             |
 | **MiniSearch**   | 7.1     | Full-text search engine              |
 | **Marked**       | 12.0    | Markdown parsing                     |
 
@@ -318,7 +359,7 @@ Inspired by RyuChan, Sakura Notes uses Umami as the source of truth: the tracker
 ### Token Security Strategy
 
 - **AES-256-GCM**: Industry-standard symmetric encryption.
-- **Fingerprint Key**: The key is derived from `userAgent` + screen resolution + timezone + language, making it device-specific.
+- **Device-bound Key**: The key is derived from browser/device traits (userAgent, screen, timezone, language, etc.) plus a per-token salt.
 - **Backup Exclusion**: Tokens are strictly excluded from all backup operations.
 - **Direct API Use**: Tokens are only sent to the GitHub API, never to any third-party servers.
 
@@ -329,7 +370,8 @@ Inspired by RyuChan, Sakura Notes uses Umami as the source of truth: the tracker
 | Preferences  | `app-store`              | Themes, fonts, wallpaper settings |
 | Interactions | `article-store`          | Favorites, likes                  |
 | Repo Config  | `github_*`               | Repository info, author name      |
-| Token        | `encrypted_github_token` | Encrypted token                   |
+| Backups      | `backup_*`               | Backup data (import/export)       |
+| Token        | `github_pat_*`           | Encrypted token materials (excluded from backups) |
 
 > ⚠️ **Warning**: Clearing browser data will delete these settings. Please use the backup feature regularly!
 
@@ -370,7 +412,7 @@ Inspired by RyuChan, Sakura Notes uses Umami as the source of truth: the tracker
 - 🔐 Added AES-256-GCM encryption for Tokens.
 - 💾 Added local backup system (Import/Export).
 - 👁️ Added real-time preview to the Publishing Workbench.
-- 🧪 Completed 7-stage Learning Lab path.
+- 🧪 Completed 8-stage Learning Lab path.
 - 🌸 Added draggable Sakura petal system.
 - 🔍 Integrated full-text search.
 
@@ -445,42 +487,6 @@ To run on GitHub Pages (or any static hosting) with no backend, the project make
 
 ---
 
-## 🚀 Migrating to a Full-Stack App (No Fork+PR Dependency)
-
-If you want to remove the “commit → PR → CI build → deploy” loop entirely, move authentication + write operations + storage into your own backend, while keeping the frontend as an SPA.
-
-### Target capabilities
-
-- Publish notes instantly from the web UI (no PR, no merge gate).
-- Upload images to your own storage (local object storage / S3 / OSS + CDN).
-- Choose an auth model: GitHub OAuth, email/password, or internal accounts.
-- Backups become database snapshots / object-storage versions rather than GitHub repo commits.
-
-### Minimal backend design (keep the current UX and mental model)
-
-- **Backend API service** (Node/NestJS, Go, Spring, etc.):
-  - `POST /auth/*`: login/refresh (GitHub OAuth or your own auth)
-  - `GET /notes/tree`: directory tree + metadata (replaces `public/data/files.json`)
-  - `GET /notes/:id`: fetch Markdown on demand (replaces `public/notes/**`)
-  - `POST /notes` / `PUT /notes/:id`: create/update notes
-  - `POST /upload`: image upload, return public URL
-  - `POST /backup` / `GET /backup/:id`: backup/restore
-- **Storage**:
-  - Markdown: DB rows (PostgreSQL/MySQL) or object storage (by path)
-  - Index: DB table (title/tags/time/path) or cached materialized views
-  - Images: object storage + CDN
-- **Frontend changes**:
-  - Replace GitHub write calls in the workbench with backend API calls.
-  - Keep `notes/` + scripts as import/export tooling, but production reads/writes go through the backend.
-  - Comments can remain Giscus or be replaced with a backend comment service.
-
-### Suggested migration order
-
-1. Move image uploads to the backend first (high impact, contained changes).
-2. Move note create/update to the backend (removes Fork+PR dependency).
-3. Move indexing and search indexing to the backend/caches for scale.
-
----
 
 ## 📄 License
 
