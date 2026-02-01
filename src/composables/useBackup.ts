@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { useGitHubPublish } from './useGitHubPublish'
 import { tokenSecurity } from './useTokenSecurity'
+import { safeLocalStorage } from '../utils/storage'
 
 export interface BackupFile {
   name: string
@@ -59,11 +60,12 @@ export function useBackup() {
   const collectBackupData = (): Record<string, any> => {
     const data: Record<string, any> = {}
     
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
+    const len = safeLocalStorage.length()
+    for (let i = 0; i < len; i++) {
+      const key = safeLocalStorage.key(i)
       if (key && !EXCLUDED_KEYS.includes(key)) {
         try {
-          const value = localStorage.getItem(key)
+          const value = safeLocalStorage.getItem(key)
           if (value) {
             // 尝试解析 JSON
             try {
@@ -555,9 +557,9 @@ export function useBackup() {
         if (!EXCLUDED_KEYS.includes(key)) {
           try {
             if (typeof value === 'string') {
-              localStorage.setItem(key, value)
+              safeLocalStorage.setItem(key, value)
             } else {
-              localStorage.setItem(key, JSON.stringify(value))
+              safeLocalStorage.setItem(key, JSON.stringify(value))
             }
             restoredCount++
           } catch (e) {
@@ -731,9 +733,9 @@ export function useBackup() {
         if (!EXCLUDED_KEYS.includes(key)) {
           try {
             if (typeof value === 'string') {
-              localStorage.setItem(key, value)
+              safeLocalStorage.setItem(key, value)
             } else {
-              localStorage.setItem(key, JSON.stringify(value))
+              safeLocalStorage.setItem(key, JSON.stringify(value))
             }
             restoredCount++
           } catch (e) {

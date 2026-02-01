@@ -247,7 +247,7 @@ import { useLightbox } from '../composables/useLightbox';
 import { useSelectionMenu } from '../composables/useSelectionMenu';
 import { useContentClick } from '../composables/useContentClick';
 import { useSearchJump } from '../composables/useSearchJump';
-import { useViewCounter } from '../composables/useViewCounter';
+import { useUmamiViewStats } from '../composables/useUmamiViewStats';
 import GiscusComments from '../components/GiscusComments.vue';
 import ArticleInfoBar from '../components/ArticleInfoBar.vue';
 
@@ -279,7 +279,7 @@ const emit = defineEmits([
 const appStore = useAppStore();
 const articleStore = useArticleStore();
 const articleNavStore = useArticleNavStore();
-const { incrementAndGetViews } = useViewCounter();
+const { trackAndFetch } = useUmamiViewStats();
 const markdownViewerRef = ref<HTMLElement | null>(null)
 const localScrollContainerRef = ref<HTMLElement | null>(null)
 const layoutIsMobile = inject<Ref<boolean> | null>('layoutIsMobile', null)
@@ -311,7 +311,7 @@ watch(
     if (!newPath || props.file.isSource) return;
     if (lastTrackedPath.value === newPath) return;
     lastTrackedPath.value = newPath;
-    void incrementAndGetViews(newPath);
+    void trackAndFetch(newPath);
   },
   { immediate: true }
 );

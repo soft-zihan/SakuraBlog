@@ -271,6 +271,7 @@ import { useGitHubPublish } from '../../composables/useGitHubPublish'
 import { useAppStore } from '../../stores/appStore'
 import { sanitizeHtml } from '../../utils/sanitize'
 import { buildPresetNoteMap } from '../../utils/i18nText'
+import { safeLocalStorage } from '@/utils/storage'
 
 // Register languages
 hljs.registerLanguage('typescript', typescript)
@@ -499,7 +500,7 @@ const loadPresetNotes = async () => {
 
       if (data.format === 'per-file') {
         presetBasePath.value = normalizeBasePath(data.basePath || `data/source-notes-preset/${props.lang}/`)
-        localStorage.setItem(getPresetVersionKey(), serverVersion)
+        safeLocalStorage.setItem(getPresetVersionKey(), serverVersion)
         if (selectedFile.value) await loadPresetNotesForFile(selectedFile.value.path)
         return
       }
@@ -516,7 +517,7 @@ const loadPresetNotes = async () => {
         }
       }
 
-      localStorage.setItem(getPresetVersionKey(), serverVersion)
+      safeLocalStorage.setItem(getPresetVersionKey(), serverVersion)
     }
   } catch (e) {
     console.error('Failed to load preset notes:', e)
@@ -546,7 +547,7 @@ async function loadPresetNotesForFile(filePath: string) {
 
 // Load user notes from localStorage
 const loadUserNotes = () => {
-  const saved = localStorage.getItem(getUserNotesKey())
+  const saved = safeLocalStorage.getItem(getUserNotesKey())
   if (saved) {
     try {
       userNotes.value = JSON.parse(saved)
@@ -558,7 +559,7 @@ const loadUserNotes = () => {
 
 // Load collapsed state from localStorage
 const loadCollapsedState = () => {
-  const saved = localStorage.getItem(getCollapsedKey())
+  const saved = safeLocalStorage.getItem(getCollapsedKey())
   if (saved) {
     try {
       collapsedState.value = JSON.parse(saved)
@@ -570,7 +571,7 @@ const loadCollapsedState = () => {
 
 // Load folded state from localStorage
 const loadFoldedState = () => {
-  const saved = localStorage.getItem(getFoldedKey())
+  const saved = safeLocalStorage.getItem(getFoldedKey())
   if (saved) {
     try {
       foldedState.value = JSON.parse(saved)
@@ -582,17 +583,17 @@ const loadFoldedState = () => {
 
 // Save user notes
 const saveUserNotes = () => {
-  localStorage.setItem(getUserNotesKey(), JSON.stringify(userNotes.value))
+  safeLocalStorage.setItem(getUserNotesKey(), JSON.stringify(userNotes.value))
 }
 
 // Save collapsed state
 const saveCollapsedState = () => {
-  localStorage.setItem(getCollapsedKey(), JSON.stringify(collapsedState.value))
+  safeLocalStorage.setItem(getCollapsedKey(), JSON.stringify(collapsedState.value))
 }
 
 // Save folded state
 const saveFoldedState = () => {
-  localStorage.setItem(getFoldedKey(), JSON.stringify(foldedState.value))
+  safeLocalStorage.setItem(getFoldedKey(), JSON.stringify(foldedState.value))
 }
 
 // Current file intro
@@ -1267,7 +1268,7 @@ const submitNotesToGitHub = async () => {
     
     const repoOwner = 'soft-zihan'
     const repoName = 'SakuraBlog'
-    const authorName = localStorage.getItem('author_name') || 'Anonymous'
+    const authorName = safeLocalStorage.getItem('author_name') || 'Anonymous'
     
     const mergedNotes: FileNotes = { ...presetNotes.value }
     

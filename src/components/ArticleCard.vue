@@ -34,12 +34,18 @@
       </span>
 
       <span class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
-        <span class="text-[10px]">👨‍💻</span>
+        <svg class="w-3.5 h-3.5 flex-shrink-0 text-[var(--primary-500)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+          <circle cx="12" cy="7" r="4" stroke-width="2" />
+        </svg>
         {{ visitorCountDisplay }}
       </span>
 
       <span class="text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1" :style="secondaryBadgeStyle">
-        <span class="text-[10px]">📖</span>
+        <svg class="w-3.5 h-3.5 flex-shrink-0 text-[var(--primary-500)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8" />
+          <circle cx="12" cy="12" r="3" stroke-width="2" />
+        </svg>
         {{ viewCountDisplay }}
       </span>
 

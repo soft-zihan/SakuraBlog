@@ -10,6 +10,8 @@
  * 5. 清除浏览器数据会同时清除 Token
  */
 
+import { safeLocalStorage } from '../utils/storage'
+
 const TOKEN_STORAGE_KEY = 'github_pat_encrypted'
 const TOKEN_IV_KEY = 'github_pat_iv'
 const TOKEN_SALT_KEY = 'github_pat_salt'
@@ -130,12 +132,12 @@ export function useTokenSecurity() {
       }
       
       const { encrypted, iv, salt } = await encryptToken(token)
-      localStorage.setItem(TOKEN_STORAGE_KEY, encrypted)
-      localStorage.setItem(TOKEN_IV_KEY, iv)
-      localStorage.setItem(TOKEN_SALT_KEY, salt)
+      safeLocalStorage.setItem(TOKEN_STORAGE_KEY, encrypted)
+      safeLocalStorage.setItem(TOKEN_IV_KEY, iv)
+      safeLocalStorage.setItem(TOKEN_SALT_KEY, salt)
       
       // 移除可能存在的旧版明文存储
-      localStorage.removeItem('github_pat')
+      safeLocalStorage.removeItem('github_pat')
       
       return true
     } catch (e) {
@@ -150,17 +152,17 @@ export function useTokenSecurity() {
   const getToken = async (): Promise<string | null> => {
     try {
       // 先检查旧版明文存储（兼容迁移）
-      const legacyToken = localStorage.getItem('github_pat')
+      const legacyToken = safeLocalStorage.getItem('github_pat')
       if (legacyToken) {
         // 迁移到加密存储
         await saveToken(legacyToken)
-        localStorage.removeItem('github_pat')
+        safeLocalStorage.removeItem('github_pat')
         return legacyToken
       }
       
-      const encrypted = localStorage.getItem(TOKEN_STORAGE_KEY)
-      const iv = localStorage.getItem(TOKEN_IV_KEY)
-      const salt = localStorage.getItem(TOKEN_SALT_KEY)
+      const encrypted = safeLocalStorage.getItem(TOKEN_STORAGE_KEY)
+      const iv = safeLocalStorage.getItem(TOKEN_IV_KEY)
+      const salt = safeLocalStorage.getItem(TOKEN_SALT_KEY)
       
       if (!encrypted || !iv || !salt) {
         return null
@@ -179,13 +181,13 @@ export function useTokenSecurity() {
    */
   const getTokenSync = (): string | null => {
     // 先检查旧版
-    const legacyToken = localStorage.getItem('github_pat')
+    const legacyToken = safeLocalStorage.getItem('github_pat')
     if (legacyToken) {
       return legacyToken
     }
     
     // 检查是否有加密存储
-    const encrypted = localStorage.getItem(TOKEN_STORAGE_KEY)
+    const encrypted = safeLocalStorage.getItem(TOKEN_STORAGE_KEY)
     if (encrypted) {
       // 返回一个占位符，实际使用时需要异步获取
       return '__ENCRYPTED__'
@@ -199,8 +201,8 @@ export function useTokenSecurity() {
    */
   const hasToken = (): boolean => {
     return !!(
-      localStorage.getItem(TOKEN_STORAGE_KEY) || 
-      localStorage.getItem('github_pat')
+      safeLocalStorage.getItem(TOKEN_STORAGE_KEY) || 
+      safeLocalStorage.getItem('github_pat')
     )
   }
   
@@ -208,10 +210,10 @@ export function useTokenSecurity() {
    * 清除 Token
    */
   const clearToken = (): void => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY)
-    localStorage.removeItem(TOKEN_IV_KEY)
-    localStorage.removeItem(TOKEN_SALT_KEY)
-    localStorage.removeItem('github_pat') // 清除旧版
+    safeLocalStorage.removeItem(TOKEN_STORAGE_KEY)
+    safeLocalStorage.removeItem(TOKEN_IV_KEY)
+    safeLocalStorage.removeItem(TOKEN_SALT_KEY)
+    safeLocalStorage.removeItem('github_pat') // 清除旧版
   }
   
   /**

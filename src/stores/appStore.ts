@@ -49,6 +49,9 @@ export const useAppStore = defineStore('app', () => {
     bannerMode: 'normal' as 'normal' | 'fullscreen' | 'background' | 'hide',
     petalLayer: 'back' as 'front' | 'back',
     themeColor: 'sakura' as ThemeColorId,
+    themeMode: 'manual' as 'manual' | 'system' | 'time',
+    themeTimeLight: '07:00',
+    themeTimeDark: '19:00',
     articleStyle: 'classic' as 'classic' | 'lined' | 'grid',
     articleSortMode: 'date' as 'date' | 'tree',
     articleBackgroundColorLight: '',
@@ -104,6 +107,7 @@ export const useAppStore = defineStore('app', () => {
   }
   
   function toggleTheme() {
+    userSettings.value.themeMode = 'manual'
     isDark.value = !isDark.value
     if (isDark.value) {
       document.documentElement.classList.add('dark')
@@ -113,6 +117,7 @@ export const useAppStore = defineStore('app', () => {
   }
   
   function setTheme(dark: boolean) {
+    userSettings.value.themeMode = 'manual'
     isDark.value = dark
     if (dark) {
       document.documentElement.classList.add('dark')

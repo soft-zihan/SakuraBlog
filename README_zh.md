@@ -21,6 +21,7 @@
 ## 📑 目录
 
 - [✨ 特性概览](#-特性概览)
+- [🙏 致谢](#-致谢)
 - [🎯 快速开始](#-快速开始)
 - [🧪 测试](#-测试)
 - [📁 项目结构](#-项目结构)
@@ -55,6 +56,7 @@
 | **Markdown 渲染** | 完整 Markdown 支持，自动目录生成，代码语法高亮                         |
 | **全文搜索**      | 基于 MiniSearch 的快速全文检索，支持高亮显示                           |
 | **文章管理**      | 收藏、点赞、标签过滤、阅读历史                                         |
+| **阅读统计**      | 基于 Umami（Share Token API）展示单篇文章阅读量与阅读人数              |
 | **评论系统**      | 基于[Giscus](https://github.com/giscus/giscus) 的 GitHub Discussions 评论 |
 | **音乐播放器**    | 内置音乐播放器，支持歌词显示                                           |
 
@@ -91,6 +93,10 @@
 | **隐私保护**       | 所有数据本地存储，不上传第三方服务器                   |
 
 ---
+
+## 🙏 致谢
+
+- 评论系统与阅读统计实现借鉴了 [RyuChan](https://github.com/kobaridev/RyuChan)。
 
 ## 🎯 快速开始
 
@@ -304,6 +310,22 @@ npm run build
 2. 安装 [Giscus App](https://github.com/apps/giscus)
 3. 访问 [giscus.app](https://giscus.app/) 获取配置参数
 4. 修改 `components/GiscusComments.vue` 中的配置
+
+### Umami 阅读统计（云端，可选）
+
+本项目按 **RyuChan** 的思路：让 Umami tracker 负责“记账”，站内通过 **Share Token API** 读数展示“阅读量 / 阅读人数”。由于本站是静态部署 + query 导航，会把每篇文章映射成 `/notes/<文件路径>` 的虚拟路径来做到“按篇统计”。
+
+1. 在 Umami Cloud 创建 Website，然后在“Tracking code”里复制 `websiteId`（也就是脚本里 `data-website-id` 那串）。  
+2. 在该 Website 打开 Share，创建 Share Link，复制 `shareId`（Share URL 最后一段）。  
+3. 在项目根目录创建 `.env`（或 `.env.local`）并填写：
+
+   ```bash
+   VITE_UMAMI_SCRIPT_URL=https://cloud.umami.is/script.js
+   VITE_UMAMI_WEBSITE_ID=<你的websiteId>
+   VITE_UMAMI_BASE_URL=https://cloud.umami.is
+   VITE_UMAMI_SHARE_ID=<你的shareId>
+   VITE_UMAMI_TIMEZONE=Asia/Shanghai
+   ```
 
 ### 自定义壁纸和音乐
 

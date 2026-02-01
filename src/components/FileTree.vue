@@ -8,13 +8,13 @@
       >
         <div 
           class="flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors group"
-          :class="currentPath === node.path ? 'bg-sakura-100 text-sakura-800 font-bold' : 'hover:bg-sakura-50 text-gray-700'"
+          :class="currentPath === node.path ? 'bg-sakura-100 text-sakura-800 font-bold dark:bg-gray-700/60 dark:text-white' : 'hover:bg-sakura-50 text-gray-700 dark:text-gray-200 dark:hover:bg-gray-700/40'"
           @dblclick.stop="$emit('toggle-folder', node.path)"
         >
           <!-- Toggle Arrow -->
           <span 
             @click.stop="$emit('toggle-folder', node.path)"
-            class="text-[10px] w-5 h-5 flex items-center justify-center transform transition-transform duration-200 cursor-pointer text-sakura-400 hover:text-sakura-600 rounded hover:bg-sakura-100" 
+            class="text-[10px] w-5 h-5 flex items-center justify-center transform transition-transform duration-200 cursor-pointer text-sakura-400 hover:text-sakura-600 rounded hover:bg-sakura-100 dark:hover:bg-gray-700/50" 
             :class="{ 'rotate-90': isOpen(node.path) }"
           >▶</span>
           
@@ -30,7 +30,7 @@
         </div>
         
         <!-- Recursive Children -->
-        <div v-show="isOpen(node.path)" class="border-l border-sakura-200 ml-2.5 pl-0.5 mt-0.5">
+        <div v-show="isOpen(node.path)" class="border-l border-sakura-200 ml-2.5 pl-0.5 mt-0.5 dark:border-gray-600/60">
           <FileTree 
             v-if="node.children" 
             :nodes="node.children" 
@@ -48,7 +48,7 @@
         v-else 
         @click="$emit('select-file', node)"
         class="flex items-center gap-2 px-2 py-1.5 ml-5 rounded-lg cursor-pointer transition-all duration-200 text-sm group"
-        :class="currentPath === node.path ? 'bg-sakura-400 text-white shadow-md' : 'hover:bg-sakura-50 text-gray-600'"
+        :class="currentPath === node.path ? 'bg-sakura-400 text-white shadow-md' : 'hover:bg-sakura-50 text-gray-600 dark:text-gray-200 dark:hover:bg-gray-700/40'"
       >
         <span class="text-lg group-hover:scale-110 transition-transform">{{ currentPath === node.path ? '🌸' : getFileIcon(node) }}</span>
         <span class="truncate">{{ node.name }}</span>

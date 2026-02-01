@@ -29,6 +29,7 @@ import StageEngineering from './stages/StageEngineering.vue'
 import StageVueCore from './stages/StageVueCore.vue'
 import StageVueAdvanced from './stages/StageVueAdvanced.vue'
 import StageChallenge from './stages/StageChallenge.vue'
+import { safeLocalStorage } from '@/utils/storage'
 
 const props = defineProps<{
   lang: 'en' | 'zh'
@@ -125,7 +126,7 @@ const activeStageComponent = computed(() => {
 })
 
 onMounted(() => {
-  const saved = localStorage.getItem(labTabStorageKey.value)
+  const saved = safeLocalStorage.getItem(labTabStorageKey.value)
   if (saved && tabs.value.some((tab: LabTab) => tab.id === saved)) {
     activeTab.value = saved
   }
@@ -149,13 +150,13 @@ watch(() => props.modelValue, (val) => {
 }, { immediate: true })
 
 watch(activeTab, (val: string) => {
-  localStorage.setItem(labTabStorageKey.value, val)
+  safeLocalStorage.setItem(labTabStorageKey.value, val)
   emit('tab-change', val)
   emit('update:modelValue', val)
 })
 
 watch(() => props.lang, () => {
-  const saved = localStorage.getItem(labTabStorageKey.value)
+  const saved = safeLocalStorage.getItem(labTabStorageKey.value)
   if (saved && tabs.value.some((tab: LabTab) => tab.id === saved)) {
     activeTab.value = saved
   }

@@ -253,6 +253,7 @@ import { useBackup, type BackupFile } from '../composables/useBackup'
 import { useArticleStore } from '../stores/articleStore'
 import { useAppStore } from '../stores/appStore'
 import { useTokenSecurity } from '../composables/useTokenSecurity'
+import { safeLocalStorage } from '@/utils/storage'
 
 const props = defineProps<{
   t: any;
@@ -296,7 +297,7 @@ const saveGitHubConfig = async () => {
       tokenInput.value = '' // 清空输入框，不显示 token
     }
     if (authorName.value) {
-      localStorage.setItem('author_name', authorName.value)
+      safeLocalStorage.setItem('author_name', authorName.value)
     }
     updateTokenStatus()
     backupMessage.value = '配置已保存（Token 已加密存储）'
@@ -459,7 +460,7 @@ onMounted(() => {
   updateTokenStatus()
   
   // Load saved config (只加载作者名)
-  authorName.value = localStorage.getItem('author_name') || ''
+  authorName.value = safeLocalStorage.getItem('author_name') || ''
   
   // Preload cloud backup list if token exists and author name is set
   if (hasToken.value && authorName.value.trim()) {

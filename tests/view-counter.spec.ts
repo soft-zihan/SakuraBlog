@@ -1,48 +1,74 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
-describe('useViewCounter (CountAPI)', () => {
+describe('useUmamiViewStats', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.restoreAllMocks()
     vi.resetModules()
+    window.sessionStorage.clear()
+    window.localStorage.clear()
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('uses a safe key and normalizes leading slash', async () => {
+  it('tracks and fetches stats by virtual path', async () => {
     vi.mock('../src/constants', () => ({
-      VIEW_COUNTER_CONFIG: { provider: 'countapi', countApiNamespace: 'mysite.com' }
+      UMAMI_CONFIG: {
+        enable: true,
+        baseUrl: 'https://umami.example.com',
+        websiteId: 'website-id-1',
+        shareId: 'share-id-1',
+        timezone: 'Asia/Shanghai',
+        scriptUrl: ''
+      }
     }))
 
-    const hitCalls: string[] = []
-    global.fetch = vi.fn().mockImplementation(async (url: string) => {
-      hitCalls.push(url)
-      return {
-        ok: true,
-        json: async () => ({ value: 1 })
-      } as any
-    })
+    const track = vi.fn()
+    window.umami = { track }
 
-    const { useViewCounter } = await import('../src/composables/useViewCounter')
+    const fetchUmamiStats = vi.fn().mockResolvedValue({
+      pageviews: { value: 12 },
+      visitors: { value: 3 }
+    })
+    window.fetchUmamiStats = fetchUmamiStats
+
+    const { useUmamiViewStats } = await import('../src/composables/useUmamiViewStats')
     const { useArticleStore } = await import('../src/stores/articleStore')
 
-    const { incrementAndGetViews } = useViewCounter()
-    await incrementAndGetViews('/zh/你好.md')
+    const { trackAndFetch, toUmamiPath } = useUmamiViewStats()
+    await trackAndFetch('/zh/你好.md')
 
-    expect(hitCalls.length).toBe(2)
-    expect(hitCalls[0]).toContain('https://api.countapi.xyz/hit/mysite.com/views_')
-    expect(hitCalls[1]).toContain('https://api.countapi.xyz/hit/mysite.com/visitors_')
+    const vpath = toUmamiPath('/zh/你好.md')
+    expect(vpath).toBe(`/notes/zh/${encodeURIComponent('你好.md')}`)
 
-    const m1 = hitCalls[0].match(/views_([0-9a-f]{8})/i)
-    const m2 = hitCalls[1].match(/visitors_([0-9a-f]{8})/i)
-    expect(m1?.[1]).toBeTruthy()
-    expect(m1?.[1]).toEqual(m2?.[1])
+    expect(track).toHaveBeenCalledTimes(1)
+    const transform = track.mock.calls[0]?.[0]
+    expect(typeof transform).toBe('function')
+    const expectedUrl = (() => {
+      try {
+        return new URL(vpath, window.location.origin).toString()
+      } catch {
+        try {
+          return new URL(vpath, window.location.href).toString()
+        } catch {
+          return `https://example.com${vpath}`
+        }
+      }
+    })()
+    const transformedPayload = transform({ url: 'http://example.com/' })
+    expect(transformedPayload.url).toBe(expectedUrl)
+    expect(fetchUmamiStats).toHaveBeenCalledWith('https://umami.example.com', 'share-id-1', expect.objectContaining({
+      timezone: 'Asia/Shanghai',
+      path: vpath
+    }))
 
     const articleStore = useArticleStore()
-    expect(articleStore.hasVisited('zh/你好.md')).toBe(true)
+    expect(articleStore.getCachedStats('/zh/你好.md')).toEqual({ views: 12, visitors: 3 })
+
+    const stored = window.sessionStorage.getItem('sakura:umami:stats:v1')
+    expect(stored).toBeTruthy()
   })
 })
-

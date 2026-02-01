@@ -479,6 +479,8 @@ export function useFileVisibility(
     isTagSelected: (tag: string) => boolean
   }
 ) {
+  const isYearTag = (tag: string) => /^\d{4}$/.test(tag)
+
   /**
    * 判断文件是否可见
    * 修复：始终检查标签匹配，而不是只在部分选中时检查
@@ -503,10 +505,23 @@ export function useFileVisibility(
     
     // 始终执行标签筛选
     const fileTags = extractTagsFromFile(file)
-    if (fileTags.length === 0) {
-      return articleStore.isTagSelected('notag')
+    if (fileTags.length === 0) return false
+
+    const fileYears = fileTags.filter(isYearTag)
+    const selectedYears = selectedTags.filter(isYearTag)
+
+    if (fileYears.length > 0) {
+      if (selectedYears.length === 0) return false
+      if (!fileYears.some((y) => articleStore.isTagSelected(y))) return false
     }
-    return fileTags.some(tag => articleStore.isTagSelected(tag))
+
+    if (!articleStore.isTagSelected('notag') && fileTags.includes('notag')) return false
+
+    const fileContentTags = fileTags.filter((t) => !isYearTag(t) && t !== 'notag')
+    const selectedContentTags = selectedTags.filter((t) => !isYearTag(t) && t !== 'notag')
+
+    if (selectedContentTags.length === 0) return true
+    return fileContentTags.some((t) => articleStore.isTagSelected(t))
   }
 
   /**

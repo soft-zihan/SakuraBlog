@@ -3,6 +3,7 @@ import type { FileNode } from '../types'
 import { useGitHubPublish } from './useGitHubPublish'
 import { buildMetaCommentWithContributors } from './useArticleMeta'
 import { fetchFileContent } from '../utils/fileUtils'
+import { safeLocalStorage } from '../utils/storage'
 
 /**
  * Raw 模式编辑 composable
@@ -124,8 +125,8 @@ export function useRawEditor(
 
     try {
       // 获取当前用户信息（用于贡献者名单）
-      const contributorName = localStorage.getItem('author_name') || ''
-      const contributorUrl = localStorage.getItem('author_url') || ''
+      const contributorName = safeLocalStorage.getItem('author_name') || ''
+      const contributorUrl = safeLocalStorage.getItem('author_url') || ''
 
       // 添加贡献者信息到内容
       let finalContent = editedRawContent.value
@@ -135,8 +136,8 @@ export function useRawEditor(
 
       // 构建文件路径
       const filePath = `notes/${currentFile.value.path}`
-      const repoOwner = localStorage.getItem('github_repo_owner') || 'soft-zihan'
-      const repoName = localStorage.getItem('github_repo_name') || 'soft-zihan.github.io'
+      const repoOwner = safeLocalStorage.getItem('github_repo_owner') || 'soft-zihan'
+      const repoName = safeLocalStorage.getItem('github_repo_name') || 'soft-zihan.github.io'
 
       const result = await updateFileOnMain(
         { owner: repoOwner, repo: repoName, base: 'main', token },

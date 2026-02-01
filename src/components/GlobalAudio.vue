@@ -177,6 +177,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, computed, onUnmounted } from 'vue'
 import { useMusicStore } from '../stores/musicStore'
+import { safeLocalStorage } from '@/utils/storage'
 
 const props = defineProps<{
   isMusicPage?: boolean
@@ -231,7 +232,7 @@ const handleButtonMouseUp = () => {
     togglePlay()
   } else {
     // 有移动，保存位置
-    localStorage.setItem('music_fab_position', JSON.stringify(fabPosition.value))
+    safeLocalStorage.setItem('music_fab_position', JSON.stringify(fabPosition.value))
   }
   
   isDragging.value = false
@@ -246,7 +247,7 @@ const handleButtonTouchEnd = () => {
   if (!hasMoved.value) {
     togglePlay()
   } else {
-    localStorage.setItem('music_fab_position', JSON.stringify(fabPosition.value))
+    safeLocalStorage.setItem('music_fab_position', JSON.stringify(fabPosition.value))
   }
   
   isDragging.value = false
@@ -300,7 +301,7 @@ const stopDrag = () => {
   if (isDragging.value) {
     isDragging.value = false
     // 保存位置到 localStorage
-    localStorage.setItem('music_fab_position', JSON.stringify(fabPosition.value))
+    safeLocalStorage.setItem('music_fab_position', JSON.stringify(fabPosition.value))
   }
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDrag)
@@ -310,7 +311,7 @@ const stopDrag = () => {
 
 // 从 localStorage 恢复位置
 const loadFabPosition = () => {
-  const saved = localStorage.getItem('music_fab_position')
+  const saved = safeLocalStorage.getItem('music_fab_position')
   if (saved) {
     try {
       const pos = JSON.parse(saved)
@@ -490,12 +491,12 @@ onUnmounted(() => {
 // Save current track and playing state on changes
 watch(() => musicStore.currentTrack, (track) => {
   if (track) {
-    localStorage.setItem('music_currentTrackFilename', musicStore.getTrackFilename(track))
+    safeLocalStorage.setItem('music_currentTrackFilename', musicStore.getTrackFilename(track))
   }
 })
 
 watch(() => musicStore.isPlaying, (playing) => {
-  localStorage.setItem('music_isPlaying', String(playing))
+  safeLocalStorage.setItem('music_isPlaying', String(playing))
 })
 </script>
 

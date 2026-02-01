@@ -1,7 +1,7 @@
 <template>
   <div class="px-2 mb-4">
     <div class="mb-3">
-      <div class="flex flex-wrap gap-1.5 items-center">
+      <div class="flex flex-wrap gap-1.5 items-center max-w-full overflow-x-hidden">
         <button
           @click="articleStore.toggleShowFavoritesOnly()"
           class="px-2 py-1 text-xs rounded-full transition-all flex items-center gap-1.5"
@@ -25,13 +25,13 @@
           </label>
           <button
             @click="articleStore.toggleTag(tag)"
-            class="px-2 py-1 text-xs rounded-full transition-all flex items-center gap-1.5"
+            class="px-2 py-1 text-xs rounded-full transition-all flex items-center gap-1.5 min-w-0 max-w-full"
             :class="articleStore.isTagSelected(tag)
               ? 'text-white shadow-sm'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-[var(--primary-100)] dark:hover:bg-[var(--primary-900)]/30'"
             :style="articleStore.isTagSelected(tag) ? { backgroundColor: 'var(--primary-500)' } : {}"
           >
-            <span>{{ tag === 'notag' ? (lang === 'zh' ? '无标签' : 'No Tag') : tag }}</span>
+            <span class="truncate">{{ tag === 'notag' ? (lang === 'zh' ? '无作者' : 'No Author') : tag }}</span>
             <span
               class="text-[10px] px-1.5 py-0.5 rounded-full"
               :class="articleStore.isTagSelected(tag) ? 'bg-white/20 text-white' : 'bg-white/70 dark:bg-gray-800/60 text-gray-500 dark:text-gray-300'"

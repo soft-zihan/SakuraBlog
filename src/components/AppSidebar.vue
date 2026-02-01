@@ -202,7 +202,9 @@
     <!-- Footer Info -->
     <div class="p-4 border-t flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md" :style="softBorderStyle">
         <a href="https://github.com/soft-zihan/SakuraBlog" target="_blank" class="text-xs text-[var(--primary-400)] hover:text-[var(--primary-600)] dark:text-gray-500 dark:hover:text-[var(--primary-400)] flex items-center gap-2 transition-colors group">
-          <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <svg class="w-4 h-4 opacity-70 group-hover:opacity-100" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0 C3.58 0 0 3.58 0 8 C0 11.54 2.29 14.53 5.47 15.59 C5.87 15.66 6.02 15.42 6.02 15.21 C6.02 15.02 6.01 14.39 6.01 13.68 C4 14.05 3.48 13.19 3.32 12.74 C3.23 12.51 2.84 11.8 2.5 11.61 C2.22 11.46 1.82 11.09 2.49 11.08 C3.12 11.07 3.57 11.66 3.72 11.9 C4.44 13.11 5.59 12.77 6.05 12.56 C6.12 12.04 6.33 11.69 6.56 11.49 C4.78 11.29 2.92 10.6 2.92 7.54 C2.92 6.67 3.23 5.95 3.74 5.39 C3.66 5.19 3.38 4.37 3.82 3.27 C3.82 3.27 4.49 3.06 6.02 4.1 C6.66 3.92 7.34 3.83 8.02 3.83 C8.7 3.83 9.38 3.92 10.02 4.1 C11.55 3.06 12.22 3.27 12.22 3.27 C12.66 4.37 12.38 5.19 12.3 5.39 C12.81 5.95 13.12 6.66 13.12 7.54 C13.12 10.61 11.25 11.29 9.47 11.49 C9.76 11.74 10.01 12.22 10.01 12.97 C10.01 14.04 10 14.9 10 15.17 C10 15.38 10.15 15.63 10.55 15.55 C13.71 14.49 16 11.52 16 8 C16 3.58 12.42 0 8 0 Z"></path>
+          </svg>
           <span>Code</span>
         </a>
         <span class="text-[10px] text-[var(--primary-300)] dark:text-gray-600 font-mono">v1.1</span>
@@ -220,12 +222,12 @@ import { NodeType } from '../types';
 import { useArticleStore } from '../stores/articleStore';
 import { useAppStore } from '../stores/appStore';
 import { useLearningStore } from '../stores/learningStore'
-import { useViewCounter } from '../composables/useViewCounter'
+import { useUmamiViewStats } from '../composables/useUmamiViewStats'
 
 const articleStore = useArticleStore();
 const appStore = useAppStore();
 const learningStore = useLearningStore()
-const { fetchAndCacheStats } = useViewCounter()
+const { prefetchAllPathStats } = useUmamiViewStats()
 
 const props = defineProps<{
   lang: string;
@@ -248,13 +250,27 @@ const props = defineProps<{
   commentCounts: Record<string, number>;
 }>();
 
+let prefetching = false
+let lastPrefetchKey = ''
+
 watch(
-  () => `${props.viewMode}|${props.loading ? 1 : 0}|${props.filteredFlatFiles.slice(0, 24).map(f => f.path).join(',')}`,
   () => {
+    const first = props.filteredFlatFiles[0]?.path || ''
+    const last = props.filteredFlatFiles[props.filteredFlatFiles.length - 1]?.path || ''
+    return `${props.viewMode}|${props.loading ? 1 : 0}|${props.filteredFlatFiles.length}|${first}|${last}`
+  },
+  async () => {
     if (props.loading) return
     if (props.viewMode !== 'latest') return
-    for (const file of props.filteredFlatFiles.slice(0, 24)) {
-      void fetchAndCacheStats(file.path)
+    const key = `${props.filteredFlatFiles.length}|${props.filteredFlatFiles[0]?.path || ''}|${props.filteredFlatFiles[props.filteredFlatFiles.length - 1]?.path || ''}`
+    if (prefetching) return
+    if (key === lastPrefetchKey) return
+    lastPrefetchKey = key
+    prefetching = true
+    try {
+      await prefetchAllPathStats(props.filteredFlatFiles.map((f) => f.path))
+    } finally {
+      prefetching = false
     }
   },
   { immediate: true }

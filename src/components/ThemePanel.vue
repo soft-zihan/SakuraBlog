@@ -116,6 +116,42 @@
               ]"
             ></button>
           </div>
+
+          <div class="mt-3 flex gap-2 flex-wrap">
+            <button
+              @click="appStore.userSettings.themeMode = 'manual'"
+              class="flex-1 min-w-[84px] py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.themeMode === 'manual' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.themeMode === 'manual' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '手动' : 'Manual' }}</button>
+            <button
+              @click="appStore.userSettings.themeMode = 'system'"
+              class="flex-1 min-w-[84px] py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.themeMode === 'system' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.themeMode === 'system' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '跟随系统' : 'System' }}</button>
+            <button
+              @click="appStore.userSettings.themeMode = 'time'"
+              class="flex-1 min-w-[84px] py-2 border rounded-xl text-xs transition-colors"
+              :class="appStore.userSettings.themeMode === 'time' ? '' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+              :style="appStore.userSettings.themeMode === 'time' ? primaryButtonStyle : undefined"
+            >{{ lang === 'zh' ? '按时间' : 'Time' }}</button>
+          </div>
+
+          <div v-if="appStore.userSettings.themeMode === 'time'" class="mt-2 flex items-center gap-2 flex-wrap text-xs text-gray-500 dark:text-gray-400">
+            <span>{{ lang === 'zh' ? '亮色' : 'Light' }}</span>
+            <input
+              v-model="appStore.userSettings.themeTimeLight"
+              type="time"
+              class="px-2 py-1 text-xs border rounded-lg bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 outline-none focus:border-[var(--primary-300)]"
+            />
+            <span>{{ lang === 'zh' ? '暗色' : 'Dark' }}</span>
+            <input
+              v-model="appStore.userSettings.themeTimeDark"
+              type="time"
+              class="px-2 py-1 text-xs border rounded-lg bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 outline-none focus:border-[var(--primary-300)]"
+            />
+          </div>
         </div>
 
         <div class="mb-4">

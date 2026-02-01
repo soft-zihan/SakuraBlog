@@ -112,7 +112,18 @@ export function extractTagsFromContent(content: string): string[] {
  */
 export function extractTagsFromFile(file: FileNode): string[] {
   const text = file.contentSnippet || file.content || ''
-  return extractTagsFromContent(text)
+  const meta = extractMetaFromContent(text)
+  const tags = (meta.tags || []).slice()
+  if (!meta.author) tags.push('notag')
+  const normalized = tags
+  const year = (() => {
+    const raw = file.lastModified || ''
+    const d = new Date(raw)
+    if (Number.isNaN(d.getTime())) return null
+    return String(d.getFullYear())
+  })()
+  if (year) normalized.push(year)
+  return [...new Set(normalized)]
 }
 
 /**

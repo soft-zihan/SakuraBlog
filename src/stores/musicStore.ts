@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { safeLocalStorage } from '@/utils/storage'
 
 export interface MusicTrack {
   id: string
@@ -229,7 +230,7 @@ export const useMusicStore = defineStore('music', () => {
         setPlaylist(mergedTracks)
         
         // Restore persisted track by filename
-        const persisted = localStorage.getItem('music_currentTrackFilename')
+        const persisted = safeLocalStorage.getItem('music_currentTrackFilename')
         if (persisted && playlist.value.length > 0) {
           const index = findTrackByFilename(persisted)
           // If not found (index would be 0 from findTrackByFilename), check if it actually matched
@@ -237,12 +238,12 @@ export const useMusicStore = defineStore('music', () => {
             // Track not found, reset to first track and pause
             currentIndex.value = 0
             isPlaying.value = false
-            localStorage.removeItem('music_currentTrackFilename')
+            safeLocalStorage.removeItem('music_currentTrackFilename')
             console.log('Persisted track not found, reset to first track')
           } else {
             currentIndex.value = index
             // Restore playing state only if track was found
-            const playingState = localStorage.getItem('music_isPlaying')
+            const playingState = safeLocalStorage.getItem('music_isPlaying')
             if (playingState) {
               isPlaying.value = playingState === 'true'
             }

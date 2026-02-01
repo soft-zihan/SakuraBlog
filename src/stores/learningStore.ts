@@ -126,7 +126,10 @@ export const useLearningStore = defineStore('learning', () => {
       lastVisitedLab: lastVisitedLab.value,
       lastSaved: Date.now()
     }
-    localStorage.setItem('sakura-learning-progress', JSON.stringify(data))
+    try {
+      localStorage.setItem('sakura-learning-progress', JSON.stringify(data))
+    } catch {
+    }
   }
   
   // 从 localStorage 加载

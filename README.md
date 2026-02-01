@@ -29,6 +29,7 @@
 ## 📑 Table of Contents
 
 - [✨ Features Overview](#-features-overview)
+- [🙏 Credits](#-credits)
 - [🎯 Quick Start](#-quick-start)
 - [🧪 Testing](#-testing)
 - [📁 Project Structure](#-project-structure)
@@ -63,7 +64,7 @@
 | **Markdown Rendering** | Full Markdown support, automatic Table of Contents (ToC) generation, and syntax highlighting. |
 | **Full-text Search**   | Fast search based on MiniSearch with hit highlighting.                                        |
 | **Article Management** | Favorites, Likes, Tag filtering, and Reading History.                                         |
-| **Analytics-Friendly** | Ready for external tools (e.g. Umami); no built-in pageview counter.                          |
+| **Reading Stats**      | Pageviews + unique visitors powered by Umami (Share Token API).                               |
 | **Comment System**     | Powered by[Giscus](https://github.com/giscus/giscus) via GitHub Discussions.                     |
 | **Music Player**       | Built-in player with synchronized lyric display.                                              |
 
@@ -100,6 +101,10 @@
 | **Privacy Protection**      | All data is stored locally; no data is uploaded to third-party servers.         |
 
 ---
+
+## 🙏 Credits
+
+- Comments and reading stats implementation is inspired by [RyuChan](https://github.com/kobaridev/RyuChan).
 
 ## 🎯 Quick Start
 
@@ -276,23 +281,24 @@ The publishing feature requires a Personal Access Token:
 3. Get your configuration parameters from [giscus.app](https://giscus.app/).
 4. Update the configuration in `components/GiscusComments.vue`.
 
-### View Counter (optional)
+### Reading Stats (Umami Cloud, optional)
 
-By default Sakura Notes does not call any third‑party analytics APIs for page views and the "views" field is hidden.
+Inspired by RyuChan, Sakura Notes uses Umami as the source of truth: the tracker records pageviews, and the UI reads stats via the Share Token API. Since this project uses static hosting + query navigation, each article is mapped to a virtual path `/notes/<filePath>` for per-article stats.
 
-If you want to show a simple global readers count for each article on a static deployment (for example GitHub Pages), you can enable the CountAPI-based counter:
-
-1. Choose a namespace, usually your domain, for example `soft-zihan.github.io`.
-2. Create `.env` (or `.env.local`) in the project root and set:
+1. Create a website in Umami Cloud.
+2. Copy the `websiteId` from the tracking script snippet in Umami.
+3. Enable sharing for that website, then copy the `shareId` from the Share URL (the last path segment).
+4. Create `.env` (or `.env.local`) and set:
 
    ```bash
-   VITE_VIEW_COUNTER_PROVIDER=countapi
-   VITE_COUNTAPI_NAMESPACE=soft-zihan.github.io
+   VITE_UMAMI_SCRIPT_URL=https://cloud.umami.is/script.js
+   VITE_UMAMI_WEBSITE_ID=<your-website-id>
+   VITE_UMAMI_BASE_URL=https://cloud.umami.is
+   VITE_UMAMI_SHARE_ID=<your-share-id>
+   VITE_UMAMI_TIMEZONE=Asia/Shanghai
    ```
 
-3. Rebuild and deploy.
-
-On first open of an article URL, the counter is created at `https://api.countapi.xyz/hit/<namespace>/<file.path>` and increments by 1 for each view. The latest value is cached client-side for a short time to reduce extra API calls.
+5. Rebuild and deploy.
 
 ---
 

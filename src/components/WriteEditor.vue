@@ -408,6 +408,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { marked } from 'marked'
 import { useGitHubPublish } from '../composables/useGitHubPublish'
 import { sanitizeHtml } from '../utils/sanitize'
+import { safeLocalStorage } from '@/utils/storage'
 
 const props = defineProps<{
   show: boolean
@@ -804,12 +805,12 @@ const addTagFromInput = () => {
   }
   publishTags.value = merged
   tagInput.value = ''
-  localStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(publishTags.value))
+  safeLocalStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(publishTags.value))
 }
 
 const removeTag = (tag: string) => {
   publishTags.value = publishTags.value.filter((t: string) => t !== tag)
-  localStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(publishTags.value))
+  safeLocalStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(publishTags.value))
 }
 
 const addImportTagFromInput = () => {
@@ -833,7 +834,7 @@ const removeImportTag = (tag: string) => {
 }
 
 const saveDraft = () => {
-  localStorage.setItem('sakura_draft', JSON.stringify({
+  safeLocalStorage.setItem('sakura_draft', JSON.stringify({
     title: title.value,
     content: content.value,
     targetFolder: targetFolder.value,
@@ -843,7 +844,7 @@ const saveDraft = () => {
 }
 
 const loadDraft = () => {
-  const draft = localStorage.getItem('sakura_draft')
+  const draft = safeLocalStorage.getItem('sakura_draft')
   if (draft) {
     const { title: t, content: c, targetFolder: f } = JSON.parse(draft)
     title.value = t || ''
@@ -870,8 +871,8 @@ const publish = async () => {
   
   try {
     // 从设置读取作者信息
-    const authorName = localStorage.getItem('author_name') || ''
-    const authorUrl = localStorage.getItem('author_url') || ''
+    const authorName = safeLocalStorage.getItem('author_name') || ''
+    const authorUrl = safeLocalStorage.getItem('author_url') || ''
     
     let processedContent = content.value
     
@@ -1014,7 +1015,7 @@ const publish = async () => {
       title.value = ''
       content.value = ''
       images.value = []
-      localStorage.removeItem('sakura_draft')
+      safeLocalStorage.removeItem('sakura_draft')
       alert(props.lang === 'zh' ? '发布成功！' : 'Published successfully!')
     } else {
       alert(`${props.lang === 'zh' ? '发布失败' : 'Publish failed'}: ${result.message}`)
@@ -1227,7 +1228,7 @@ const openImportModal = async (files: File[], mode: 'file' | 'folder') => {
     importPreviewStatus.value = ''
   }
 
-  const savedTags = localStorage.getItem(`publish_tags_${props.lang}`)
+  const savedTags = safeLocalStorage.getItem(`publish_tags_${props.lang}`)
   if (savedTags) {
     try {
       const tags = JSON.parse(savedTags)
@@ -1239,8 +1240,8 @@ const openImportModal = async (files: File[], mode: 'file' | 'folder') => {
     importTags.value = []
   }
 
-  importAuthorName.value = localStorage.getItem('author_name') || ''
-  importAuthorUrl.value = localStorage.getItem('author_url') || ''
+  importAuthorName.value = safeLocalStorage.getItem('author_name') || ''
+  importAuthorUrl.value = safeLocalStorage.getItem('author_url') || ''
   importProgress.value = 0
   importError.value = ''
   importMissingImages.value = 0
@@ -1442,9 +1443,9 @@ const publishImportedFiles = async () => {
     return
   }
 
-  localStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(importTags.value))
-  localStorage.setItem('author_name', importAuthorName.value)
-  localStorage.setItem('author_url', importAuthorUrl.value)
+  safeLocalStorage.setItem(`publish_tags_${props.lang}`, JSON.stringify(importTags.value))
+  safeLocalStorage.setItem('author_name', importAuthorName.value)
+  safeLocalStorage.setItem('author_url', importAuthorUrl.value)
 
   isImporting.value = true
   importProgress.value = 0
@@ -1628,8 +1629,8 @@ const uploadMarkdownFiles = async (files: File[], mode: 'file' | 'folder' = 'fil
 
       const normalizedRel = relPath.replace(/^\/+/, '')
       const contentText = await file.text()
-      const authorName = localStorage.getItem('author_name') || ''
-      const authorUrl = localStorage.getItem('author_url') || ''
+      const authorName = safeLocalStorage.getItem('author_name') || ''
+      const authorUrl = safeLocalStorage.getItem('author_url') || ''
       const relFolder = normalizedRel.split('/').slice(0, -1).join('/')
       const publishTags = buildTagsForPublish(contentText)
       const finalContent = applyMetaComment(contentText, publishTags, authorName, authorUrl)
@@ -1664,10 +1665,10 @@ const confirmClose = () => {
 onMounted(() => {
   loadDraft()
   updateTokenStatus() // 检查 token 状态
-  repoOwner.value = localStorage.getItem('github_repo_owner') || 'soft-zihan'
-  repoName.value = localStorage.getItem('github_repo_name') || 'SakuraBlog'
+  repoOwner.value = safeLocalStorage.getItem('github_repo_owner') || 'soft-zihan'
+  repoName.value = safeLocalStorage.getItem('github_repo_name') || 'SakuraBlog'
 
-  const savedTags = localStorage.getItem(`publish_tags_${props.lang}`)
+  const savedTags = safeLocalStorage.getItem(`publish_tags_${props.lang}`)
   if (savedTags) {
     try {
       const tags = JSON.parse(savedTags)
@@ -1691,7 +1692,7 @@ watch(() => props.lang, () => {
   }
   pathSuffix.value = targetFolder.value.replace(rootFolder, '').replace(/^\/+/, '')
 
-  const savedTags = localStorage.getItem(`publish_tags_${props.lang}`)
+  const savedTags = safeLocalStorage.getItem(`publish_tags_${props.lang}`)
   if (savedTags) {
     try {
       const tags = JSON.parse(savedTags)

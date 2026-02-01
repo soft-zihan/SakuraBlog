@@ -178,6 +178,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useArticleStore } from '../stores/articleStore'
 import JSZip from 'jszip'
 import { buildPresetNoteMap } from '../utils/i18nText'
+import { safeLocalStorage } from '@/utils/storage'
 
 const props = defineProps<{
   lang: 'zh' | 'en'
@@ -475,7 +476,7 @@ const getUserNotesKey = () => `sakura_source_code_notes_user_${props.lang}`
 // Load user notes from localStorage
 const loadUserNotes = (): Record<string, Array<{line: number, content: string}>> => {
   try {
-    const saved = localStorage.getItem(getUserNotesKey())
+    const saved = safeLocalStorage.getItem(getUserNotesKey())
     if (saved) {
       return JSON.parse(saved)
     }
