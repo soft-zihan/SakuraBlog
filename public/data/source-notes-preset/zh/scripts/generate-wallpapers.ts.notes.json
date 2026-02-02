@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "构建脚本：生成 files.json / raw / 资源清单等构建产物。",
+  "notes": []
+}

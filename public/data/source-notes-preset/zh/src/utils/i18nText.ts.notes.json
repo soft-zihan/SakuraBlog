@@ -1,0 +1,18 @@
+{
+  "version": "2026.02.01",
+  "intro": "预置笔记锚点工具：用 match/matchRegex 定位到代码行，减少错位。",
+  "notes": [
+    {
+      "matchRegex": "^export type PresetNote\\s*=",
+      "content": "PresetNote 支持 3 种锚定方式：matchRegex（正则）→ match（子串）→ line（兜底行号）。occurrence 表示第 N 次命中，offset 用于最终行号偏移。"
+    },
+    {
+      "matchRegex": "export const resolvePresetNoteLine\\s*=",
+      "content": "resolvePresetNoteLine 的核心目标是“减少错位”：优先用锚点找行，找不到才回退 line，并对越界结果直接丢弃。"
+    },
+    {
+      "matchRegex": "export const buildPresetNoteMap\\s*=",
+      "content": "buildPresetNoteMap 将解析后的笔记聚合为 Map(行号→内容)。同一行多条笔记会用空行拼接，便于块级阅读。"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": "2026.02.01",
+  "intro": "Legacy raw exporter: copies a fixed file list into public/raw for the Source Viewer.",
+  "notes": [
+    {
+      "line": 19,
+      "matchRegex": "^const FILES_TO_GENERATE\\s*=",
+      "content": "Exports raw files from a fixed whitelist (FILES_TO_GENERATE)."
+    },
+    {
+      "line": 118,
+      "match": "Flatten path structure",
+      "content": "Flattens paths into a single filename (src_components_...) to make raw fetch simple on a static site."
+    }
+  ]
+}

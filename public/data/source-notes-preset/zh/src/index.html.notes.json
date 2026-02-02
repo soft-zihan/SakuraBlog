@@ -1,0 +1,92 @@
+{
+  "version": "2026.02.01",
+  "intro": "源码/资源文件：index.html。",
+  "notes": [
+    {
+      "matchRegex": "^<!DOCTYPE html>",
+      "content": "HTML5 文档类型声明：告诉浏览器按标准模式解析页面，避免旧版兼容模式导致渲染差异。"
+    },
+    {
+      "match": "<html lang=\"en\">",
+      "content": "lang 属性声明页面主要语言，影响无障碍朗读、翻译与搜索引擎识别。可按站点语言改为 zh。"
+    },
+    {
+      "match": "<head>",
+      "content": "head 用来放元信息与资源声明，不直接渲染页面内容。标题、图标、样式、脚本入口通常都放在这里。"
+    },
+    {
+      "match": "<meta charset=\"UTF-8\" />",
+      "content": "字符编码声明：UTF-8 覆盖大多数语言字符，避免中文/特殊符号乱码。"
+    },
+    {
+      "match": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />",
+      "content": "移动端视口设置：width=device-width 让布局基于设备宽度，initial-scale 控制初始缩放，确保响应式正确显示。"
+    },
+    {
+      "match": "<title>Sakura Notes</title>",
+      "content": "页面标题：显示在浏览器标签页与收藏夹名称中，也会影响搜索引擎摘要标题。"
+    },
+    {
+      "matchRegex": "^\\s*<link",
+      "occurrence": 1,
+      "content": "link 是空元素（void element），不需要闭合标签，用于声明外部资源或图标。"
+    },
+    {
+      "match": "rel=\"icon\"",
+      "content": "站点图标：rel=\"icon\" 是标准 favicon，type 指定图标格式，浏览器标签页会显示。"
+    },
+    {
+      "match": "rel=\"shortcut icon\"",
+      "content": "兼容性写法：部分旧浏览器仍读取 shortcut icon 作为 favicon。"
+    },
+    {
+      "match": "rel=\"apple-touch-icon\"",
+      "content": "iOS 主屏幕图标：用户“添加到主屏幕”时显示的图标。"
+    },
+    {
+      "match": "<meta name=\"theme-color\"",
+      "content": "浏览器主题色：移动端地址栏与系统 UI 会使用这个颜色。"
+    },
+    {
+      "match": "property=\"og:image\"",
+      "content": "Open Graph 元信息：分享链接到社交平台时显示的预览图。"
+    },
+    {
+      "match": "name=\"twitter:image\"",
+      "content": "Twitter 卡片预览图：用于 X/Twitter 的链接分享卡片。"
+    },
+    {
+      "match": "<div id=\"app\"",
+      "content": "应用挂载点：Vite 会加载 ./main.ts，在其中 createApp 并 mount 到这个元素。"
+    },
+    {
+      "matchRegex": "^\\s*<style>$",
+      "content": "全局样式块：直接写在 HTML 里，首屏无需等待打包 CSS 即可生效；适合基础背景与通用样式兜底。"
+    },
+    {
+      "match": "<script type=\"importmap\">",
+      "content": "Import Map：浏览器原生的模块映射表，把 import 名称映射到具体 CDN 地址。"
+    },
+    {
+      "matchRegex": "^\\s*\\{\\s*$",
+      "occurrence": 1,
+      "content": "importmap 的内容是 JSON，必须符合严格 JSON 语法，才能被浏览器解析。"
+    },
+    {
+      "match": "<body>",
+      "content": "页面主体：所有可见内容都放在 body 内；脚本入口通常放在 body 底部以减少阻塞。"
+    },
+    {
+      "match": "Loading Sakura Notes...",
+      "content": "首屏加载占位：在 JS 应用启动前提供视觉反馈，避免白屏。"
+    },
+    {
+      "match": "@keyframes petalFall",
+      "content": "花瓣动画的基础 CSS keyframes。实际花瓣系统主要由 Vue 侧动态控制，但保留一套标准动画/样式以增强兼容性与可预期性。"
+    },
+    {
+      "match": "type=\"module\" src=\"./main.ts\"",
+      "content": "Vite 入口脚本：从这里进入打包后的 SPA 代码（Vue 应用启动）。"
+    }
+  ]
+}

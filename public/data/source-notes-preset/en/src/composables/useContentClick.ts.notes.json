@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "Content click handler: intercept internal links and route within the app.",
+  "notes": []
+}

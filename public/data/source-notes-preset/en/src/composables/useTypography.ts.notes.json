@@ -1,0 +1,16 @@
+{
+  "version": "2026.02.01",
+  "intro": "Reader typography density: writes compact/normal/loose presets into root CSS variables for markdown-body.",
+  "notes": [
+    {
+      "line": 1,
+      "matchRegex": "export function useTypography\\(",
+      "content": "Implements reader density by mapping presets into root CSS variables (line-height, spacing, headings, etc.)."
+    },
+    {
+      "line": 20,
+      "match": "readerDensity",
+      "content": "readerDensity only writes CSS variables; markdown-body consumes them."
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  user-select: none;
+}
+
+#markdown-viewer,
+#markdown-viewer * {
+  user-select: text;
+}
+
+#markdown-viewer ::selection {
+  background: var(--primary-100);
+}
+
+.dark #markdown-viewer ::selection {
+  background: var(--primary-900-30);
+}
+
+/* Dynamic Title Colors & Scroll Margin */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  color: var(--primary-600);
+  scroll-margin-top: 5rem; /* Ensure title is not hidden behind header */
+}
+
+.dark .markdown-body h1,
+.dark .markdown-body h2,
+.dark .markdown-body h3,
+.dark .markdown-body h4,
+.dark .markdown-body h5,
+.dark .markdown-body h6 {
+  color: var(--primary-300);
+}
+
+.font-kaiti {
+  font-family: "KaiTi", "STKaiti", "楷体", "Microsoft YaHei", serif;
+}
+
+.article-style-lined {
+  text-decoration: underline;
+  text-decoration-color: var(--primary-200);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.dark .article-style-lined {
+  text-decoration-color: var(--primary-800);
+}
+
+.article-style-grid {
+  --line-h: 2rem;
+  --line-color: var(--primary-100);
+  line-height: var(--line-h) !important;
+  background-image: 
+    linear-gradient(to right, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)),
+    linear-gradient(to bottom, transparent calc(var(--line-h) - 1px), var(--line-color) calc(var(--line-h) - 1px)) !important;
+  background-size: var(--line-h) var(--line-h) !important;
+  background-attachment: local;
+}
+
+.article-style-grid #markdown-viewer p,
+.article-style-grid #markdown-viewer ul,
+.article-style-grid #markdown-viewer ol,
+.article-style-grid #markdown-viewer li,
+.article-style-grid #markdown-viewer h1,
+.article-style-grid #markdown-viewer h2,
+.article-style-grid #markdown-viewer h3,
+.article-style-grid #markdown-viewer h4,
+.article-style-grid #markdown-viewer blockquote {
+  line-height: var(--line-h) !important;
+  margin-bottom: var(--line-h) !important;
+  margin-top: 0 !important;
+}
+
+.dark .article-style-grid {
+  --line-color: var(--primary-900-30);
+}
+
+#markdown-viewer .sakura-block-highlight {
+  background: rgba(250, 204, 21, 0.22);
+  border-radius: 0.75rem;
+  padding: 0.35rem 0.6rem;
+}
+
+.dark #markdown-viewer .sakura-block-highlight {
+  background: rgba(250, 204, 21, 0.16);
+}

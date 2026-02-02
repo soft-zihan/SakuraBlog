@@ -1,0 +1,14 @@
+{
+  "version": "2026.02.01",
+  "intro": "组合式函数：抽离可复用业务逻辑（Composition API）。",
+  "notes": [
+    {
+      "matchRegex": "export function useContentRenderer\\(",
+      "content": "Markdown 渲染管线核心：marked 自定义渲染器 + 语法高亮 + TOC + 路径解析 + sanitize，且带一个简单的渲染缓存以减少重复计算。"
+    },
+    {
+      "match": "const resolveContentPath",
+      "content": "resolveContentPath 负责把 Markdown 里的相对链接解析成可在 GitHub Pages 子路径下工作的可访问 URL（含 hash/query、../ 等情况）。"
+    }
+  ]
+}

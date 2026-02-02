@@ -1,0 +1,11 @@
+{
+  "version": "2026.02.01",
+  "intro": "Vue bootstrap: create app, install Pinia (with persistence), mount to #app.",
+  "notes": [
+    {
+      "line": 8,
+      "matchRegex": "createApp\\(",
+      "content": "Minimal but critical bootstrap: createApp(App) → install Pinia (with persistedstate) → mount('#app'). try/catch provides a visible fallback on mount failure."
+    }
+  ]
+}

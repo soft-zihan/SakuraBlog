@@ -1,0 +1,10 @@
+{
+  "version": "2026.02.01",
+  "intro": "项目英文说明：功能、结构、构建与部署流程。",
+  "notes": [
+    {
+      "match": "### Media Proxy (Bilibili & Downloads, optional)",
+      "content": "静态部署（GitHub Pages）下，B 站与部分图片下载会因 CORS/防盗链失败。\n可选部署 Cloudflare Worker 作为媒体代理：\n- B 站搜索/播放（WBI 签名）\n- 壁纸/封面下载（attachment 下载）\n并通过 .env 配置 VITE_BILI_PROXY_BASE_URL / VITE_WALLPAPER_PROXY_BASE_URL。"
+    }
+  ]
+}

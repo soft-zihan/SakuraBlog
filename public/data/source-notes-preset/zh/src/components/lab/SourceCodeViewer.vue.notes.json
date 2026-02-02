@@ -1,0 +1,22 @@
+{
+  "version": "2026.02.01",
+  "intro": "源码查看器：源码树 + 代码区 + 行内笔记（预置/用户）。",
+  "notes": [
+    {
+      "match": "File Introduction Bar",
+      "content": "文件说明来自 public/data/source-notes-preset.<lang>.json 的 intros[filePath]。"
+    },
+    {
+      "matchRegex": "^const loadPresetNotes\\s*=\\s*async \\(\\) =>",
+      "content": "预置笔记支持锚点匹配（match/matchRegex），比纯 line 号更不易随源码变动而错位。"
+    },
+    {
+      "matchRegex": "const getPresetNotesUrl\\s*=\\s*\\(\\)\\s*=>",
+      "content": "预置笔记从 BASE_URL + data/source-notes-preset.<lang>.json 拉取，适配 GitHub Pages 的子路径部署。"
+    },
+    {
+      "matchRegex": "const presetNoteContentByLine\\s*=\\s*computed\\(",
+      "content": "预置笔记在渲染时动态解析：currentPresetNotes + fileLines → Map(行号→内容)，UI 用它判断哪些行要显示预置笔记。"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "version": "2026.02.01",
+  "intro": "实验室实验组件：LabDirectives.vue（用于交互式讲解/演示）。",
+  "notes": [
+    {
+      "matchRegex": "^<template>",
+      "content": "Vue 指令本质：v-* 把“数据/逻辑”绑定到 DOM。你写的是声明式规则，Vue 在运行时把它转成对 DOM 的最小更新。"
+    },
+    {
+      "match": "v-if=\"activeTab === 'conditional'\"",
+      "content": "v-if 控制“是否渲染”：条件为假时，节点不会出现在 DOM 里。适合条件很少变化、或组件初始化开销大的场景。"
+    },
+    {
+      "match": "v-if=\"isVisible\"",
+      "content": "v-if=\"isVisible\"：这里是真实 DOM 增删；你能在右侧可视化看到节点被移除时留下的 <!--v-if--> 注释占位。"
+    },
+    {
+      "match": ":style=\"{ display: isVisible ? 'block' : 'none' }\"",
+      "content": ":style 绑定对象：键是 CSS 属性名，值是表达式结果。三元运算符用于在两种字符串之间切换，实现类似 v-show 的 display 控制。"
+    },
+    {
+      "match": "v-bind / :",
+      "content": "v-bind 的简写是 :。它把 JS 表达式的值绑定到属性上，例如 :src/:href/:disabled。表达式每次更新会反映到 DOM 属性。"
+    },
+    {
+      "match": "<img :src=\"imageUrl\"",
+      "content": ":src 绑定图片地址：当 imageUrl 改变，img 的 src 属性会更新并触发浏览器重新加载资源。"
+    },
+    {
+      "match": "<a :href=\"linkUrl\"",
+      "content": ":href 绑定链接地址：target=\"_blank\" 会在新标签页打开。注意外链场景建议配合 rel=\"noopener noreferrer\"（安全与性能）。"
+    },
+    {
+      "match": "<button :disabled=\"isDisabled\"",
+      "content": ":disabled 绑定布尔属性：当 isDisabled 为 true，DOM 会出现 disabled 属性，并触发 CSS 的 disabled: 变体（Tailwind）。"
+    },
+    {
+      "match": "v-model=\"textInput\"",
+      "content": "v-model 是双向绑定语法糖：对 input[type=text] 等价于 :value + @input。模板里直接读 textInput 会自动解包 ref。"
+    },
+    {
+      "match": "v-model=\"checkboxValue\"",
+      "content": "checkbox 的 v-model：绑定的是布尔值（选中=true）。radio 的 v-model：绑定的是 value 字符串（A/B/C）。select 的 v-model：绑定当前 option 的 value。"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "Git ignore rules for build artifacts, caches, and local configs.",
+  "notes": []
+}

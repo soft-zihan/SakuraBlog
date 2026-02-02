@@ -1,0 +1,30 @@
+{
+  "version": "2026.02.01",
+  "intro": "应用启动入口：createApp + Pinia（持久化）+ mount。",
+  "notes": [
+    {
+      "matchRegex": "createApp\\(",
+      "content": "入口很短但关键：createApp(App) → 安装 Pinia → mount(#app)。\n这就是 Vue3 的“应用启动三步”。\n理解为：先创建应用，再装插件，最后挂到页面上。"
+    },
+    {
+      "matchRegex": "^import\\s+\\{\\s*createApp\\s*\\}",
+      "content": "import { createApp } 是“具名导入”。\n大括号表示从模块导出里按名字取值。\n如果导出名字拼错，编译会直接报错。"
+    },
+    {
+      "matchRegex": "^import\\s+\\{\\s*createPersistedState",
+      "content": "这里导入的是 pinia 持久化插件的工厂函数。\n后面会通过 pinia.use(createPersistedState(...)) 安装到 Pinia。\n作用是让指定的 store 字段自动持久化到安全的本地存储。"
+    },
+    {
+      "matchRegex": "const\\s+pinia\\s*=\\s*createPinia\\(",
+      "content": "createPinia() 生成一个全局状态容器。\npinia.use(plugin) 注册插件，扩展所有 store 的行为。\n这一行把“持久化能力”装进 Pinia。"
+    },
+    {
+      "matchRegex": "app\\.mount\\('#app'\\)",
+      "content": "mount('#app') 把应用挂到 DOM 节点上。\n选择器必须与 index.html 里的挂载点一致。\n挂载后，Vue 才会真正开始渲染界面。"
+    },
+    {
+      "matchRegex": "^try\\s*\\{",
+      "content": "try/catch 用来捕获启动阶段的异常。\n如果初始化失败，就直接替换 body 内容。\n这是兜底策略：至少让用户看到错误提示。"
+    }
+  ]
+}

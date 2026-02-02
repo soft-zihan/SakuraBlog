@@ -1,0 +1,31 @@
+{
+  "version": "2026.02.01",
+  "intro": "UI 组件：页面功能块与交互入口。",
+  "notes": [
+    {
+      "matchRegex": "<Transition\\s+name=\"slide-left\"",
+      "content": "Transition 组件包裹侧边栏，控制进入/离开动画。\nname 会对应到 scoped CSS 中的 slide-left-* 类名。\n这是 Vue 内置的动画机制，适合做简单过渡。\n新手可以把它理解成“切换时加动画”。"
+    },
+    {
+      "matchRegex": "v-if=\"isOpen\"",
+      "content": "右侧栏只在 isOpen 为 true 时渲染。\nv-if 会创建/销毁 DOM，而不是仅仅隐藏。\n移动端不需要时直接不渲染，更省性能。\n缺点是切换时会重新创建组件。"
+    },
+    {
+      "matchRegex": "ActionDockGroup",
+      "occurrence": 1,
+      "content": "操作按钮组通过 props 传入当前文件、模式与音乐状态。\n所有点击操作通过事件向外 emit，父组件统一处理。\n这是“纯 UI + 事件输出”的组件设计方式。\n好处是组件可复用、逻辑更集中。"
+    },
+    {
+      "matchRegex": "defineProps<\\{",
+      "content": "props 就是侧边栏的输入参数。\n例如 isOpen 控制显示，currentFile 决定是否是 PDF。\n新手可以把组件当函数，props 就是参数。\n参数变了，组件输出的 UI 也会变。"
+    },
+    {
+      "matchRegex": "const t = computed",
+      "content": "t 是国际化文本对象，根据 lang 切换语言。\ncomputed 会在 lang 改变时自动更新。\n模板使用 t.xxx，所以文字会自动切换。\n这是“数据变，UI 跟着变”的典型例子。"
+    },
+    {
+      "matchRegex": "const isPdf = computed",
+      "content": "通过文件路径判断是否为 PDF。\n这是派生状态，用于切换按钮组功能。\n用 computed 计算，避免手动同步状态。"
+    }
+  ]
+}

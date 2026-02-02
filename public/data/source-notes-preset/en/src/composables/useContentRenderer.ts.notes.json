@@ -1,0 +1,21 @@
+{
+  "version": "2026.02.01",
+  "intro": "Markdown rendering core: marked + highlight + TOC + path resolution + sanitization.",
+  "notes": [
+    {
+      "line": 13,
+      "matchRegex": "export function useContentRenderer\\(",
+      "content": "Core Markdown rendering pipeline: custom marked renderer, robust path resolution for GitHub Pages, HTML sanitization, and a simple render cache."
+    },
+    {
+      "line": 64,
+      "match": "const resolveContentPath",
+      "content": "Path resolution handles BASE_URL differences and both relative/absolute links under GitHub Pages."
+    },
+    {
+      "line": 157,
+      "match": "renderer.link",
+      "content": "Internal links are rendered with data-internal-href to let the app intercept navigation without full reload."
+    }
+  ]
+}

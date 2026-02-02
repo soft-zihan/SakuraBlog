@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sakura Notes</title>
+    <link rel="icon" href="./image/sakura.svg" type="image/svg+xml" />
+    <link rel="shortcut icon" href="./image/sakura.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./image/sakura.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#f43f72" />
+    <meta property="og:image" content="./image/sakura.svg" />
+    <meta name="twitter:image" content="./image/sakura.svg" />
+    <style>
+      html, body, #app {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      body {
+        background-color: #fff0f5;
+        transition: background-color 0.5s ease;
+      }
+      /* Modern mesh gradient background for Light Mode */
+      body:not(.dark) {
+        background-image: 
+          radial-gradient(at 0% 0%, hsla(338,70%,96%,1) 0, transparent 50%), 
+          radial-gradient(at 50% 0%, hsla(330,60%,94%,1) 0, transparent 50%), 
+          radial-gradient(at 100% 0%, hsla(338,70%,96%,1) 0, transparent 50%), 
+          radial-gradient(at 0% 100%, hsla(330,50%,96%,1) 0, transparent 50%), 
+          radial-gradient(at 80% 100%, hsla(320,50%,94%,1) 0, transparent 50%), 
+          radial-gradient(at 0% 50%, hsla(340,60%,92%,1) 0, transparent 50%);
+        background-attachment: fixed;
+      }
+      /* Dark Mode Background */
+      .dark body {
+        background-color: #111827;
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(136, 19, 59, 0.1) 0, transparent 50%), 
+          radial-gradient(at 90% 90%, rgba(88, 28, 135, 0.1) 0, transparent 50%);
+      }
+
+      /* Standard CSS Animation for reliability */
+      @keyframes petalFall {
+        0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0.8; }
+        25% { transform: translateY(20vh) translateX(15px) rotate(45deg); opacity: 1; }
+        50% { transform: translateY(50vh) translateX(-15px) rotate(90deg); opacity: 0.8; }
+        75% { transform: translateY(80vh) translateX(15px) rotate(135deg); opacity: 0.6; }
+        100% { transform: translateY(110vh) translateX(0) rotate(180deg); opacity: 0; }
+      }
+
+      .petals-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 100; /* Ensure on top but strictly no pointer events */
+        overflow: hidden;
+      }
+      .petal {
+        position: absolute;
+        width: 15px;
+        height: 20px;
+        background: linear-gradient(120deg, #ffd7e6 0%, #ffc4d6 100%);
+        border-radius: 150% 0 150% 0;
+        opacity: 0.8; 
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        animation-name: petalFall; /* Reference standard keyframe */
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        will-change: transform, opacity;
+      }
+      .dark .petal {
+        background: linear-gradient(120deg, #be1245 0%, #f43f72 100%); 
+        opacity: 0.6;
+        box-shadow: 0 0 10px rgba(244, 63, 114, 0.3); 
+      }
+
+      .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #fecdd7; border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #fda4b8; }
+      
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; }
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #6b7280; }
+
+      .mask-linear { mask-image: linear-gradient(to right, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%); }
+      
+      .markdown-body { color: #374151; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 1em; line-height: var(--reader-line-height, 1.85); overflow-x: hidden; overflow-wrap: anywhere; word-break: break-word; }
+      .dark .markdown-body { color: #d1d5db; }
+      
+      .font-serif .markdown-body { font-family: 'Songti SC', 'Noto Serif SC', serif; }
+      .font-kaiti .markdown-body { font-family: KaiTi, STKaiti, "楷体", "STKaiti", serif; }
+      
+      /* Ensure scroll margin for anchors */
+      .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { scroll-margin-top: 100px; position: relative; } 
+      .markdown-body h1 { font-size: var(--reader-h1-font-size, 2.2em); font-weight: 800; margin-bottom: var(--reader-h1-margin-bottom, 1em); color: #88133b; border-bottom: 2px solid #ffe4e9; padding-bottom: var(--reader-h1-padding-bottom, 0.3em); letter-spacing: -0.025em; }
+      .dark .markdown-body h1 { color: #fecdd7; border-bottom-color: #88133b; }
+
+      .markdown-body h2 { font-size: var(--reader-h2-font-size, 1.6em); font-weight: 700; margin-top: var(--reader-h2-margin-top, 1.5em); margin-bottom: var(--reader-h2-margin-bottom, 0.8em); color: #9f123f; display: flex; align-items: center; }
+      .dark .markdown-body h2 { color: #fda4b8; }
+      .markdown-body h2::before { content: '🌸'; margin-right: 12px; font-size: 0.8em; animation: float 3s ease-in-out infinite; opacity: 0.8; }
+      
+      .markdown-body h3 { font-size: var(--reader-h3-font-size, 1.3em); font-weight: 600; margin-top: var(--reader-h3-margin-top, 1.5em); margin-bottom: var(--reader-h3-margin-bottom, 0.6em); color: #be1245; }
+      .dark .markdown-body h3 { color: #fc7096; }
+
+      .markdown-body h4 { font-size: var(--reader-h4-font-size, 1.1em); font-weight: 600; margin-top: var(--reader-h4-margin-top, 1.4em); margin-bottom: var(--reader-h4-margin-bottom, 0.5em); color: #9f123f; }
+      .dark .markdown-body h4 { color: #f9a8d4; }
+      .markdown-body h5 { font-size: var(--reader-h5-font-size, 1em); font-weight: 600; margin-top: var(--reader-h5-margin-top, 1.2em); margin-bottom: var(--reader-h5-margin-bottom, 0.4em); color: #831843; }
+      .dark .markdown-body h5 { color: #fbcfe8; }
+      .markdown-body h6 { font-size: var(--reader-h6-font-size, 0.95em); font-weight: 600; margin-top: var(--reader-h6-margin-top, 1em); margin-bottom: var(--reader-h6-margin-bottom, 0.4em); color: #6b1236; text-transform: uppercase; letter-spacing: 0.04em; }
+      .dark .markdown-body h6 { color: #fce7f3; }
+
+      .markdown-body p { margin-bottom: var(--reader-paragraph-gap, 1.6em); line-height: var(--reader-paragraph-line-height, 1.9); }
+      .markdown-body p strong { color: #9f123f; font-weight: 700; }
+      .dark .markdown-body p strong { color: #fda4b8; }
+      .markdown-body p em { color: #be185d; }
+      .dark .markdown-body p em { color: #f9a8d4; }
+      .markdown-body mark { background: rgba(253, 164, 184, 0.35); color: #9f123f; padding: 0 0.25em; border-radius: 4px; }
+      .dark .markdown-body mark { background: rgba(244, 63, 114, 0.35); color: #fde2e8; }
+      .markdown-body kbd { background: #fff0f5; border: 1px solid #fecdd7; border-bottom-width: 2px; padding: 0.1em 0.4em; border-radius: 6px; font-size: 0.85em; color: #9f123f; }
+      .dark .markdown-body kbd { background: #111827; border-color: #374151; color: #fbcfe8; }
+      .markdown-body del { color: #9ca3af; }
+      .dark .markdown-body del { color: #6b7280; }
+      .markdown-body ul { list-style-type: none; padding-left: 1.2em; margin-bottom: var(--reader-list-margin-bottom, 1.5em); }
+      .markdown-body ul li { position: relative; margin-bottom: var(--reader-list-item-gap, 0.6em); padding-left: 1em; }
+      .markdown-body ul li::before { content: '•'; color: #fc7096; font-size: 1.5em; position: absolute; left: -0.5em; top: -0.1em; line-height: 1; }
+      
+      .markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: var(--reader-list-margin-bottom, 1.5em); color: #be1245; font-weight: 500; }
+      .markdown-body ol li { margin-bottom: var(--reader-list-item-gap, 0.6em); }
+      .dark .markdown-body ol { color: #fda4b8; }
+
+      .markdown-body blockquote { border-left: 4px solid #fda4b8; background: linear-gradient(to right, #fff0f5, transparent); padding: var(--reader-blockquote-padding-y, 1rem) var(--reader-blockquote-padding-x, 1.5rem); border-radius: 0 8px 8px 0; color: #be1245; margin: var(--reader-blockquote-margin-y, 2em) 0; font-style: italic; }
+      .dark .markdown-body blockquote { border-left-color: #be1245; background: linear-gradient(to right, #374151, transparent); color: #fecdd7; }
+
+      .markdown-body code { background: #fff0f5; color: #d61f69; padding: 0.2em 0.5em; border-radius: 6px; font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: var(--reader-code-font-size, 0.9em); border: 1px solid #fecdd7; }
+      .dark .markdown-body code { background: #374151; color: #fda4b8; border-color: #4b5563; }
+
+      .markdown-body pre { background: #1f2937; color: #e5e7eb; padding: var(--reader-pre-padding-top, 3.5em) var(--reader-pre-padding-x, 1.5em) var(--reader-pre-padding-bottom, 1.5em) var(--reader-pre-padding-x, 1.5em); border-radius: 16px; overflow-x: auto; margin: var(--reader-pre-margin-y, 2em) 0; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2); position: relative; font-family: 'Menlo', 'Monaco', 'Courier New', monospace; line-height: var(--reader-code-line-height, 1.5); }
+      .dark .markdown-body pre { background: #000000; border: 1px solid #374151; }
+      
+      .markdown-body pre::before { content: ''; position: absolute; top: 16px; left: 16px; width: 12px; height: 12px; background: #ff5f56; border-radius: 50%; box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f; }
+      .markdown-body pre code { background: transparent; color: inherit; padding: 0; border: none; font-size: var(--reader-pre-code-font-size, 14px); }
+      .markdown-body pre.hljs { background: #1f2937; border: 1px solid #374151; }
+      .hljs { color: #e5e7eb; }
+      .hljs-comment { color: #9ca3af; font-style: italic; }
+      .hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #f472b6; }
+      .hljs-string, .hljs-attr, .hljs-attribute { color: #a7f3d0; }
+      .hljs-number, .hljs-built_in { color: #fbbf24; }
+      .hljs-title, .hljs-function { color: #93c5fd; }
+      .markdown-body img { max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px -10px rgba(244, 63, 114, 0.2); margin: var(--reader-media-margin-y, 2em) auto; display: block; }
+
+      .markdown-body hr { border: none; height: 1px; margin: var(--reader-hr-margin-y, 2.5em) 0; background: linear-gradient(to right, transparent, rgba(244, 63, 114, 0.5), transparent); }
+      .dark .markdown-body hr { background: linear-gradient(to right, transparent, rgba(253, 164, 184, 0.5), transparent); }
+
+      .markdown-body table { width: 100%; border-collapse: collapse; margin: var(--reader-table-margin-y, 2em) 0; overflow: hidden; border-radius: 12px; box-shadow: 0 12px 30px -20px rgba(244, 63, 114, 0.4); }
+      .markdown-body thead { background: linear-gradient(to right, rgba(253, 164, 184, 0.4), rgba(255, 240, 245, 0.9)); color: #9f123f; }
+      .dark .markdown-body thead { background: linear-gradient(to right, rgba(244, 63, 114, 0.4), rgba(17, 24, 39, 0.9)); color: #fbcfe8; }
+      .markdown-body th, .markdown-body td { padding: var(--reader-table-cell-padding-y, 0.8em) var(--reader-table-cell-padding-x, 1em); border-bottom: 1px solid rgba(244, 63, 114, 0.15); text-align: left; }
+      .dark .markdown-body th, .dark .markdown-body td { border-bottom-color: rgba(148, 163, 184, 0.2); }
+      .markdown-body tbody tr:nth-child(2n) { background: rgba(255, 240, 245, 0.6); }
+      .dark .markdown-body tbody tr:nth-child(2n) { background: rgba(17, 24, 39, 0.5); }
+
+      .markdown-body input[type="checkbox"] { margin-right: 0.5em; accent-color: #f472b6; }
+      .dark .markdown-body input[type="checkbox"] { accent-color: #fb7185; }
+
+      .markdown-body .pdf-embed-wrapper { margin: var(--reader-media-margin-y, 2em) 0; border-radius: 14px; overflow: hidden; border: 1px solid rgba(244, 63, 114, 0.2); background: #fff7f9; box-shadow: 0 12px 30px -18px rgba(244, 63, 114, 0.4); }
+      .dark .markdown-body .pdf-embed-wrapper { background: #111827; border-color: rgba(244, 63, 114, 0.35); }
+      .markdown-body .pdf-embed-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0.6rem 0.9rem; background: linear-gradient(to right, rgba(253, 164, 184, 0.25), rgba(255, 255, 255, 0.9)); color: #be1245; font-size: 0.9rem; font-weight: 600; }
+      .dark .markdown-body .pdf-embed-toolbar { background: linear-gradient(to right, rgba(244, 63, 114, 0.25), rgba(17, 24, 39, 0.9)); color: #fecdd7; }
+      .markdown-body .pdf-embed-actions { display: inline-flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; }
+      .markdown-body .pdf-embed-actions a { border-bottom: none; padding: 0.1rem 0.3rem; border-radius: 6px; background: rgba(244, 63, 114, 0.08); }
+      .dark .markdown-body .pdf-embed-actions a { background: rgba(244, 63, 114, 0.2); }
+      .markdown-body .pdf-embed { width: 100%; height: min(70vh, 900px); border: none; background: #ffffff; }
+      .dark .markdown-body .pdf-embed { background: #0f172a; }
+      
+      .markdown-body a { color: #e11d59; text-decoration: none; border-bottom: 2px solid rgba(225, 29, 89, 0.2); transition: all 0.2s; font-weight: 500; }
+      .dark .markdown-body a { color: #fda4b8; border-bottom-color: rgba(253, 164, 184, 0.2); }
+      
+      .markdown-body a:hover { color: #be1245; background-color: rgba(254, 205, 215, 0.3); border-color: #be1245; }
+      .dark .markdown-body a:hover { color: #fff0f5; background-color: rgba(253, 164, 184, 0.1); }
+
+      .folder-card:hover { transform: translateY(-5px); }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "fs": "https://esm.sh/fs@^0.0.1-security",
+    "path": "https://esm.sh/path@^0.12.7",
+    "vue": "https://esm.sh/vue@^3.5.26",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-vue": "https://esm.sh/@vitejs/plugin-vue@^6.0.3",
+    "lodash": "https://esm.sh/lodash@^4.17.21",
+    "marked": "https://esm.sh/marked@12.0.0"
+  }
+}
+</script>
+
+  <script async src="./js/umami-share.js?v=5"></script>
+
+</head>
+  <body>
+    <!-- Petals are now rendered inside Vue App for dynamic control -->
+    <div id="app" class="relative z-10">
+      <div id="boot-screen" style="height: 100vh; display: flex; justify-content: center; align-items: center; color: #fc7096; flex-direction: column; padding: 24px; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; animation: spin 4s linear infinite;">🌸</div>
+        <div id="boot-title" style="font-family: 'Quicksand', sans-serif; font-weight: bold; color: #be1245; font-size: 1.05rem;">Loading Sakura Notes...</div>
+        <div id="boot-detail" style="margin-top: 0.75rem; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; font-size: 0.9rem; color: rgba(190, 18, 69, 0.85); max-width: 520px;"></div>
+        <div id="boot-actions" style="display: none; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; justify-content: center;">
+          <button id="boot-retry" style="appearance: none; border: 1px solid rgba(190, 18, 69, 0.25); background: rgba(255, 255, 255, 0.7); color: #be1245; padding: 10px 14px; border-radius: 999px; font-weight: 700; cursor: pointer;">刷新重试</button>
+          <button id="boot-lite" style="appearance: none; border: 1px solid rgba(190, 18, 69, 0.25); background: rgba(190, 18, 69, 0.08); color: #be1245; padding: 10px 14px; border-radius: 999px; font-weight: 700; cursor: pointer;">进入轻量模式</button>
+        </div>
+        <div id="boot-tips" style="display: none; margin-top: 0.9rem; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; font-size: 0.85rem; color: rgba(190, 18, 69, 0.75); line-height: 1.6; max-width: 560px;">
+          <div>如果一直加载：建议检查网络、清理站点缓存后重试，或确认发布目录为 dist/（而不是 src/）。</div>
+        </div>
+      </div>
+      <style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
+    </div>
+    <!-- Vite entry point -->
+    <script>
+      (function () {
+        var root = document.getElementById('app')
+        var screen = document.getElementById('boot-screen')
+        if (!root || !screen) return
+
+        try {
+          if (!window.__sakuraFilesJsonPrefetch) {
+            window.__sakuraFilesJsonPrefetch = fetch('./data/files.json')
+          }
+        } catch (e) { }
+
+        var title = document.getElementById('boot-title')
+        var detail = document.getElementById('boot-detail')
+        var actions = document.getElementById('boot-actions')
+        var tips = document.getElementById('boot-tips')
+
+        var stopped = false
+        var timers = []
+
+        var setDetail = function (text) {
+          if (!detail) return
+          detail.textContent = text || ''
+        }
+
+        var showFail = function (reason) {
+          if (stopped) return
+          stopped = true
+          if (title) title.textContent = '无法加载 Sakura Notes'
+          setDetail(reason || '资源加载失败或网络较慢。')
+          if (actions) actions.style.display = 'flex'
+          if (tips) tips.style.display = 'block'
+        }
+
+        var stop = function () {
+          stopped = true
+          for (var i = 0; i < timers.length; i++) window.clearTimeout(timers[i])
+        }
+
+        var observer = new MutationObserver(function () {
+          if (!document.getElementById('boot-screen')) {
+            stop()
+            observer.disconnect()
+          }
+        })
+        observer.observe(root, { childList: true, subtree: true })
+
+        timers.push(window.setTimeout(function () {
+          if (stopped) return
+          var conn = navigator.connection && navigator.connection.effectiveType ? '（网络：' + navigator.connection.effectiveType + '）' : ''
+          setDetail('首次打开需要下载核心资源并初始化索引' + (conn ? ' ' + conn : ''))
+        }, 2000))
+
+        timers.push(window.setTimeout(function () {
+          if (stopped) return
+          setDetail('正在初始化界面与文章索引…')
+        }, 5000))
+
+        timers.push(window.setTimeout(function () {
+          if (stopped) return
+          showFail('加载时间较长，可能是网络或资源路径问题。')
+        }, 8000))
+
+        window.__sakuraBoot = { fail: showFail }
+
+        window.addEventListener('error', function (e) {
+          if (stopped) return
+          var target = e && e.target
+          var tag = target && target.tagName
+          if (tag === 'SCRIPT' || tag === 'LINK') {
+            showFail('关键资源加载失败，请检查网络或刷新重试。')
+          }
+        }, true)
+
+        window.addEventListener('unhandledrejection', function () {
+          if (stopped) return
+          showFail('初始化发生异常，请刷新重试。')
+        })
+
+        var retry = document.getElementById('boot-retry')
+        if (retry) retry.addEventListener('click', function () { window.location.reload() })
+
+        var lite = document.getElementById('boot-lite')
+        if (lite) lite.addEventListener('click', function () {
+          try { window.localStorage.setItem('sakura:liteMode:v1', '1') } catch (e) { }
+          window.location.reload()
+        })
+      })()
+    </script>
+    <script type="module" src="./main.ts" onerror="window.__sakuraBoot && window.__sakuraBoot.fail('入口脚本加载失败，请检查部署路径或刷新重试。')"></script>
+  </body>
+</html>

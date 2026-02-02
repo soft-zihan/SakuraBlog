@@ -1,0 +1,34 @@
+{
+  "version": "2026.02.01",
+  "intro": "实验室实验组件：LabComposables.vue（用于交互式讲解/演示）。",
+  "notes": [
+    {
+      "matchRegex": "^<script\\s+setup\\s+lang=\"ts\">$",
+      "content": "script setup 是 Vue 3 的语法糖。\nlang=\"ts\" 表示这一段用 TypeScript 写。\n组件内变量会自动暴露给模板。"
+    },
+    {
+      "matchRegex": "^const\\s+props\\s*=\\s*defineProps<\\{",
+      "content": "defineProps<...> 用泛型标注 props 类型。\n这里把 lang 限定为 'en' | 'zh'。\n这样模板和脚本都有类型提示。"
+    },
+    {
+      "matchRegex": "^const\\s+isZh\\s*=\\s*computed\\(",
+      "content": "computed 接收一个 getter。\n依赖 props.lang，变化时自动更新。\n模板中可直接用 isZh.value 的结果。"
+    },
+    {
+      "matchRegex": "^const\\s+openCode\\s*=\\s*\\(",
+      "content": "函数参数使用类型注解：path 是 string，range 可选。\n可选参数用 ? 标记，调用时可省略。\n这是一种常见的 API 设计方式。"
+    },
+    {
+      "matchRegex": "^const\\s+selectedComposable\\s*=\\s*ref\\(",
+      "content": "ref('useSearch') 初始化字符串状态。\nref 默认推断类型为 string。\n用于记录当前选中的 tab。"
+    },
+    {
+      "matchRegex": "^interface\\s+ComposableSection\\s*\\{",
+      "content": "interface 定义对象结构。\n字段类型为 string 或可选 string。\n用接口让数据结构在多个地方复用。"
+    },
+    {
+      "matchRegex": "^const\\s+composablesList:\\s*ComposableInfo\\[]\\s*=\\s*\\[",
+      "content": "数组类型用 T[] 表示。\n显式写 ComposableInfo[] 可以约束数组元素。\n这样每个 section 都必须符合接口。"
+    }
+  ]
+}

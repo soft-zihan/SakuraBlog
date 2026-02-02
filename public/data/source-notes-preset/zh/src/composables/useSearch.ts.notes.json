@@ -1,0 +1,14 @@
+{
+  "version": "2026.02.01",
+  "intro": "组合式函数：抽离可复用业务逻辑（Composition API）。",
+  "notes": [
+    {
+      "matchRegex": "export function useSearch\\(",
+      "content": "全量搜索（浏览器端）：构建 MiniSearch 索引，按当前语言根目录过滤（zh/ 或 en/），并对名称精确/前缀匹配做额外加权。"
+    },
+    {
+      "matchRegex": "const tokenizeMixed\\s*=",
+      "content": "tokenizeMixed 做中英文混合分词：英文按词切分，中文按连续片段与单字同时入索引，提升中文召回。"
+    }
+  ]
+}

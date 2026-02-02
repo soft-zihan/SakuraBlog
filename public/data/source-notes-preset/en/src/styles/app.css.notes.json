@@ -1,0 +1,11 @@
+{
+  "version": "2026.02.01",
+  "intro": "Global style overrides: article style classes (lined/grid), font helpers, etc.",
+  "notes": [
+    {
+      "line": 1,
+      "matchRegex": "^\\.dark\\s+#markdown-viewer\\s+::selection",
+      "content": "Global style overrides: selection color, article style classes, and font helpers."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "Routing/state sync: map current file/folder/mode to URL and restore.",
+  "notes": []
+}

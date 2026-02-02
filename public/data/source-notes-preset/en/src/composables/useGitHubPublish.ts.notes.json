@@ -1,0 +1,21 @@
+{
+  "version": "2026.02.01",
+  "intro": "GitHub publishing: auth, write operations, fork+PR fallback, upload files.",
+  "notes": [
+    {
+      "line": 18,
+      "matchRegex": "export function useGitHubPublish\\(",
+      "content": "Enables write operations for a static site via GitHub APIs, with a Fork+PR fallback when the user lacks write access."
+    },
+    {
+      "line": 60,
+      "matchRegex": "^\\s*const checkWriteAccess\\s*=\\s*async\\b",
+      "content": "Checks write access via permissions.push from GitHub repo API."
+    },
+    {
+      "line": 213,
+      "matchRegex": "^\\s*const createPullRequest\\s*=\\s*async\\b",
+      "content": "Fork+PR flow enables contributions without direct push permission."
+    }
+  ]
+}

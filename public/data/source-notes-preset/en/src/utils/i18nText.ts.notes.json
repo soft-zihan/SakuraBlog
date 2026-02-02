@@ -1,0 +1,18 @@
+{
+  "version": "2026.02.01",
+  "intro": "Bilingual text helper: pick current language from ZH/EN blocks; supports anchor-based preset notes to reduce drift.",
+  "notes": [
+    {
+      "matchRegex": "^export type PresetNote\\s*=",
+      "content": "PresetNote supports 3 ways to anchor: (1) matchRegex, (2) match (substring), (3) line fallback. occurrence selects the Nth hit, and offset adjusts the final line."
+    },
+    {
+      "matchRegex": "export const resolvePresetNoteLine\\s*=",
+      "content": "resolvePresetNoteLine prefers matchRegex → match → line. It clamps occurrence >= 1, applies offset, and drops out-of-range results to avoid invalid mappings."
+    },
+    {
+      "matchRegex": "export const buildPresetNoteMap\\s*=",
+      "content": "buildPresetNoteMap resolves each note to a final line number and merges multiple notes on the same line by joining with a blank line."
+    }
+  ]
+}

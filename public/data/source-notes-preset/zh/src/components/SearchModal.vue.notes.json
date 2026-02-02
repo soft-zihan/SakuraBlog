@@ -1,0 +1,40 @@
+{
+  "version": "2026.02.01",
+  "intro": "UI 组件：页面功能块与交互入口。",
+  "notes": [
+    {
+      "match": "<Teleport to=\"body\">",
+      "content": "搜索弹窗通过 Teleport 渲染到 body 下。\n这样不受父容器 overflow/层级影响，弹窗能盖住全屏。\n视觉位置变了，但逻辑仍归属于当前组件。\n状态、事件、数据都在这里管理。"
+    },
+    {
+      "matchRegex": "v-if=\"showSearchModal\"",
+      "content": "showSearchModal 控制弹窗是否渲染。\n@click.self 只在点击遮罩空白处时触发，避免误点内容。\n@keydown.esc 允许按 ESC 关闭。\n这是“遮罩点击关闭 + 快捷键关闭”的标准弹窗交互。"
+    },
+    {
+      "matchRegex": "v-model=\"query\"",
+      "content": "v-model 把输入框的值与 query 绑定。\n用户输入会更新 query，query 变化也会回写到输入框。\n这就是“表单双向绑定”，新手最常见的语法。\n理解为：输入框和变量始终保持一致。"
+    },
+    {
+      "matchRegex": "@keydown\\.up\\.prevent",
+      "content": "键盘事件修饰符让交互更清晰。\n.up/.down 代表方向键，.prevent 阻止默认光标移动。\n这样方向键就用于“选择搜索结果”。\n这是键盘导航的基础做法。"
+    },
+    {
+      "matchRegex": "v-for=\"\\(result, idx\\) in results\"",
+      "content": "结果列表使用 v-for 渲染。\nselectedIndex 决定高亮哪一项。\n@mouseenter 让鼠标移动时更新高亮。\n这样键盘和鼠标都能控制当前选中项。"
+    },
+    {
+      "matchRegex": "v-html=\"highlightText",
+      "occurrence": 1,
+      "content": "v-html 会把字符串当作 HTML 渲染。\n必须先用 sanitizeHtml 清洗，避免 XSS 注入。\n这里再做关键词高亮，确保安全。\n新手记住：能不用 v-html 就不用。"
+    },
+    {
+      "matchRegex": "searchDebounceTimer",
+      "occurrence": 5,
+      "content": "输入搜索时用 setTimeout 做防抖。\n用户连续输入只触发最后一次搜索。\n这样减少无用计算，提升性能。\n防抖是搜索输入的常用优化。"
+    },
+    {
+      "matchRegex": "watch\\(\\(\\) => props\\.showSearchModal",
+      "content": "watch 用于监听弹窗开关。\n打开时 nextTick 聚焦输入框；关闭时清理定时器并重置状态。\n这样每次打开都是“干净的初始状态”。\n这是良好用户体验的细节处理。"
+    }
+  ]
+}

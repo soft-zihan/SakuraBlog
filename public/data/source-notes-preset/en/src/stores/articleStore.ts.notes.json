@@ -1,0 +1,11 @@
+{
+  "version": "2026.02.01",
+  "intro": "Article interactions: likes, favorites, tag filters, and local stats.",
+  "notes": [
+    {
+      "line": 35,
+      "matchRegex": "defineStore\\('article'",
+      "content": "Manages interaction state (likes/favorites/tags/stats) rather than Markdown content."
+    }
+  ]
+}
