@@ -734,33 +734,6 @@
           </div>
         </div>
 
-        <div class="mb-4 border-t border-gray-100 dark:border-gray-800 pt-4">
-          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '音乐设置' : 'Music Settings' }}</div>
-          <div class="flex gap-2 mb-2">
-            <input v-model="customMusicTitle" type="text" :placeholder="lang === 'zh' ? '标题' : 'Title'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-            <input v-model="customMusicArtist" type="text" :placeholder="lang === 'zh' ? '作者' : 'Artist'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-          </div>
-          <div class="flex gap-2 mb-2">
-            <input v-model="customMusicUrl" type="text" :placeholder="lang === 'zh' ? '音乐链接或本地上传' : 'Music URL or Upload'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-            <button @click="triggerMusicUpload" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)]">{{ lang === 'zh' ? '本地' : 'Local' }}</button>
-          </div>
-          <div class="flex gap-2 mb-2">
-            <input v-model="customMusicCover" type="text" :placeholder="lang === 'zh' ? '封面链接（可选）' : 'Cover URL (optional)'" class="flex-1 px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400" />
-            <button @click="triggerCoverUpload" class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-[var(--primary-600)]">{{ lang === 'zh' ? '本地封面' : 'Local Cover' }}</button>
-          </div>
-          <div class="flex gap-2">
-            <button @click="addCustomMusic" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-[var(--primary-400)] text-[var(--primary-600)] dark:text-[var(--primary-400)] hover:bg-[var(--primary-50)] dark:hover:bg-[var(--primary-900)]/20">{{ lang === 'zh' ? '添加音乐' : 'Add Track' }}</button>
-            <button @click="clearCustomMusic" class="flex-1 py-2 border rounded-xl text-xs transition-colors border-gray-200 dark:border-gray-700 text-gray-500 hover:text-red-500">{{ lang === 'zh' ? '清空自定义' : 'Clear Custom' }}</button>
-          </div>
-          <input ref="musicFileInput" type="file" accept="audio/*" class="hidden" @change="handleMusicFile" />
-          <input ref="coverFileInput" type="file" accept="image/*" class="hidden" @change="handleCoverFile" />
-          <div v-if="musicStore.customTracks.length" class="mt-3 space-y-2">
-            <div v-for="track in musicStore.customTracks" :key="track.id" class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg px-2 py-1">
-              <span class="truncate flex-1">{{ track.title || track.url }}</span>
-              <button @click="musicStore.removeCustomTrack(track.id)" class="text-red-400 hover:text-red-500">✕</button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </Teleport>
@@ -770,7 +743,6 @@
 import { computed, ref, onMounted } from 'vue'
 import { THEME_COLOR_LIST } from '@/constants'
 import type { ThemeColorId } from '@/constants'
-import { useMusicStore } from '@/stores/musicStore'
 import { useAppStore } from '@/stores/appStore'
 import { useWallpapers, type WallpaperItem } from '@/composables/useWallpapers'
 
@@ -784,7 +756,6 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:open', 'toggle-theme', 'update:petal-speed'])
 
-const musicStore = useMusicStore()
 const appStore = useAppStore()
 const {
   currentThemeWallpapers,
@@ -1182,72 +1153,6 @@ const wallhavenCollectionNextPage = async () => {
   const w: any = (appStore.wallpaperApiSettings as any).wallhaven
   w.collectionPage = Math.max(1, Number(w.collectionPage || 1) + 1)
   await loadWallhavenCollectionWallpapers()
-}
-
-const customMusicTitle = ref('')
-const customMusicArtist = ref('')
-const customMusicUrl = ref('')
-const customMusicCover = ref('')
-const musicFileInput = ref<HTMLInputElement | null>(null)
-const coverFileInput = ref<HTMLInputElement | null>(null)
-
-const triggerMusicUpload = () => {
-  musicFileInput.value?.click()
-}
-
-const handleMusicFile = (e: Event) => {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    const url = typeof reader.result === 'string' ? reader.result : ''
-    if (!url) return
-    customMusicUrl.value = url
-    if (!customMusicTitle.value) customMusicTitle.value = file.name
-    input.value = ''
-  }
-  reader.readAsDataURL(file)
-}
-
-const triggerCoverUpload = () => {
-  coverFileInput.value?.click()
-}
-
-const handleCoverFile = (e: Event) => {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    const url = typeof reader.result === 'string' ? reader.result : ''
-    if (!url) return
-    customMusicCover.value = url
-    input.value = ''
-  }
-  reader.readAsDataURL(file)
-}
-
-const addCustomMusic = () => {
-  const url = customMusicUrl.value.trim()
-  if (!url) return
-  const id = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-  musicStore.addCustomTrack({
-    id,
-    title: customMusicTitle.value || 'Custom',
-    artist: customMusicArtist.value || '',
-    cover: customMusicCover.value || undefined,
-    url
-  })
-  customMusicTitle.value = ''
-  customMusicArtist.value = ''
-  customMusicUrl.value = ''
-  customMusicCover.value = ''
-}
-
-const clearCustomMusic = () => {
-  const ids = musicStore.customTracks.map((t: { id: string }) => t.id)
-  ids.forEach(id => musicStore.removeCustomTrack(id))
 }
 
 const getPetalSpeedLabel = (speed: 'off' | 'slow' | 'fast') => {

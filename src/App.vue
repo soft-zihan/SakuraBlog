@@ -569,12 +569,12 @@ const handleCommentCountUpdate = (payload: { path: string; count: number }) => {
 };
 
 const getArticleViews = (path: string): number | undefined => {
-  const cached = articleStore.getCachedStats(path);
+  const cached = articleStore.getCachedStats(path, { allowStale: true });
   return cached ? cached.views : undefined;
 };
 
 const getArticleVisitors = (path: string): number | undefined => {
-  const cached = articleStore.getCachedStats(path);
+  const cached = articleStore.getCachedStats(path, { allowStale: true });
   return cached ? cached.visitors : undefined;
 };
 

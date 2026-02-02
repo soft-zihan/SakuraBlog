@@ -1,6 +1,6 @@
 <template>
   <header 
-    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/60 shrink-0 z-20 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-transform duration-300 ease-out hover:bg-white/80 dark:hover:bg-gray-900/80 overflow-hidden"
+    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/60 shrink-0 z-20 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-transform duration-300 ease-out hover:bg-white/80 dark:hover:bg-gray-900/80"
     style="will-change: transform;"
     :class="[
       isMobile ? 'px-3' : 'h-16 px-6',

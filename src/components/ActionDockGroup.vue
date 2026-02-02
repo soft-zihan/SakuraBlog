@@ -84,6 +84,7 @@ const { showToast } = useToast();
 const { 
   changeWallpaperSameSeries, 
   downloadWallpaper, 
+  currentWallpaper,
   currentWallpaperPath, 
   addCustomWallpaper
 } = useWallpapers();
@@ -115,7 +116,7 @@ const addCurrentToList = (theme?: 'light' | 'dark') => {
 };
 
 const downloadCurrentWallpaper = () => {
-  const url = currentWallpaperPath.value;
+  const url = currentWallpaper.value || currentWallpaperPath.value;
   if (!url) return;
   downloadWallpaper(url);
   if (props.downloadToast) {

@@ -7,6 +7,10 @@
       "content": "根节点同时使用 class 与 :class。\nclass 放固定样式，:class 根据状态拼接条件样式。\n适合处理“移动端/收起/主题面板打开”等多种情况。"
     },
     {
+      "matchRegex": "backdrop-blur-xl",
+      "content": "顶部栏里不建议用 overflow-hidden。\n否则会裁剪绝对定位的下拉菜单（例如“收藏壁纸”下拉）。\n需要圆角/遮罩时，优先在内部容器做裁剪。"
+    },
+    {
       "matchRegex": "v-if=\"!isMobile\"",
       "content": "v-if / v-else 直接切换两套 DOM 结构。\n桌面与移动端差异大时，这比写大量 CSS 更清晰。\n缺点是结构重复，但逻辑更直观。"
     },

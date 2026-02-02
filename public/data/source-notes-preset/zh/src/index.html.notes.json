@@ -56,14 +56,6 @@
       "content": "Twitter 卡片预览图：用于 X/Twitter 的链接分享卡片。"
     },
     {
-      "match": "<!-- Tailwind CSS via CDN -->",
-      "content": "HTML 注释不会被渲染，用来给开发者标记结构与用途。"
-    },
-    {
-      "match": "cdn.tailwindcss.com?plugins=typography",
-      "content": "外部脚本加载：浏览器会请求 CDN 资源并执行，后续 inline 配置才能生效。"
-    },
-    {
       "match": "<div id=\"app\"",
       "content": "应用挂载点：Vite 会加载 /main.ts，在其中 createApp 并 mount 到这个元素。"
     },
@@ -87,10 +79,6 @@
     {
       "match": "Loading Sakura Notes...",
       "content": "首屏加载占位：在 JS 应用启动前提供视觉反馈，避免白屏。"
-    },
-    {
-      "match": "tailwind.config",
-      "content": "通过 CDN 方式注入 Tailwind，并在这里写运行时配置：darkMode=class，扩展 sakura 调色板，以及用 CSS 变量驱动 primary 主题色。"
     },
     {
       "match": "@keyframes petalFall",

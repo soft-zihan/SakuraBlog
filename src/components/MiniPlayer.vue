@@ -13,9 +13,10 @@
         <!-- Spinning Cover -->
         <div class="relative w-12 h-12 rounded-full overflow-hidden border-2 border-sakura-200 dark:border-gray-600">
           <img 
-            :src="musicStore.currentTrack?.cover || '/image/music-default.jpg'" 
+            :src="musicStore.currentTrack?.cover || '/image/music-default.svg'" 
             class="w-full h-full object-cover animate-spin-slow"
             :style="{ animationPlayState: musicStore.isPlaying ? 'running' : 'paused' }"
+            referrerpolicy="no-referrer"
             @error="handleCoverError"
           />
           <!-- Center Hole -->
@@ -49,7 +50,26 @@ import { useMusicStore } from '../stores/musicStore';
 const musicStore = useMusicStore();
 
 const handleCoverError = (e: Event) => {
-  (e.target as HTMLImageElement).src = '/image/music-default.jpg';
+  const img = e.target as HTMLImageElement;
+  const src = (img.currentSrc || img.src || '').trim();
+  if (!src) return;
+  if (src.includes('/image/music-default.svg')) return;
+  if (src.includes('/api/bili/image?')) {
+    img.onerror = null;
+    img.src = '/image/music-default.svg';
+    return;
+  }
+
+  const anyImg = img as any;
+  const base = (musicStore.effectiveBiliProxyBaseUrl || '').trim().replace(/\/+$/, '');
+  if (!anyImg.__biliProxyTried && base && src.includes('hdslb.com')) {
+    anyImg.__biliProxyTried = true;
+    img.src = `${base}/api/bili/image?url=${encodeURIComponent(src)}`;
+    return;
+  }
+
+  img.onerror = null;
+  img.src = '/image/music-default.svg';
 }
 </script>
 

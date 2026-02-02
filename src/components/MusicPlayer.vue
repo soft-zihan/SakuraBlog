@@ -10,7 +10,7 @@
         <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="musicStore.showMusicPlayer = false"></div>
         
         <!-- Player Card -->
-        <div class="relative w-full max-w-lg bg-gradient-to-br from-white/95 to-sakura-50/95 dark:from-gray-900/95 dark:to-gray-800/95 rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700 overflow-hidden animate-fade-in">
+        <div class="relative w-full max-w-lg max-h-[calc(100vh-2rem)] bg-gradient-to-br from-white/95 to-sakura-50/95 dark:from-gray-900/95 dark:to-gray-800/95 rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700 overflow-hidden animate-fade-in flex flex-col">
           
           <!-- Close Button -->
           <button 
@@ -21,13 +21,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
+
+          <div class="overflow-y-auto overscroll-contain">
           
           <!-- Cover Art -->
           <div class="relative aspect-square max-h-64 mx-auto mt-8">
-            <img 
-              :src="currentTrack?.cover || '/image/music-default.jpg'" 
+            <img
+              :src="currentTrack?.cover || '/image/music-default.svg'"
               class="w-48 h-48 mx-auto rounded-2xl object-cover shadow-2xl transition-transform duration-500"
               :class="{ 'animate-pulse': musicStore.isPlaying }"
+              referrerpolicy="no-referrer"
               @error="handleCoverError"
             />
             <div class="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
@@ -99,7 +102,8 @@
                 <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
               </svg>
               <svg v-else-if="musicStore.playMode === 'single'" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 7h10v10H7V7zm2 2v6h6V9H9z"/>
+                <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                <path d="M13 15V9h-1l-1 1v1h1v4h1z"/>
               </svg>
               <svg v-else-if="musicStore.playMode === 'loop'" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
@@ -171,57 +175,324 @@
             </div>
           </div>
           
-          <!-- Playlist Toggle -->
           <div class="border-t border-gray-200 dark:border-gray-700">
-            <button 
-              @click="showPlaylist = !showPlaylist"
-              class="w-full px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-sakura-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-              </svg>
-              播放列表 ({{ musicStore.playlist.length }})
-              <svg 
-                class="w-4 h-4 transition-transform"
-                :class="{ 'rotate-180': showPlaylist }"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            <div class="grid grid-cols-3">
+              <button
+                @click="activeTab = 'playlist'"
+                class="px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                :class="tabButtonClass('playlist')"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </button>
-            
-            <!-- Playlist -->
-            <Transition name="slide">
-              <div v-if="showPlaylist" class="max-h-48 overflow-y-auto border-t border-gray-200 dark:border-gray-700">
-                <div 
-                  v-for="(track, idx) in musicStore.playlist" 
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                </svg>
+                播放列表 ({{ musicStore.playlist.length }})
+              </button>
+              <button
+                @click="activeTab = 'bili'"
+                class="px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                :class="tabButtonClass('bili')"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"/>
+                </svg>
+                B 站搜索
+              </button>
+              <button
+                @click="activeTab = 'custom'"
+                class="px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                :class="tabButtonClass('custom')"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                添加音乐
+              </button>
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-gray-700">
+              <div v-if="activeTab === 'playlist'" class="max-h-48 overflow-y-auto">
+                <div
+                  v-for="(track, idx) in musicStore.playlist"
                   :key="track.id"
                   @click="musicStore.play(idx)"
                   class="px-6 py-3 flex items-center gap-3 hover:bg-sakura-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                   :class="{ 'bg-sakura-50 dark:bg-gray-800': musicStore.currentIndex === idx }"
                 >
-                  <img 
-                    :src="track.cover || '/image/music-default.jpg'" 
+                  <img
+                    :src="track.cover || '/image/music-default.svg'"
                     class="w-10 h-10 rounded-lg object-cover"
+                    referrerpolicy="no-referrer"
                     @error="handleCoverError"
                   />
                   <div class="flex-1 min-w-0">
                     <div class="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{{ track.title }}</div>
                     <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ track.artist }}</div>
                   </div>
-                  <div v-if="musicStore.currentIndex === idx && musicStore.isPlaying" class="text-sakura-500">
-                    <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                    </svg>
+                  <div class="flex items-center gap-2">
+                    <div v-if="musicStore.currentIndex === idx && musicStore.isPlaying" class="text-sakura-500">
+                      <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                      </svg>
+                    </div>
+                    <button
+                      @click.stop="downloadTrack(track)"
+                      class="p-1 rounded-md text-gray-400 hover:text-sakura-600 hover:bg-sakura-50 dark:hover:bg-gray-700 transition-colors"
+                      title="下载"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/>
+                      </svg>
+                    </button>
+                    <button
+                      @click.stop="musicStore.removeFromPlaylist(track.id)"
+                      class="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 transition-colors"
+                      title="从播放列表移除"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
                   </div>
                 </div>
-                
+
                 <div v-if="musicStore.playlist.length === 0" class="px-6 py-8 text-center text-gray-400">
                   暂无歌曲
                 </div>
               </div>
-            </Transition>
+
+              <div v-else-if="activeTab === 'bili'">
+                <div class="px-6 py-4 space-y-3">
+                  <div class="grid grid-cols-1 gap-3">
+                    <div class="space-y-1">
+                      <div class="text-xs text-gray-500 dark:text-gray-400">解析服务地址（Cloudflare Worker）</div>
+                      <input
+                        v-model="musicStore.biliSettings.proxyBaseUrl"
+                        :placeholder="musicStore.effectiveBiliProxyBaseUrl || 'https://xxx.workers.dev'"
+                        class="w-full px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-sakura-400"
+                      />
+                      <div
+                        v-if="!musicStore.biliSettings.proxyBaseUrl.trim() && musicStore.effectiveBiliProxyBaseUrl"
+                        class="text-xs text-gray-500 dark:text-gray-400"
+                      >
+                        已使用站点默认代理地址：{{ musicStore.effectiveBiliProxyBaseUrl }}
+                      </div>
+                      <div
+                        v-if="!musicStore.effectiveBiliProxyBaseUrl"
+                        class="text-xs text-amber-600 dark:text-amber-400"
+                      >
+                        B 站功能未启用：站点未配置解析服务地址（需部署 bili-proxy-worker 并设置 VITE_BILI_PROXY_BASE_URL）。
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                      <div class="space-y-1">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">音轨偏好</div>
+                        <select
+                          v-model="musicStore.biliSettings.prefer"
+                          class="w-full px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-sakura-400"
+                        >
+                          <option value="best">best</option>
+                          <option value="lossless">lossless</option>
+                          <option value="dolby">dolby</option>
+                          <option value="high">high</option>
+                          <option value="medium">medium</option>
+                          <option value="low">low</option>
+                        </select>
+                      </div>
+
+                      <div class="space-y-1">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">取流模式</div>
+                        <select
+                          v-model="musicStore.biliSettings.streamMode"
+                          class="w-full px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-sakura-400"
+                        >
+                          <option value="dash">dash</option>
+                          <option value="html5">html5</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <div class="flex gap-2">
+                      <input
+                        v-model="biliKeyword"
+                        @keydown.enter="doBiliSearch"
+                        placeholder="搜索 B 站视频（当作音乐播放）"
+                        class="flex-1 px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-sakura-400"
+                      />
+                      <button
+                        @click="doBiliSearch"
+                        class="px-3 py-2 rounded-lg bg-sakura-500 hover:bg-sakura-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                        :disabled="biliLoading || !biliKeyword.trim()"
+                      >
+                        {{ biliLoading ? '搜索中' : '搜索' }}
+                      </button>
+                    </div>
+
+                    <div v-if="biliError" class="text-xs text-red-600 dark:text-red-400">
+                      {{ biliError }}
+                    </div>
+                    <div v-if="musicStore.biliResolveError" class="text-xs text-amber-600 dark:text-amber-400">
+                      {{ musicStore.biliResolveError }}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="max-h-56 overflow-y-auto border-t border-gray-200 dark:border-gray-700"
+                  @scroll="onBiliScroll"
+                >
+                  <div
+                    v-for="track in biliResults"
+                    :key="track.id"
+                    class="px-6 py-3 flex items-center gap-3 hover:bg-sakura-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                    @click="playBili(track)"
+                  >
+                    <img
+                      :src="track.cover || '/image/music-default.svg'"
+                      class="w-10 h-10 rounded-lg object-cover"
+                      referrerpolicy="no-referrer"
+                      @error="handleCoverError"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{{ track.title }}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ track.artist }}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button
+                        @click.stop="playBili(track)"
+                        class="px-2 py-1 rounded-md bg-sakura-500 hover:bg-sakura-600 text-white text-xs font-medium transition-colors"
+                      >
+                        播放
+                      </button>
+                      <button
+                        @click.stop="joinBili(track)"
+                        class="px-2 py-1 rounded-md bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium hover:bg-white dark:hover:bg-gray-700 transition-colors"
+                      >
+                        加入
+                      </button>
+                      <button
+                        @click.stop="downloadBili(track)"
+                        class="px-2 py-1 rounded-md bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium hover:bg-white dark:hover:bg-gray-700 transition-colors"
+                      >
+                        下载
+                      </button>
+                    </div>
+                  </div>
+
+                  <div v-if="!biliLoading && biliResults.length === 0" class="px-6 py-6 text-center text-gray-400 text-sm">
+                    输入关键词开始搜索
+                  </div>
+                  <div v-else-if="biliLoadingMore" class="px-6 py-4 text-center text-gray-400 text-sm">
+                    加载更多...
+                  </div>
+                  <div v-else-if="biliHasMore" class="px-6 py-4 text-center text-gray-400 text-sm">
+                    滚动到底自动加载更多
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="border-t-0">
+                <div class="px-6 py-4 space-y-3">
+                  <div class="flex gap-2">
+                    <input
+                      v-model="customMusicTitle"
+                      type="text"
+                      placeholder="标题"
+                      class="flex-1 px-3 py-2 text-sm rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-sakura-400"
+                    />
+                    <input
+                      v-model="customMusicArtist"
+                      type="text"
+                      placeholder="作者"
+                      class="flex-1 px-3 py-2 text-sm rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-sakura-400"
+                    />
+                  </div>
+
+                  <div class="flex gap-2">
+                    <input
+                      v-model="customMusicUrl"
+                      type="text"
+                      placeholder="音乐链接或本地上传"
+                      class="flex-1 px-3 py-2 text-sm rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-sakura-400"
+                    />
+                    <button
+                      @click="triggerMusicUpload"
+                      class="px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-white dark:hover:bg-gray-700 transition-colors"
+                    >
+                      本地
+                    </button>
+                  </div>
+
+                  <div class="flex gap-2">
+                    <input
+                      v-model="customMusicCover"
+                      type="text"
+                      placeholder="封面链接（可选）"
+                      class="flex-1 px-3 py-2 text-sm rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-sakura-400"
+                    />
+                    <button
+                      @click="triggerCoverUpload"
+                      class="px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-white dark:hover:bg-gray-700 transition-colors"
+                    >
+                      本地封面
+                    </button>
+                  </div>
+
+                  <div class="flex gap-2">
+                    <button
+                      @click="addCustomMusic"
+                      class="flex-1 px-3 py-2 rounded-lg bg-sakura-500 hover:bg-sakura-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                      :disabled="!customMusicUrl.trim()"
+                    >
+                      添加
+                    </button>
+                    <button
+                      @click="clearCustomMusic"
+                      class="flex-1 px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-white dark:hover:bg-gray-700 transition-colors"
+                      :disabled="!musicStore.customTracks.length"
+                    >
+                      清空自定义
+                    </button>
+                  </div>
+
+                  <input ref="musicFileInput" type="file" accept="audio/*" class="hidden" @change="handleMusicFile" />
+                  <input ref="coverFileInput" type="file" accept="image/*" class="hidden" @change="handleCoverFile" />
+                </div>
+
+                <div class="max-h-48 overflow-y-auto border-t border-gray-200 dark:border-gray-700">
+                  <div
+                    v-for="track in musicStore.customTracks"
+                    :key="track.id"
+                    class="px-6 py-3 flex items-center gap-3 hover:bg-sakura-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <img
+                      :src="track.cover || '/image/music-default.svg'"
+                      class="w-10 h-10 rounded-lg object-cover"
+                      referrerpolicy="no-referrer"
+                      @error="handleCoverError"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{{ track.title || track.url }}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ track.artist }}</div>
+                    </div>
+                    <button
+                      @click="musicStore.removeCustomTrack(track.id)"
+                      class="px-2 py-1 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 text-xs font-medium transition-colors"
+                    >
+                      删除
+                    </button>
+                  </div>
+
+                  <div v-if="!musicStore.customTracks.length" class="px-6 py-6 text-center text-gray-400 text-sm">
+                    暂无自定义音乐
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
         </div>
       </div>
     </Transition>
@@ -231,15 +502,35 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useMusicStore } from '../stores/musicStore'
+import type { MusicTrack } from '../stores/musicStore'
 
 const props = defineProps<{
   lang: 'en' | 'zh'
 }>()
 
 const musicStore = useMusicStore()
-const showPlaylist = ref(false)
+type MusicTab = 'playlist' | 'bili' | 'custom'
+const activeTab = ref<MusicTab>('playlist')
+const tabButtonClass = (tab: MusicTab) =>
+  activeTab.value === tab
+    ? 'text-sakura-600 dark:text-sakura-300 bg-sakura-50 dark:bg-gray-800'
+    : 'text-gray-600 dark:text-gray-300 hover:bg-sakura-50 dark:hover:bg-gray-800'
 const progressBar = ref<HTMLElement | null>(null)
 const isSeeking = ref(false)
+const biliKeyword = ref('')
+const biliLoading = ref(false)
+const biliResults = ref<MusicTrack[]>([])
+const biliError = ref<string | null>(null)
+const biliPage = ref(1)
+const biliHasMore = ref(false)
+const biliLoadingMore = ref(false)
+const biliLastKeyword = ref('')
+const customMusicTitle = ref('')
+const customMusicArtist = ref('')
+const customMusicUrl = ref('')
+const customMusicCover = ref('')
+const musicFileInput = ref<HTMLInputElement | null>(null)
+const coverFileInput = ref<HTMLInputElement | null>(null)
 
 const currentTrack = computed(() => musicStore.currentTrack)
 
@@ -283,7 +574,174 @@ onUnmounted(() => {
 })
 
 const handleCoverError = (e: Event) => {
-  (e.target as HTMLImageElement).src = '/image/music-default.jpg'
+  const img = e.target as HTMLImageElement
+  const src = (img.currentSrc || img.src || '').trim()
+  if (!src) return
+  if (src.includes('/image/music-default.svg')) return
+  if (src.includes('/api/bili/image?')) {
+    img.onerror = null
+    img.src = '/image/music-default.svg'
+    return
+  }
+
+  const anyImg = img as any
+  const base = (musicStore.effectiveBiliProxyBaseUrl || '').trim().replace(/\/+$/, '')
+  if (!anyImg.__biliProxyTried && base && src.includes('hdslb.com')) {
+    anyImg.__biliProxyTried = true
+    img.src = `${base}/api/bili/image?url=${encodeURIComponent(src)}`
+    return
+  }
+
+  img.onerror = null
+  img.src = '/image/music-default.svg'
+}
+
+const formatBiliError = (e: unknown) => {
+  const msg = e instanceof Error ? e.message : String(e)
+  const base = (musicStore.effectiveBiliProxyBaseUrl || '').trim()
+  const isNetwork = msg === 'Failed to fetch' || msg.toLowerCase().includes('networkerror')
+  if (!isNetwork) return msg
+  return `请求失败（可能是网络/跨域/CORS）：请检查代理地址可访问，并确认 Worker 允许当前站点 Origin。当前代理：${base || '未配置'}`
+}
+
+const doBiliSearch = async () => {
+  biliError.value = null
+  const keyword = biliKeyword.value.trim()
+  if (!keyword) return
+  if (!musicStore.effectiveBiliProxyBaseUrl) {
+    biliError.value = '站点未配置 B 站解析服务地址'
+    return
+  }
+
+  biliLastKeyword.value = keyword
+  biliPage.value = 1
+  biliHasMore.value = false
+
+  biliLoading.value = true
+  try {
+    const res = await musicStore.searchBilibiliPage(keyword, 1)
+    biliResults.value = res.items
+    biliPage.value = res.page || 1
+    biliHasMore.value = biliPage.value < (res.numPages || 1)
+  } catch (e) {
+    biliResults.value = []
+    biliError.value = formatBiliError(e)
+  } finally {
+    biliLoading.value = false
+  }
+}
+
+const loadMoreBili = async () => {
+  if (biliLoading.value || biliLoadingMore.value) return
+  if (!biliHasMore.value) return
+  const keyword = biliKeyword.value.trim()
+  if (!keyword) return
+  if (keyword !== biliLastKeyword.value) return
+
+  const nextPage = biliPage.value + 1
+  biliLoadingMore.value = true
+  try {
+    const res = await musicStore.searchBilibiliPage(keyword, nextPage)
+    const seen = new Set(biliResults.value.map((t) => t.id))
+    const appended = (res.items || []).filter((t) => !seen.has(t.id))
+    biliResults.value = [...biliResults.value, ...appended]
+    biliPage.value = res.page || nextPage
+    biliHasMore.value = biliPage.value < (res.numPages || biliPage.value)
+  } catch (e) {
+    biliError.value = formatBiliError(e)
+    biliHasMore.value = false
+  } finally {
+    biliLoadingMore.value = false
+  }
+}
+
+const onBiliScroll = (e: Event) => {
+  const el = e.target as HTMLElement | null
+  if (!el) return
+  const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 32
+  if (nearBottom) loadMoreBili()
+}
+
+const playBili = (track: MusicTrack) => {
+  musicStore.playBiliTemporary(track)
+}
+
+const joinBili = (track: MusicTrack) => {
+  musicStore.addBiliTrack(track)
+}
+
+const downloadBili = async (track: MusicTrack) => {
+  try {
+    await musicStore.downloadBiliTrack(track)
+  } catch (e) {
+    biliError.value = e instanceof Error ? e.message : String(e)
+  }
+}
+
+const downloadTrack = async (track: MusicTrack) => {
+  try {
+    await musicStore.downloadTrack(track)
+  } catch {
+  }
+}
+
+const triggerMusicUpload = () => {
+  musicFileInput.value?.click()
+}
+
+const handleMusicFile = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    const url = typeof reader.result === 'string' ? reader.result : ''
+    if (!url) return
+    customMusicUrl.value = url
+    if (!customMusicTitle.value) customMusicTitle.value = file.name
+    input.value = ''
+  }
+  reader.readAsDataURL(file)
+}
+
+const triggerCoverUpload = () => {
+  coverFileInput.value?.click()
+}
+
+const handleCoverFile = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    const url = typeof reader.result === 'string' ? reader.result : ''
+    if (!url) return
+    customMusicCover.value = url
+    input.value = ''
+  }
+  reader.readAsDataURL(file)
+}
+
+const addCustomMusic = () => {
+  const url = customMusicUrl.value.trim()
+  if (!url) return
+  const id = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  musicStore.addCustomTrack({
+    id,
+    title: customMusicTitle.value || 'Custom',
+    artist: customMusicArtist.value || '',
+    cover: customMusicCover.value || undefined,
+    url
+  })
+  customMusicTitle.value = ''
+  customMusicArtist.value = ''
+  customMusicUrl.value = ''
+  customMusicCover.value = ''
+}
+
+const clearCustomMusic = () => {
+  const ids = musicStore.customTracks.map((t: { id: string }) => t.id)
+  ids.forEach(id => musicStore.removeCustomTrack(id))
 }
 </script>
 

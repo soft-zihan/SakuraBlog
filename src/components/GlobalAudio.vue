@@ -2,7 +2,8 @@
   <!-- Hidden Audio Element -->
   <audio
     ref="audioEl"
-    :src="musicStore.currentTrack?.url"
+    :src="musicStore.currentPlayableUrl"
+    crossorigin="anonymous"
     @timeupdate="onTimeUpdate"
     @loadedmetadata="onLoadedMetadata"
     @ended="onEnded"
@@ -28,9 +29,11 @@
         <!-- Track Info -->
         <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
           <img 
-            :src="musicStore.currentTrack?.cover || '/image/music-default.jpg'" 
+            :src="musicStore.currentTrack?.cover || '/image/music-default.svg'" 
             class="w-12 h-12 rounded-lg object-cover shadow-md"
             :alt="musicStore.currentTrack?.title"
+            referrerpolicy="no-referrer"
+            @error="handleCoverError"
           />
           <div class="flex-1 min-w-0">
             <div class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate">
@@ -86,7 +89,8 @@
               <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
             </svg>
             <svg v-else-if="musicStore.playMode === 'single'" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/><text x="10" y="16" font-size="8" fill="currentColor">1</text>
+              <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+              <path d="M13 15V9h-1l-1 1v1h1v4h1z"/>
             </svg>
             <svg v-else class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
@@ -140,7 +144,7 @@
         :class="{ 'animate-spin-slow': musicStore.isPlaying }"
         :style="{ 
           animationPlayState: musicStore.isPlaying ? 'running' : 'paused',
-          background: `url('${musicStore.currentTrack?.cover || '/image/music-default.jpg'}')`,
+          background: `url('${musicStore.currentTrack?.cover || '/image/music-default.svg'}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           opacity: 0.5
@@ -190,6 +194,29 @@ const fabContainer = ref<HTMLElement | null>(null)
 
 const isMusicPage = computed(() => props.isMusicPage ?? (typeof window !== 'undefined' ? window.location.pathname.includes('/music') : false))
 const showFloating = computed(() => props.showFloating !== false)
+
+const handleCoverError = (e: Event) => {
+  const img = e.target as HTMLImageElement
+  const src = (img.currentSrc || img.src || '').trim()
+  if (!src) return
+  if (src.includes('/image/music-default.svg')) return
+  if (src.includes('/api/bili/image?')) {
+    img.onerror = null
+    img.src = '/image/music-default.svg'
+    return
+  }
+
+  const anyImg = img as any
+  const base = (musicStore.effectiveBiliProxyBaseUrl || '').trim().replace(/\/+$/, '')
+  if (!anyImg.__biliProxyTried && base && src.includes('hdslb.com')) {
+    anyImg.__biliProxyTried = true
+    img.src = `${base}/api/bili/image?url=${encodeURIComponent(src)}`
+    return
+  }
+
+  img.onerror = null
+  img.src = '/image/music-default.svg'
+}
 
 // 拖动相关
 const fabPosition = ref({ bottom: 32, right: 32 })
@@ -403,27 +430,29 @@ const togglePlay = () => {
 }
 
 // Sync audio element with store state
-watch(() => musicStore.isPlaying, (playing) => {
+watch(() => musicStore.isPlaying, async (playing) => {
   if (!audioEl.value) return
   if (playing) {
+    const ok = await musicStore.ensureCurrentTrackResolved()
+    if (!ok) {
+      musicStore.pause()
+      return
+    }
     playAudio()
   } else {
     audioEl.value.pause()
   }
 })
 
-watch(() => musicStore.currentIndex, () => {
+watch(() => musicStore.currentIndex, async () => {
   if (!audioEl.value) return
   audioEl.value.currentTime = 0
   musicStore.setCurrentTime(0)
   musicStore.setDuration(0)
-  audioEl.value.load()
-  if (musicStore.isPlaying) {
-    playAudio()
-  }
+  if (musicStore.isPlaying) await musicStore.ensureCurrentTrackResolved()
 })
 
-watch(() => musicStore.currentTrack?.url, (url) => {
+watch(() => musicStore.currentPlayableUrl, (url) => {
   if (!audioEl.value || !url) return
   audioEl.value.currentTime = 0
   musicStore.setCurrentTime(0)
@@ -467,6 +496,11 @@ const onLoadedMetadata = () => {
 }
 
 const onEnded = () => {
+  if (musicStore.temporaryTrack) {
+    musicStore.clearTemporaryTrack()
+    musicStore.pause()
+    return
+  }
   if (musicStore.playMode === 'single') {
     if (audioEl.value) {
       audioEl.value.currentTime = 0
@@ -479,6 +513,11 @@ const onEnded = () => {
 
 const onError = (e: Event) => {
   console.error('Audio error:', e)
+  if (musicStore.currentTrack?.source === 'bili') {
+    musicStore.retryResolveCurrentTrack().then((ok) => {
+      if (!ok) musicStore.pause()
+    })
+  }
 }
 
 // 删除重复的 onMounted，合并到上面的 onMounted 中
@@ -491,7 +530,9 @@ onUnmounted(() => {
 // Save current track and playing state on changes
 watch(() => musicStore.currentTrack, (track) => {
   if (track) {
+    if (track.id?.startsWith('temp-bili-')) return
     safeLocalStorage.setItem('music_currentTrackFilename', musicStore.getTrackFilename(track))
+    safeLocalStorage.setItem('music_currentTrackId', track.id)
   }
 })
 

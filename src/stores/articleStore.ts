@@ -195,17 +195,21 @@ export const useArticleStore = defineStore('article', () => {
   // For Umami stats cache
   const umamiCache = ref<Record<string, { views: number; visitors: number; timestamp: number }>>({})
   const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+  const normalizeStatsKey = (path: string) => (path || '').replace(/^\/+/, '')
   
-  function getCachedStats(path: string) {
-    const cached = umamiCache.value[path]
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return { views: cached.views, visitors: cached.visitors }
-    }
+  function getCachedStats(path: string, options?: { allowStale?: boolean }) {
+    const key = normalizeStatsKey(path)
+    const cached = umamiCache.value[key]
+    if (!cached) return null
+    if (options?.allowStale) return { views: cached.views, visitors: cached.visitors }
+    if (Date.now() - cached.timestamp < CACHE_DURATION) return { views: cached.views, visitors: cached.visitors }
     return null
   }
   
   function setCachedStats(path: string, views: number, visitors: number) {
-    umamiCache.value[path] = { views, visitors, timestamp: Date.now() }
+    const key = normalizeStatsKey(path)
+    umamiCache.value[key] = { views, visitors, timestamp: Date.now() }
   }
   
   return {
@@ -217,6 +221,7 @@ export const useArticleStore = defineStore('article', () => {
     availableTags,
     selectedTags,
     showFavoritesOnly,
+    umamiCache,
     // Computed
     likedCount,
     favoritesCount,
@@ -241,6 +246,6 @@ export const useArticleStore = defineStore('article', () => {
   }
 }, {
   persist: {
-    pick: ['likedArticles', 'favorites', 'articleStats', 'likeFingerprints', 'userFingerprint', 'selectedTags', 'showFavoritesOnly', 'visitedArticles']
+    pick: ['likedArticles', 'favorites', 'articleStats', 'likeFingerprints', 'userFingerprint', 'selectedTags', 'showFavoritesOnly', 'visitedArticles', 'umamiCache']
   }
 })

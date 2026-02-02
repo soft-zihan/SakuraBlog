@@ -1,0 +1,6 @@
+name = "bili-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-02-01"
+
+[vars]
+ALLOW_ORIGIN = "http://localhost:*,http://127.0.0.1:*,https://soft-zihan.github.io"

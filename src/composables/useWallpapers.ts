@@ -203,8 +203,15 @@ export function useWallpapers() {
     const filename = appStore.currentWallpaperFilename
     const wallpapers = currentThemeWallpapers.value
     
-    if (filename && (filename.startsWith('http') || filename.startsWith('data:') || filename.startsWith('blob:'))) {
-      return filename
+    if (
+      filename &&
+      (filename.startsWith('http') ||
+        filename.startsWith('data:') ||
+        filename.startsWith('blob:') ||
+        filename.startsWith('./') ||
+        filename.startsWith('/'))
+    ) {
+      return normalizePath(filename)
     }
     
     if (!wallpapers.length) return ''
@@ -287,6 +294,34 @@ export function useWallpapers() {
 
   const downloadWallpaper = async (url: string) => {
     if (!url) return
+    const proxyBaseUrl = String(
+      import.meta.env.VITE_WALLPAPER_PROXY_BASE_URL || import.meta.env.VITE_BILI_PROXY_BASE_URL || ''
+    )
+      .trim()
+      .replace(/\/+$/, '')
+
+    if (url.startsWith('blob:') || url.startsWith('data:')) {
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `wallpaper-${Date.now()}.jpg`
+      document.body.appendChild(anchor)
+      anchor.click()
+      document.body.removeChild(anchor)
+      return
+    }
+
+    if (proxyBaseUrl && url.startsWith('http')) {
+      const filename = `wallpaper-${Date.now()}.jpg`
+      const anchor = document.createElement('a')
+      anchor.href = `${proxyBaseUrl}/api/wallpaper/file?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`
+      anchor.rel = 'noopener'
+      anchor.target = '_blank'
+      document.body.appendChild(anchor)
+      anchor.click()
+      document.body.removeChild(anchor)
+      return
+    }
+
     try {
       const res = await fetch(url)
       if (res.ok) {

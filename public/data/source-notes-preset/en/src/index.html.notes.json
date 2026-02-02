@@ -7,10 +7,6 @@
       "content": "The app mount point. Vite will load /main.ts, which creates the Vue app and mounts it onto this element."
     },
     {
-      "match": "tailwind.config",
-      "content": "Inline Tailwind config via CDN: sets darkMode to class and defines a pink \"sakura\" palette plus CSS-variable-driven \"primary\" colors for theming."
-    },
-    {
       "match": "@keyframes petalFall",
       "content": "A fallback CSS animation for petals. The runtime petal system is now primarily controlled by the Vue app, but the base keyframes and styles are kept for reliability."
     },

@@ -352,6 +352,32 @@ Inspired by RyuChan, Sakura Notes uses Umami as the source of truth: the tracker
 
 5. Rebuild and deploy.
 
+### Media Proxy (Bilibili & Downloads, optional)
+
+When deployed as a fully static site (GitHub Pages), some media sources cannot be fetched or downloaded directly due to CORS and anti-leech policies. Sakura Notes supports an optional Cloudflare Worker proxy for:
+
+- **Bilibili search/playback** via signed WBI endpoints
+- **Reliable downloads** (music cover images, wallpapers) via `Content-Disposition: attachment`
+
+1. Deploy the Worker in `bili-proxy-worker/`.
+2. Create `.env` (or `.env.local`) and set:
+
+   ```bash
+   # Required for Bilibili search/playback
+   VITE_BILI_PROXY_BASE_URL=https://<your-worker>.workers.dev
+
+   # Optional: download proxy for wallpapers/covers (defaults to VITE_BILI_PROXY_BASE_URL if unset)
+   VITE_WALLPAPER_PROXY_BASE_URL=https://<your-worker>.workers.dev
+   ```
+
+3. Rebuild and deploy.
+
+**Notes**
+
+- Bilibili search results support **click-to-play** and **infinite scroll pagination** in the UI.
+- Music downloads will download **audio + cover** (as a separate image file) when a cover URL exists.
+- The Worker exposes download-friendly routes like `GET /api/wallpaper/file?url=...&filename=...`.
+
 ---
 
 ## 🔐 Security & Data

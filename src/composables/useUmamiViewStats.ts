@@ -15,7 +15,14 @@ const STATS_ERROR_NOTIFIED_KEY = 'sakura:umami:share-error-notified:v1'
 
 const normalizeFilePath = (path: string) => (path || '').replace(/^\/+/, '')
 
-const toUmamiPath = (filePath: string) => `/notes/${normalizeFilePath(filePath)}`
+const toUmamiPath = (filePath: string) => {
+  const normalized = normalizeFilePath(filePath)
+  const encoded = normalized
+    .split('/')
+    .map((seg) => encodeURIComponent(seg))
+    .join('/')
+  return `/notes/${encoded}`
+}
 
 const resolveUmamiBaseUrl = () => {
   const raw = (UMAMI_CONFIG.baseUrl || '').trim()

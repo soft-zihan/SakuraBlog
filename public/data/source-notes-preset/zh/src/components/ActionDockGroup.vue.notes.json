@@ -1,5 +1,14 @@
 {
   "version": "2026.02.01",
   "intro": "UI 组件：页面功能块与交互入口。",
-  "notes": []
+  "notes": [
+    {
+      "matchRegex": "const addCurrentToList",
+      "content": "顶栏“收藏壁纸”会把当前壁纸加入自定义列表。\n如果你选择加到“明亮/深色主题”，ThemePanel 里需要切换到对应主题才能看到。\n（如果看不到下拉菜单，通常是父容器 overflow-hidden 把菜单裁剪了。）"
+    },
+    {
+      "matchRegex": "const downloadCurrentWallpaper",
+      "content": "下载当前壁纸应优先使用已解析的 blob/data URL（可绕开跨域）。\n如果是远程 URL，则交给 Worker 以 attachment 方式下载更可靠。"
+    }
+  ]
 }

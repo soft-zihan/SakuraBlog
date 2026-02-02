@@ -11,8 +11,8 @@
       "content": "import { createApp } 是“具名导入”。\n大括号表示从模块导出里按名字取值。\n如果导出名字拼错，编译会直接报错。"
     },
     {
-      "matchRegex": "^import\\s+piniaPluginPersistedstate",
-      "content": "import foo from 'bar' 是“默认导入”。\n这里的插件是一个函数，后面会注册到 Pinia。\n作用是让 store 自动持久化到本地存储。"
+      "matchRegex": "^import\\s+\\{\\s*createPersistedState",
+      "content": "这里导入的是 pinia 持久化插件的工厂函数。\n后面会通过 pinia.use(createPersistedState(...)) 安装到 Pinia。\n作用是让指定的 store 字段自动持久化到安全的本地存储。"
     },
     {
       "matchRegex": "const\\s+pinia\\s*=\\s*createPinia\\(",
