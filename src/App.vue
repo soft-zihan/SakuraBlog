@@ -675,6 +675,13 @@ const runWarmupTasks = (tasks: Array<() => Promise<unknown>>, timeout = 1500) =>
   next()
 }
 
+const prewarmArticleDeps = () => {
+  if (!shouldWarmup()) return
+  Promise.resolve().then(() => import('./views/ArticleReader.vue')).catch(() => {})
+  Promise.resolve().then(() => import('marked')).catch(() => {})
+  Promise.resolve().then(() => import('highlight.js/lib/common')).catch(() => {})
+}
+
 let warmupFilesStarted = false
 watch(() => appStore.loading, async (loading) => {
   if (loading) return
@@ -682,11 +689,9 @@ watch(() => appStore.loading, async (loading) => {
   warmupFilesStarted = true
   await nextTick()
   await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+  prewarmArticleDeps()
   runWarmupTasks([
     () => import('minisearch'),
-    () => import('marked'),
-    () => import('highlight.js/lib/common'),
-    () => import('./views/ArticleReader.vue'),
     () => import('./components/SearchModal.vue'),
     () => import('./components/SettingsModal.vue'),
     () => import('./components/DownloadModal.vue'),

@@ -11,10 +11,10 @@
            :class="[fontSizeClass, articleStyleClass, appStore.sidebarOpen ? 'max-w-4xl xl:max-w-5xl' : 'max-w-5xl xl:max-w-7xl']"
            :style="[{ padding: 'var(--reader-card-padding, 2.5rem)' }, articleContainerStyle]"
         >
-          <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
+          <div v-if="overlayVisible" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
             <div class="flex flex-col items-center gap-4">
                <div class="animate-spin text-4xl">🌸</div>
-               <div class="text-sm font-bold animate-pulse" :style="loadingTextStyle">Fetching Content...</div>
+               <div class="text-sm font-bold animate-pulse" :style="loadingTextStyle">{{ overlayLabel }}</div>
             </div>
           </div>
 
@@ -304,6 +304,29 @@ const isRawMode = toRef(props, 'isRawMode');
 
 const showFloatingNav = computed(() => !currentFile.value.isSource && !isRawMode.value && isOnMobileCenterPage.value)
 
+const rendering = ref(false)
+let renderSeq = 0
+
+const isPdf = computed(() => !!currentFile.value?.path && currentFile.value.path.toLowerCase().endsWith('.pdf'))
+const awaitingContent = computed(() => {
+  if (props.loading) return false
+  if (rendering.value) return false
+  if (!currentFile.value) return false
+  if (isPdf.value) return false
+  if (currentFile.value.isSource || isRawMode.value) return false
+  const hasRendered = typeof currentFile.value.renderedHtml === 'string' && currentFile.value.renderedHtml.length > 0
+  if (hasRendered) return false
+  const hasContent = typeof currentFile.value.content === 'string' && currentFile.value.content.length > 0
+  return !hasContent
+})
+
+const overlayVisible = computed(() => Boolean(props.loading) || rendering.value || awaitingContent.value)
+const overlayLabel = computed(() => {
+  if (props.loading) return props.lang === 'zh' ? '正在加载文章内容…' : 'Loading content...'
+  if (rendering.value) return props.lang === 'zh' ? '正在渲染文章…' : 'Rendering...'
+  return props.lang === 'zh' ? '正在准备文章…' : 'Preparing...'
+})
+
 const lastTrackedPath = ref<string | null>(null);
 watch(
   () => props.file.path,
@@ -541,8 +564,17 @@ watch(markdownViewerRef, (el) => {
 }, { immediate: true })
 
 watch([currentFile, isRawMode], () => {
-  updateRenderedContent();
-  generateToc();
+  const seq = ++renderSeq
+  rendering.value = true
+  Promise.resolve()
+    .then(() => nextTick())
+    .then(() => new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve())))
+    .then(() => updateRenderedContent())
+    .catch(() => {})
+    .finally(() => {
+      generateToc()
+      if (seq === renderSeq) rendering.value = false
+    })
 }, { immediate: true });
 
 // Raw Editor

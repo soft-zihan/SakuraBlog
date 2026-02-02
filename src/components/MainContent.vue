@@ -95,13 +95,21 @@ import type { GuwenItem } from '../composables/usePoem';
 
 // Components
 import WelcomeScreen from './WelcomeScreen.vue';
+import ArticleReaderLoading from './ArticleReaderLoading.vue'
+import ArticleReaderError from './ArticleReaderError.vue'
 
 const LabDashboard = defineAsyncComponent(() => import('./lab/LabDashboard.vue'))
 const SourceCodeViewer = defineAsyncComponent(() => import('./lab/SourceCodeViewer.vue'))
 const LabEventHandling = defineAsyncComponent(() => import('./lab/stage6-vue-core/LabEventHandling.vue'))
 const LabSlot = defineAsyncComponent(() => import('./lab/stage7-vue-advanced/LabSlot.vue'))
 const FolderView = defineAsyncComponent(() => import('./FolderView.vue'))
-const ArticleReader = defineAsyncComponent(() => import('../views/ArticleReader.vue'))
+const ArticleReader = defineAsyncComponent({
+  loader: () => import('../views/ArticleReader.vue'),
+  loadingComponent: ArticleReaderLoading,
+  errorComponent: ArticleReaderError,
+  delay: 0,
+  timeout: 20000
+})
 
 const props = defineProps<{
   viewMode: 'latest' | 'files' | 'lab';

@@ -5,7 +5,7 @@
     <AppSidebar 
       v-if="!isMobile && !appStore.readingMode"
       :class="[
-        appStore.sidebarOpen ? 'translate-x-0 md:translate-x-0 md:w-72 lg:w-80' : '-translate-x-full md:-translate-x-full md:w-0 md:opacity-0 md:overflow-hidden md:pointer-events-none'
+        appStore.sidebarOpen ? 'md:w-72 lg:w-80' : 'md:w-0 md:opacity-0 md:overflow-hidden md:pointer-events-none'
       ]"
       class="fixed md:relative z-40 transition-all duration-300 ease-out"
       :lang="lang"

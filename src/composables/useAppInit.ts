@@ -149,9 +149,15 @@ export function useAppInit(
   };
 
   onMounted(async () => {
-    loadRandomPoem();
-    musicStore.loadPlaylist();
     searchApi.setFetchFunction(fetchFileContent);
     await initFileSystem();
+    runWhenIdle(() => {
+      if (appStore.currentFile || appStore.currentFolder) return
+      if (appStore.viewMode !== 'latest') return
+      loadRandomPoem()
+    })
+    runWhenIdle(() => {
+      musicStore.loadPlaylist()
+    })
   });
 }
