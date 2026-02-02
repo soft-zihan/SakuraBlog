@@ -1,6 +1,4 @@
 import { ref, computed, nextTick, watch, onUnmounted, type Ref } from 'vue'
-import { marked } from 'marked'
-import hljs from 'highlight.js/lib/common'
 import type { FileNode, TocItem } from '../types'
 import { stripMetaComment } from './useArticleMeta'
 import { isSupportedInternalLink } from './useContentClick'
@@ -136,13 +134,38 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
 
   // Temp storage for TOC items during rendering
   let tempToc: TocItem[] = []
+  let markedApi: any = null
+  let hljsApi: any = null
+  let rendererReady = false
+  let rendererRequested = false
+
+  const ensureRendererDeps = async () => {
+    if (!markedApi) {
+      const mod: any = await import('marked')
+      markedApi = mod?.marked || mod?.default || mod
+    }
+    if (!hljsApi) {
+      const mod: any = await import('highlight.js/lib/common')
+      hljsApi = mod?.default || mod
+    }
+  }
+
+  const ensureMarkedRendererReady = async () => {
+    if (rendererReady) return
+    await ensureRendererDeps()
+    if (!markedApi || !hljsApi) throw new Error('Renderer dependencies are not available')
+    setupMarkedRenderer()
+  }
 
   /**
    * 配置 marked 渲染器
    */
   const setupMarkedRenderer = () => {
-    const renderer = new marked.Renderer()
-    renderer.heading = function(text, level, raw) {
+    rendererRequested = true
+    if (rendererReady) return
+    if (!markedApi || !hljsApi) return
+    const renderer = new markedApi.Renderer()
+    renderer.heading = function (text: string, level: number, raw: string) {
       const id = nextUniqueHeadingId(String(raw ?? text))
       if (!currentFile.value?.toc?.length) {
         tempToc.push({
@@ -153,12 +176,12 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
       }
       return `<h${level} id="${id}">${text}</h${level}>`
     }
-    renderer.code = function(code, language) {
-      const lang = (language && hljs.getLanguage(language)) ? language : 'plaintext'
-      const highlighted = hljs.highlight(code, { language: lang }).value
+    renderer.code = function (code: string, language?: string) {
+      const lang = (language && hljsApi.getLanguage(language)) ? language : 'plaintext'
+      const highlighted = hljsApi.highlight(code, { language: lang }).value
       return `<pre class="hljs"><code class="hljs language-${lang}">${highlighted}</code></pre>`
     }
-    renderer.image = function(href, title, text) {
+    renderer.image = function (href: string, title: string | null, text: string) {
       if (href && isPdfPath(href)) {
         const resolved = resolveContentPath(href)
         return renderPdfEmbed(resolved, text, title || text)
@@ -168,7 +191,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
       return `<img src="${safeHref}" alt="${text}"${titleAttr}>`
     }
     // 自定义链接渲染：为内部链接添加 data-internal 属性，防止浏览器自动跳转
-    renderer.link = function(href, title, text) {
+    renderer.link = function (href: string, title: string | null, text: string) {
       const titleAttr = title ? ` title="${title}"` : ''
       if (href && isPdfPath(href)) {
         const resolved = resolveContentPath(href)
@@ -181,7 +204,8 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
       // 外部链接：正常渲染，新窗口打开
       return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`
     }
-    marked.use({ renderer })
+    markedApi.use({ renderer })
+    rendererReady = true
   }
 
   /**
@@ -289,7 +313,13 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     try {
       headingIdCount = new Map<string, number>()
       tempToc = [] // Reset temp TOC
-      const parsed = await marked.parse(rawContent)
+      if (!rendererReady && rendererRequested) {
+        await ensureMarkedRendererReady()
+      }
+      if (!rendererReady) {
+        await ensureMarkedRendererReady()
+      }
+      const parsed = await markedApi.parse(rawContent)
       const sanitized = sanitizeHtml(parsed)
       const finalHtml = sanitized || parsed
       renderedHtml.value = finalHtml

@@ -142,7 +142,6 @@ import type { FileNode, BreadcrumbItem } from './types';
 
 // Components
 import AppLayout from './layout/AppLayout.vue';
-import DualColumnView from './components/lab/DualColumnView.vue';
 import PetalBackground from './components/PetalBackground.vue';
 import GlobalAudio from './components/GlobalAudio.vue';
 import FloatingSelectionMenu from './components/FloatingSelectionMenu.vue';
@@ -150,6 +149,7 @@ import MainContent from './components/MainContent.vue';
 import Toast from './components/Toast.vue';
 
 // Async Components
+const DualColumnView = defineAsyncComponent(() => import('./components/lab/DualColumnView.vue'));
 const SettingsModal = defineAsyncComponent(() => import('./components/SettingsModal.vue'));
 const DownloadModal = defineAsyncComponent(() => import('./components/DownloadModal.vue'));
 const SearchModal = defineAsyncComponent(() => import('./components/SearchModal.vue'));
@@ -633,10 +633,95 @@ useAppInit(
   { initSearchIndex, setFetchFunction }
 );
 
+const isLiteMode = () => {
+  try {
+    return window.localStorage.getItem('sakura:liteMode:v1') === '1'
+  } catch {
+    return false
+  }
+}
+
+const shouldWarmup = () => {
+  if (isLiteMode()) return false
+  const conn: any = (navigator as any).connection
+  if (conn?.saveData) return false
+  const t = String(conn?.effectiveType || '')
+  if (t === 'slow-2g' || t === '2g') return false
+  return true
+}
+
+const runWhenIdle = (fn: () => void, timeout = 1500) => {
+  const w = window as any
+  if (typeof w.requestIdleCallback === 'function') {
+    w.requestIdleCallback(() => fn(), { timeout })
+    return
+  }
+  window.setTimeout(fn, 0)
+}
+
+const runWarmupTasks = (tasks: Array<() => Promise<unknown>>, timeout = 1500) => {
+  let i = 0
+  const next = () => {
+    if (i >= tasks.length) return
+    const task = tasks[i++]
+    runWhenIdle(() => {
+      if (!shouldWarmup()) return
+      Promise.resolve()
+        .then(task)
+        .catch(() => {})
+        .finally(() => next())
+    }, timeout)
+  }
+  next()
+}
+
+let warmupFilesStarted = false
+watch(() => appStore.loading, async (loading) => {
+  if (loading) return
+  if (warmupFilesStarted) return
+  warmupFilesStarted = true
+  await nextTick()
+  await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+  runWarmupTasks([
+    () => import('minisearch'),
+    () => import('marked'),
+    () => import('highlight.js/lib/common'),
+    () => import('./views/ArticleReader.vue'),
+    () => import('./components/SearchModal.vue'),
+    () => import('./components/SettingsModal.vue'),
+    () => import('./components/DownloadModal.vue'),
+    () => import('./components/MusicPlayer.vue'),
+    () => import('./components/WriteEditor.vue'),
+    () => import('./components/lab/DualColumnView.vue'),
+    () => import('./components/lab/LabDashboard.vue'),
+    () => import('./components/lab/SourceCodeViewer.vue'),
+    () => import('./components/lab/stage6-vue-core/LabEventHandling.vue'),
+    () => import('./components/lab/stage7-vue-advanced/LabSlot.vue')
+  ], 2000)
+})
+
+let warmupContentStarted = false
+watch([() => appStore.currentFile?.path, () => appStore.contentLoading], ([path, contentLoading]) => {
+  if (!path) return
+  if (contentLoading) return
+  if (warmupContentStarted) return
+  warmupContentStarted = true
+  runWhenIdle(() => {
+    if (!shouldWarmup()) return
+    loadFullContentAndRebuild().catch(() => {})
+  }, 3000)
+})
+
 // =====================
 // Lifecycle
 // =====================
 onMounted(async () => {
+  if (isLiteMode()) {
+    appStore.showParticles = false
+    appStore.userSettings.petalSpeed = 'off'
+    appStore.userSettings.autoChangeMode = 'off'
+    appStore.userSettings.musicPlayer = 'off'
+  }
   document.addEventListener('selectionchange', handleSelectionChange);
   document.addEventListener('contextmenu', handleSelectionContextMenu, { capture: true });
   // 捕获阶段拦截内部链接点击

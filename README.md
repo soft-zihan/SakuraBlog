@@ -40,6 +40,7 @@
 - [🙏 Credits](#-credits)
 - [🎯 Quick Start](#-quick-start)
 - [🧪 Testing](#-testing)
+- [⚡ First-Load Performance (No Cache)](#-first-load-performance-no-cache)
 - [📁 Project Structure](#-project-structure)
 - [🏗️ Technical Architecture](#️-technical-architecture)
 - [🔧 Configuration Guide](#-configuration-guide)
@@ -197,6 +198,38 @@ npm run test -- --run
 ```
 
 ---
+
+## ⚡ First-Load Performance (No Cache)
+
+This project targets static hosting (e.g. GitHub Pages), where **first-time visitors have zero cache** and every byte matters. The optimization goal is: **show a complete app shell fast**, then **progressively fill content**, while **pre-warming heavy modules in idle time** so users rarely feel “lazy-load delays”.
+
+### Boot Pipeline (What happens on first open)
+
+1. **Stage 0 — HTML boot screen**: `src/index.html` renders an immediate placeholder and runs a tiny boot script:
+   - Shows a staged loading message (download core → init UI → load index).
+   - Fails fast with a helpful UI (no more infinite spinner) if the entry script fails or if boot takes too long.
+   - Provides “Lite Mode” (`localStorage: sakura:liteMode:v1`) for slow devices/networks.
+2. **Stage 1 — Vue mount**: `src/main.ts` mounts the app as soon as the entry bundle executes.
+3. **Stage 2 — Index first, content later**: `src/composables/useAppInit.ts` loads `public/data/files.json`:
+   - Sidebar/tree/list can appear first.
+   - Article content can load afterwards (with an in-app loading overlay).
+4. **Stage 3 — Opportunistic warm-up**: `src/App.vue` uses idle time to progressively `import()` heavier modules (search/markdown/lab/write/download, etc.), so users usually don’t notice module loading.
+
+### Key Strategies
+
+- **Remove critical-path blockers**: avoid extra synchronous/defer scripts before the entry module; keep the boot path minimal.
+- **Async split, but not “wait until clicked”**: make heavy features loadable as chunks, then preload them during idle windows (“see gaps, fill gaps”).
+- **Parallelize index download**: the boot script can prefetch `./data/files.json` early, and the app init reuses it when available.
+- **Lite Mode escape hatch**: if boot is slow, users can switch to a reduced-effects mode that prioritizes readability and responsiveness.
+
+### Troubleshooting “stuck on Loading…”
+
+If you keep seeing the HTML boot screen, Vue likely never mounted:
+
+- **Wrong publish directory**: GitHub Pages should serve `dist/` (not `src/`).
+- **Entry bundle 404**: check DevTools → Network for `assets/index-*.js`.
+- **Sub-path deployment mismatch**: ensure the entry script path works under `/<repo>/` on GitHub Pages.
+- **Runtime error before mount**: check Console for an exception during module initialization.
 
 ## 📁 Project Structure
 

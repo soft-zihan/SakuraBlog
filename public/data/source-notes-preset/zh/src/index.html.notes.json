@@ -57,7 +57,7 @@
     },
     {
       "match": "<div id=\"app\"",
-      "content": "应用挂载点：Vite 会加载 /main.ts，在其中 createApp 并 mount 到这个元素。"
+      "content": "应用挂载点：Vite 会加载 ./main.ts，在其中 createApp 并 mount 到这个元素。"
     },
     {
       "matchRegex": "^\\s*<style>$",
@@ -85,7 +85,7 @@
       "content": "花瓣动画的基础 CSS keyframes。实际花瓣系统主要由 Vue 侧动态控制，但保留一套标准动画/样式以增强兼容性与可预期性。"
     },
     {
-      "match": "type=\"module\" src=\"/main.ts\"",
+      "match": "type=\"module\" src=\"./main.ts\"",
       "content": "Vite 入口脚本：从这里进入打包后的 SPA 代码（Vue 应用启动）。"
     }
   ]

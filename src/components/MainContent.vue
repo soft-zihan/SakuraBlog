@@ -89,18 +89,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, type Ref } from 'vue';
+import { ref, watch, nextTick, type Ref, defineAsyncComponent } from 'vue';
 import type { FileNode } from '../types';
 import type { GuwenItem } from '../composables/usePoem';
 
 // Components
-import LabDashboard from './lab/LabDashboard.vue';
-import SourceCodeViewer from './lab/SourceCodeViewer.vue';
-import LabEventHandling from './lab/stage6-vue-core/LabEventHandling.vue';
-import LabSlot from './lab/stage7-vue-advanced/LabSlot.vue';
-import FolderView from './FolderView.vue';
-import ArticleReader from '../views/ArticleReader.vue';
 import WelcomeScreen from './WelcomeScreen.vue';
+
+const LabDashboard = defineAsyncComponent(() => import('./lab/LabDashboard.vue'))
+const SourceCodeViewer = defineAsyncComponent(() => import('./lab/SourceCodeViewer.vue'))
+const LabEventHandling = defineAsyncComponent(() => import('./lab/stage6-vue-core/LabEventHandling.vue'))
+const LabSlot = defineAsyncComponent(() => import('./lab/stage7-vue-advanced/LabSlot.vue'))
+const FolderView = defineAsyncComponent(() => import('./FolderView.vue'))
+const ArticleReader = defineAsyncComponent(() => import('../views/ArticleReader.vue'))
 
 const props = defineProps<{
   viewMode: 'latest' | 'files' | 'lab';

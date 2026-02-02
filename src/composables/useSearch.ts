@@ -1,5 +1,4 @@
 import { ref, onMounted, onUnmounted } from 'vue'
-import MiniSearch from 'minisearch'
 import type { FileNode } from '../types'
 import { NodeType } from '../types'
 
@@ -27,7 +26,7 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
   const isSearching = ref(false)
   const showSearchModal = ref(false)
   const isLoadingContent = ref(false)
-  const searchIndex = ref<MiniSearch<IndexedDocument> | null>(null)
+  const searchIndex = ref<any>(null)
   const fileSystem = ref<FileNode[]>([])
   const isFullIndexReady = ref(false)
   const currentLang = ref<'en' | 'zh'>('zh')
@@ -74,8 +73,18 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
     }
   } as const
 
+  let MiniSearchCtor: any = null
+
+  const ensureMiniSearch = async () => {
+    if (MiniSearchCtor) return MiniSearchCtor
+    const mod: any = await import('minisearch')
+    MiniSearchCtor = mod?.default || mod
+    return MiniSearchCtor
+  }
+
   const createMiniSearch = () => {
-    return new MiniSearch<IndexedDocument>(miniSearchOptions as any)
+    if (!MiniSearchCtor) throw new Error('MiniSearch is not ready')
+    return new MiniSearchCtor(miniSearchOptions as any)
   }
 
   const flattenFiles = (nodes: FileNode[], filterPrefix: string | null): FileNode[] => {
@@ -114,14 +123,15 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
 
   const getIndexCacheKey = (fingerprint: string) => `sakura:searchIndex:v2:${fingerprint}`
 
-  const tryLoadIndexFromCache = (fingerprint: string) => {
+  const tryLoadIndexFromCache = async (fingerprint: string) => {
     try {
+      const MiniSearch = await ensureMiniSearch()
       const raw = window.localStorage.getItem(getIndexCacheKey(fingerprint))
       if (!raw) return false
       const parsed = JSON.parse(raw)
       const json = parsed?.indexJson
       if (!json) return false
-      const loaded = (MiniSearch as any).loadJSON?.(json, miniSearchOptions)
+      const loaded = MiniSearch?.loadJSON?.(json, miniSearchOptions)
       if (!loaded) return false
       searchIndex.value = loaded
       isFullIndexReady.value = true
@@ -173,7 +183,9 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
     
     try {
       const filesToLoad = flattenFiles(fileSystem.value, langPrefix)
-      const concurrency = 6
+      const conn: any = (navigator as any).connection
+      const effectiveType = String(conn?.effectiveType || '')
+      const concurrency = effectiveType === '4g' ? 6 : effectiveType === '3g' ? 4 : 2
       let cursor = 0
 
       const worker = async () => {
@@ -228,8 +240,9 @@ export function useSearch(fetchFileContentFn?: (file: FileNode) => Promise<strin
     })
 
     indexCacheFingerprint.value = computeIndexFingerprint(fileSystem.value, langPrefix)
-    if (tryLoadIndexFromCache(indexCacheFingerprint.value)) return
+    if (await tryLoadIndexFromCache(indexCacheFingerprint.value)) return
 
+    await ensureMiniSearch()
     const miniSearch = createMiniSearch()
     searchIndex.value = miniSearch
     await miniSearch.addAllAsync(documents, { chunkSize: 200 })

@@ -197,19 +197,116 @@
 }
 </script>
 
-  <script defer src="./js/umami-share.js?v=5"></script>
+  <script async src="./js/umami-share.js?v=5"></script>
 
 </head>
   <body>
     <!-- Petals are now rendered inside Vue App for dynamic control -->
     <div id="app" class="relative z-10">
-      <div style="height: 100vh; display: flex; justify-content: center; align-items: center; color: #fc7096; flex-direction: column;">
+      <div id="boot-screen" style="height: 100vh; display: flex; justify-content: center; align-items: center; color: #fc7096; flex-direction: column; padding: 24px; text-align: center;">
         <div style="font-size: 4rem; margin-bottom: 1rem; animation: spin 4s linear infinite;">🌸</div>
-        <div style="font-family: 'Quicksand', sans-serif; font-weight: bold; color: #be1245;">Loading Sakura Notes...</div>
+        <div id="boot-title" style="font-family: 'Quicksand', sans-serif; font-weight: bold; color: #be1245; font-size: 1.05rem;">Loading Sakura Notes...</div>
+        <div id="boot-detail" style="margin-top: 0.75rem; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; font-size: 0.9rem; color: rgba(190, 18, 69, 0.85); max-width: 520px;"></div>
+        <div id="boot-actions" style="display: none; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; justify-content: center;">
+          <button id="boot-retry" style="appearance: none; border: 1px solid rgba(190, 18, 69, 0.25); background: rgba(255, 255, 255, 0.7); color: #be1245; padding: 10px 14px; border-radius: 999px; font-weight: 700; cursor: pointer;">刷新重试</button>
+          <button id="boot-lite" style="appearance: none; border: 1px solid rgba(190, 18, 69, 0.25); background: rgba(190, 18, 69, 0.08); color: #be1245; padding: 10px 14px; border-radius: 999px; font-weight: 700; cursor: pointer;">进入轻量模式</button>
+        </div>
+        <div id="boot-tips" style="display: none; margin-top: 0.9rem; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; font-size: 0.85rem; color: rgba(190, 18, 69, 0.75); line-height: 1.6; max-width: 560px;">
+          <div>如果一直加载：建议检查网络、清理站点缓存后重试，或确认发布目录为 dist/（而不是 src/）。</div>
+        </div>
       </div>
       <style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
     </div>
     <!-- Vite entry point -->
-    <script type="module" src="/main.ts"></script>
+    <script>
+      (function () {
+        var root = document.getElementById('app')
+        var screen = document.getElementById('boot-screen')
+        if (!root || !screen) return
+
+        try {
+          if (!window.__sakuraFilesJsonPrefetch) {
+            window.__sakuraFilesJsonPrefetch = fetch('./data/files.json')
+          }
+        } catch (e) { }
+
+        var title = document.getElementById('boot-title')
+        var detail = document.getElementById('boot-detail')
+        var actions = document.getElementById('boot-actions')
+        var tips = document.getElementById('boot-tips')
+
+        var stopped = false
+        var timers = []
+
+        var setDetail = function (text) {
+          if (!detail) return
+          detail.textContent = text || ''
+        }
+
+        var showFail = function (reason) {
+          if (stopped) return
+          stopped = true
+          if (title) title.textContent = '无法加载 Sakura Notes'
+          setDetail(reason || '资源加载失败或网络较慢。')
+          if (actions) actions.style.display = 'flex'
+          if (tips) tips.style.display = 'block'
+        }
+
+        var stop = function () {
+          stopped = true
+          for (var i = 0; i < timers.length; i++) window.clearTimeout(timers[i])
+        }
+
+        var observer = new MutationObserver(function () {
+          if (!document.getElementById('boot-screen')) {
+            stop()
+            observer.disconnect()
+          }
+        })
+        observer.observe(root, { childList: true, subtree: true })
+
+        timers.push(window.setTimeout(function () {
+          if (stopped) return
+          var conn = navigator.connection && navigator.connection.effectiveType ? '（网络：' + navigator.connection.effectiveType + '）' : ''
+          setDetail('首次打开需要下载核心资源并初始化索引' + (conn ? ' ' + conn : ''))
+        }, 2000))
+
+        timers.push(window.setTimeout(function () {
+          if (stopped) return
+          setDetail('正在初始化界面与文章索引…')
+        }, 5000))
+
+        timers.push(window.setTimeout(function () {
+          if (stopped) return
+          showFail('加载时间较长，可能是网络或资源路径问题。')
+        }, 8000))
+
+        window.__sakuraBoot = { fail: showFail }
+
+        window.addEventListener('error', function (e) {
+          if (stopped) return
+          var target = e && e.target
+          var tag = target && target.tagName
+          if (tag === 'SCRIPT' || tag === 'LINK') {
+            showFail('关键资源加载失败，请检查网络或刷新重试。')
+          }
+        }, true)
+
+        window.addEventListener('unhandledrejection', function () {
+          if (stopped) return
+          showFail('初始化发生异常，请刷新重试。')
+        })
+
+        var retry = document.getElementById('boot-retry')
+        if (retry) retry.addEventListener('click', function () { window.location.reload() })
+
+        var lite = document.getElementById('boot-lite')
+        if (lite) lite.addEventListener('click', function () {
+          try { window.localStorage.setItem('sakura:liteMode:v1', '1') } catch (e) { }
+          window.location.reload()
+        })
+      })()
+    </script>
+    <script type="module" src="./main.ts" onerror="window.__sakuraBoot && window.__sakuraBoot.fail('入口脚本加载失败，请检查部署路径或刷新重试。')"></script>
   </body>
 </html>

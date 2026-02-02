@@ -106,9 +106,12 @@ export function useAppInit(
     }
 
     try {
-      const res = await fetch(`./data/files.json`);
+      const prefetched = (window as any).__sakuraFilesJsonPrefetch
+      const res = prefetched
+        ? await Promise.resolve(prefetched).catch(() => fetch(`./data/files.json`))
+        : await fetch(`./data/files.json`);
       if (res.ok) {
-        const raw = await res.text()
+        const raw = await (typeof res.clone === 'function' ? res.clone().text() : res.text())
         try {
           window.localStorage.setItem(cacheKey, raw)
         } catch {
