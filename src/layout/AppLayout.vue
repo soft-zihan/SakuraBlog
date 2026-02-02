@@ -136,39 +136,41 @@
               />
             </div>
 
-            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full flex flex-col overflow-hidden" style="scroll-snap-align: start; scroll-snap-stop: always;">
-              <AppHeader
-                ref="headerRef"
-                :lang="lang"
-                :t="t"
-                :breadcrumbs="breadcrumbs"
-                :view-mode="appStore.viewMode"
-                :current-tool="appStore.currentTool"
-                :current-file="appStore.currentFile"
-                :show-particles="appStore.showParticles"
-                :is-dark="appStore.isDark"
-                :petal-speed="appStore.userSettings.petalSpeed"
-                :header-hidden="headerHidden"
-                :dual-column-mode="dualColumnMode"
-                :sidebar-open="mobileShellPage === 0"
-                :right-sidebar-open="appStore.rightSidebarOpen"
-                :get-article-views="getArticleViews"
-                v-model:isRawMode="appStore.isRawMode"
-                @reset="$emit('reset')"
-                @navigate="$emit('navigate', $event)"
-                @copy-link="$emit('copy-link')"
-                @open-settings="appStore.showSettings = true; headerHidden = false"
-                @open-theme-panel="$emit('open-theme-panel', $event)"
-                @open-search="appStore.showSearch = true"
-                @open-music="musicStore.showMusicPlayer = true"
-                @open-write="appStore.showWriteEditor = true"
-                @open-download="appStore.showDownloadModal = true"
-                @toggle-theme="appStore.toggleTheme()"
-                @update:petal-speed="$emit('update:petal-speed', $event)"
-                @toggle-dual-column="$emit('toggle-dual-column')"
-                @toggle-sidebar="handleHeaderToggleSidebar"
-                @toggle-right-sidebar="handleHeaderToggleRightSidebar"
-              />
+            <div class="h-full w-full basis-full shrink-0 grow-0 max-w-full flex flex-col overflow-hidden relative" style="scroll-snap-align: start; scroll-snap-stop: always;">
+              <div class="absolute top-0 left-0 right-0 z-40">
+                <AppHeader
+                  ref="headerRef"
+                  :lang="lang"
+                  :t="t"
+                  :breadcrumbs="breadcrumbs"
+                  :view-mode="appStore.viewMode"
+                  :current-tool="appStore.currentTool"
+                  :current-file="appStore.currentFile"
+                  :show-particles="appStore.showParticles"
+                  :is-dark="appStore.isDark"
+                  :petal-speed="appStore.userSettings.petalSpeed"
+                  :header-hidden="headerHidden"
+                  :dual-column-mode="dualColumnMode"
+                  :sidebar-open="mobileShellPage === 0"
+                  :right-sidebar-open="appStore.rightSidebarOpen"
+                  :get-article-views="getArticleViews"
+                  v-model:isRawMode="appStore.isRawMode"
+                  @reset="$emit('reset')"
+                  @navigate="$emit('navigate', $event)"
+                  @copy-link="$emit('copy-link')"
+                  @open-settings="appStore.showSettings = true; headerHidden = false"
+                  @open-theme-panel="$emit('open-theme-panel', $event)"
+                  @open-search="appStore.showSearch = true"
+                  @open-music="musicStore.showMusicPlayer = true"
+                  @open-write="appStore.showWriteEditor = true"
+                  @open-download="appStore.showDownloadModal = true"
+                  @toggle-theme="appStore.toggleTheme()"
+                  @update:petal-speed="$emit('update:petal-speed', $event)"
+                  @toggle-dual-column="$emit('toggle-dual-column')"
+                  @toggle-sidebar="handleHeaderToggleSidebar"
+                  @toggle-right-sidebar="handleHeaderToggleRightSidebar"
+                />
+              </div>
 
               <div class="flex-1 flex overflow-hidden min-h-0">
                 <div class="flex-1 min-w-0 min-h-0 overflow-hidden flex">

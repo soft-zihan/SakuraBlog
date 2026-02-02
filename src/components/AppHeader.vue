@@ -1,12 +1,10 @@
 <template>
   <header 
-    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/60 shrink-0 z-20 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-all duration-300 ease-out hover:bg-white/80 dark:hover:bg-gray-900/80"
+    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/60 shrink-0 z-20 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-transform duration-300 ease-out hover:bg-white/80 dark:hover:bg-gray-900/80"
     style="will-change: transform;"
     :class="[
-      isMobile ? 'px-3 overflow-hidden' : 'h-16 px-6',
-      isMobile
-        ? (headerHidden && !themeOpen ? 'max-h-0 py-0 border-b-0 shadow-none opacity-0 pointer-events-none' : 'max-h-24 py-2 opacity-100')
-        : '',
+      isMobile ? 'h-14 px-3 py-2 overflow-hidden' : 'h-16 px-6',
+      isMobile && headerHidden && !themeOpen ? 'opacity-0 pointer-events-none' : '',
       { 'translate-y-0': !headerHidden || themeOpen, '-translate-y-full': headerHidden && !themeOpen }
     ]"
   >
@@ -161,7 +159,7 @@ const emit = defineEmits([
 ]);
 
 // Mobile detection
-const isMobile = ref(false);
+const isMobile = ref(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth < 768;
@@ -206,7 +204,6 @@ defineExpose({
 });
 
 onMounted(() => {
-  checkMobile();
   window.addEventListener('resize', checkMobile);
 });
 

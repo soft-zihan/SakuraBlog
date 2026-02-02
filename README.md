@@ -220,7 +220,10 @@ This project targets static hosting (e.g. GitHub Pages), where **first-time visi
 - **Remove critical-path blockers**: avoid extra synchronous/defer scripts before the entry module; keep the boot path minimal.
 - **Async split, but not “wait until clicked”**: make heavy features loadable as chunks, then preload them during idle windows (“see gaps, fill gaps”).
 - **Parallelize index download**: the boot script can prefetch `./data/files.json` early, and the app init reuses it when available.
+- **Warm up article essentials early (mobile-first)**: prewarm `ArticleReader` chunk + markdown/highlight deps in idle time, so the first article open doesn’t stall on dynamic imports.
+- **Avoid bandwidth contention**: delay non-critical large fetches (e.g. welcome poem data) until after the index is ready and the user is not already opening an article.
 - **Lite Mode escape hatch**: if boot is slow, users can switch to a reduced-effects mode that prioritizes readability and responsiveness.
+- **Prevent layout shift on mobile**: keep the article page layout stable while the header hides/shows (use transform-based hide and overlay header), so the content doesn’t “jump” during scroll.
 
 ### Troubleshooting “stuck on Loading…”
 
