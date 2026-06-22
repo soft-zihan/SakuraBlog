@@ -1,0 +1,37 @@
+{
+  "intro": "组件源码：src/components/lab/stage7-vue-advanced/LabVModel.vue。预置笔记聚焦 v-model 语法糖、修饰符、以及组件侧的 modelValue/update 约定。",
+  "notes": [
+    {
+      "matchRegex": "^<template>\\s*$",
+      "content": "<template>：模板语法只允许写表达式（如三元、??、?.），不允许写 if/for 语句块或赋值语句。"
+    },
+    {
+      "matchRegex": "^<script setup lang=\"ts\">\\s*$",
+      "content": "<script setup>：Composition API 的语法糖。这里用 defineComponent + h 在同一个文件里声明一个小型子组件，便于演示 v-model 约定。"
+    },
+    {
+      "matchRegex": "^const props = defineProps<\\{\\s*$",
+      "content": "defineProps：定义组件输入。lang 用联合类型限制取值，配合 computed(isZh) 做中英文文案切换。"
+    },
+    {
+      "match": "v-model.trim=\"nickname\"",
+      "content": "v-model.trim：会在更新前对字符串做 trim()，常用于输入框，避免因为首尾空格造成“看似相同但不相等”的状态。"
+    },
+    {
+      "match": "v-model.number=\"age\"",
+      "content": "v-model.number：会把值转成数字。对 range/number 控件尤其常见，能减少手动 parseInt/Number 的样板代码。"
+    },
+    {
+      "matchRegex": "^            <VModelTextInput v-model=\"title\" :label=\"isZh \\? '标题' : 'Title'\" />\\s*$",
+      "content": "组件 v-model：默认映射到子组件 props.modelValue 和 emit('update:modelValue', value)。父组件的 title 是单一事实来源。"
+    },
+    {
+      "match": "emits: {",
+      "content": "emits：声明组件会发出的事件。这里显式声明 update:modelValue，能在开发期获得更好的类型提示与运行时报错提示。"
+    },
+    {
+      "match": "h('input', {",
+      "content": "h：渲染函数 API。用它可以不写额外 .vue 文件就声明小组件；本质上依然是“受控输入”，value 来自 props，更新通过事件回传。"
+    }
+  ]
+}

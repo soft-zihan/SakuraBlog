@@ -1,0 +1,25 @@
+{
+  "intro": "组件源码：src/components/lab/stage6-vue-core/LabTemplateVsScript.vue。预置笔记聚焦新手最常卡住的两套语境：Template（表达式） vs Script（逻辑与响应式）。",
+  "notes": [
+    {
+      "matchRegex": "^<template>\\s*$",
+      "content": "Template：只负责“绑定与展示”。模板里写的是表达式（读取/运算/三元/调用），不要写 if/for/let 等语句块。控制流用 v-if/v-for 来表达。"
+    },
+    {
+      "matchRegex": "^<script setup lang=\"ts\">\\s*$",
+      "content": "Script setup：逻辑区。这里写变量、函数、computed/watch 等；在脚本里操作 ref 必须用 .value。"
+    },
+    {
+      "matchRegex": "^const count = ref\\(0\\)\\s*$",
+      "content": "ref 与 .value：脚本里 count 是 Ref 对象，所以需要 count.value；模板会自动解包 ref，因此模板里直接写 {{ count }}。"
+    },
+    {
+      "matchRegex": "^const templateBad = computed\\(\\(\\) => \\{\\s*$",
+      "content": "“不允许的模板写法”：通过对照示例强调模板不能写 if/for/let 语句。遇到类似需求应改用 v-if/v-for 或把逻辑下沉到脚本函数/computed。"
+    },
+    {
+      "matchRegex": "^              @click=\"count\\+\\+\"\\s*$",
+      "content": "事件处理：@click 绑定表达式。建议模板只做触发，把复杂流程写进 script 的函数里，避免模板变成脚本。"
+    }
+  ]
+}

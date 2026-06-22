@@ -1,0 +1,9 @@
+{
+  "intro": "TypeScript 源码：src/utils/highlightFormats.ts。预置笔记聚焦 import/export、类型声明、泛型、异步与常用语法符号。",
+  "notes": [
+    {
+      "matchRegex": "^export const FORMAT_CLASS_MAP: Record<string, string> = \\{\\s*$",
+      "content": "export：对外暴露变量/函数/类型。export const / export function 是最常见的模块边界写法。\n\nRecord<K, V>：把一组 key 映射到同一种 value 类型，常用于配置表/字典结构。它能让索引访问更安全。"
+    }
+  ]
+}

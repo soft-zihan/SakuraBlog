@@ -87,9 +87,10 @@
 | Feature | Description |
 | :-- | :-- |
 | **Touch-native interactions** | Uses pointer events for both mouse and touch; drag interactions disable default touch actions when needed. |
-| **Effects that don’t block reading** | Background effects default to non-interactive layers; only petals are pointer-enabled. |
+| **Effects that don't block reading** | Background effects default to non-interactive layers; only petals are pointer-enabled. |
 | **Mobile-safe links & assets** | Resolves internal links/images/PDF embeds with a GitHub Pages-friendly base URL strategy. |
 | **Modal & reader ergonomics** | Search and panels use viewport-based heights and responsive layout to stay usable on small screens. |
+| **Adaptive performance** | GPU-intensive effects (backdrop-blur, 3D transforms) automatically disabled on mobile via CSS media queries for smooth 60fps scrolling. |
 
 ### 🧪 Learning Lab & Source Viewer
 
@@ -223,7 +224,8 @@ This project targets static hosting (e.g. GitHub Pages), where **first-time visi
 - **Warm up article essentials early (mobile-first)**: prewarm `ArticleReader` chunk + markdown/highlight deps in idle time, so the first article open doesn’t stall on dynamic imports.
 - **Avoid bandwidth contention**: delay non-critical large fetches (e.g. welcome poem data) until after the index is ready and the user is not already opening an article.
 - **Lite Mode escape hatch**: if boot is slow, users can switch to a reduced-effects mode that prioritizes readability and responsiveness.
-- **Prevent layout shift on mobile**: keep the article page layout stable while the header hides/shows (use transform-based hide and overlay header), so the content doesn’t “jump” during scroll.
+- **Adaptive CSS effects**: GPU-heavy effects (backdrop-blur, 3D transforms) are automatically disabled on screens <768px via CSS media queries in `src/styles/app.css`, ensuring smooth scrolling on mobile without JavaScript overhead.
+- **Prevent layout shift on mobile**: keep the article page layout stable while the header hides/shows (use transform-based hide and overlay header), so the content doesn't "jump" during scroll.
 
 ### Troubleshooting “stuck on Loading…”
 

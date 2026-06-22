@@ -92,3 +92,33 @@ body {
 .dark #markdown-viewer .sakura-block-highlight {
   background: rgba(250, 204, 21, 0.16);
 }
+
+/* ========== 移动端性能优化 ========== */
+/* 关闭毛玻璃效果 - 自动修复 25+ 处性能瓶颈 */
+@media (max-width: 767px) {
+  /* Tailwind backdrop-blur utilities */
+  .backdrop-blur-\[3px\],
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* 自定义 sakura-glass-card */
+  .sakura-glass-card,
+  .dark .sakura-glass-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* 移动端简化 3D 按钮 - 自动优化 15+ 处按钮 */
+@media (max-width: 767px) {
+  .sakura-3d,
+  .sakura-3d:hover,
+  .sakura-3d:active {
+    transform: none !important;
+  }
+}
