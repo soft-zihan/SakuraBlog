@@ -22,23 +22,25 @@
       <div v-if="welcomePoemLoading" class="mt-4 text-sm text-gray-400">{{ lang === 'zh' ? '加载中...' : 'Loading...' }}</div>
       <div v-else-if="welcomePoemError" class="mt-4 text-sm text-amber-500">{{ welcomePoemError }}</div>
       <div v-else class="mt-6">
-        <div class="text-center">
-          <div class="text-2xl md:text-3xl font-bold tracking-wide text-[var(--primary-600)] dark:text-[var(--primary-300)] poem-font">
-            {{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}
+        <div class="bg-white/40 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 dark:border-gray-700/50 shadow-lg font-kaiti">
+          <div class="text-center">
+            <div class="text-2xl md:text-3xl font-bold tracking-wide text-[var(--primary-600)] dark:text-[var(--primary-300)] poem-font">
+              {{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}
+            </div>
+            <div v-if="welcomePoemAuthorLine" class="mt-2 text-base text-gray-500 dark:text-gray-400 poem-font">
+              {{ welcomePoemAuthorLine }}
+            </div>
           </div>
-          <div v-if="welcomePoemAuthorLine" class="mt-2 text-base text-gray-500 dark:text-gray-400 poem-font">
-            {{ welcomePoemAuthorLine }}
+          <div v-if="welcomePoemLines.length" class="mt-6 space-y-2 text-xl md:text-2xl leading-relaxed text-[var(--primary-600)] dark:text-[var(--primary-200)] poem-font poem-page">
+            <div v-for="(line, idx) in welcomePoemLines" :key="idx" class="poem-line" :style="{ animationDelay: `${idx * 120}ms` }">
+              {{ line }}
+            </div>
           </div>
-        </div>
-        <div v-if="welcomePoemLines.length" class="mt-6 space-y-2 text-xl md:text-2xl leading-relaxed text-[var(--primary-600)] dark:text-[var(--primary-200)] poem-font poem-page">
-          <div v-for="(line, idx) in welcomePoemLines" :key="idx" class="poem-line" :style="{ animationDelay: `${idx * 120}ms` }">
-            {{ line }}
-          </div>
-        </div>
-        <div v-if="welcomePoemDetails.length" class="mt-8 w-full text-left space-y-6 text-sm text-gray-600 dark:text-gray-300">
-          <div v-for="detail in welcomePoemDetails" :key="detail.label" class="pt-4 border-t border-white/60 dark:border-gray-700/60">
-            <div class="text-xs font-semibold text-[var(--primary-500)] dark:text-[var(--primary-300)] mb-2">{{ detail.label }}</div>
-            <div class="whitespace-pre-line leading-relaxed">{{ detail.value }}</div>
+          <div v-if="welcomePoemDetails.length" class="mt-8 w-full text-left space-y-6 text-sm text-gray-600 dark:text-gray-300">
+            <div v-for="detail in welcomePoemDetails" :key="detail.label" class="pt-4 border-t border-white/60 dark:border-gray-700/60">
+              <div class="text-xs font-semibold text-[var(--primary-500)] dark:text-[var(--primary-300)] mb-2">{{ detail.label }}</div>
+              <div class="whitespace-pre-line leading-relaxed">{{ detail.value }}</div>
+            </div>
           </div>
         </div>
       </div>

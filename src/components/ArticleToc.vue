@@ -19,15 +19,14 @@
         :key="item.id"
         :ref="(el) => setTocItemRef(el, item.id)"
         :href="`#${item.id}`"
-        class="block text-sm py-1.5 transition-all duration-200 leading-tight pr-2"
+        class="block py-2 transition-all duration-200 leading-snug pr-2"
         :class="[
-          item.level === 1 ? 'font-bold mb-2 mt-4' : 'font-normal',
+          item.level === 1 ? 'font-bold mb-2 mt-4 text-base' : 'font-normal text-sm',
           activeHeaderId === item.id ? 'translate-x-1 font-medium scale-105 origin-left' : ''
         ]"
         :style="{
           ...getTocItemStyle(item),
-          marginLeft: item.level > 1 ? `${(item.level - 1) * 0.75}rem` : undefined,
-          fontSize: item.level > 1 ? '0.75rem' : undefined
+          marginLeft: item.level > 1 ? `${(item.level - 1) * 0.75}rem` : undefined
         }"
         @touchstart.stop
         @touchend.stop

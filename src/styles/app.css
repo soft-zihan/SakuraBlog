@@ -87,10 +87,18 @@ body {
   background: rgba(250, 204, 21, 0.22);
   border-radius: 0.75rem;
   padding: 0.35rem 0.6rem;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .dark #markdown-viewer .sakura-block-highlight {
   background: rgba(250, 204, 21, 0.16);
+}
+
+/* Inline highlight with box-decoration-break for multi-line */
+#markdown-viewer .sakura-inline-highlight {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 /* ========== 移动端性能优化 ========== */

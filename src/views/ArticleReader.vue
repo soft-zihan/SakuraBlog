@@ -7,7 +7,7 @@
         :style="{ padding: 'var(--reader-page-padding, 1.5rem)' }"
       >
         <div 
-           class="w-full mx-auto bg-white/85 dark:bg-gray-900/85 rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
+           class="w-full mx-auto rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
            :class="[fontSizeClass, articleStyleClass, appStore.sidebarOpen ? 'max-w-4xl xl:max-w-5xl' : 'max-w-5xl xl:max-w-7xl']"
            :style="[{ padding: 'var(--reader-card-padding, 2.5rem)' }, articleContainerStyle]"
         >
@@ -131,11 +131,11 @@
       <!-- Right Sidebar (TOC) -->
       <aside 
         v-if="!file.isSource && !isRawMode"
-        class="hidden lg:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 backdrop-blur-md overflow-y-auto custom-scrollbar z-20 lg:static lg:h-auto lg:shadow-none lg:bg-white/20 lg:dark:bg-gray-900/20"
+        class="hidden lg:flex w-72 2xl:w-80 flex-col gap-6 p-6 border-l border-white/30 dark:border-gray-700/30 overflow-y-auto custom-scrollbar z-20 lg:static lg:h-auto lg:shadow-none"
       >
 
         <!-- Table of Contents -->
-        <div v-if="toc.length > 0">
+        <div v-if="toc.length > 0" class="rounded-xl p-4" :style="tocContainerStyle">
           <h3 class="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2" :style="tocTitleStyle">
             <span>📑</span> {{ t.on_this_page }}
           </h3>
@@ -161,10 +161,10 @@
               :key="item.id"
               :ref="(el) => setTocItemRef(el, item.id)"
               :href="`#${item.id}`"
-              class="block text-sm py-1.5 transition-all duration-200 leading-tight pr-2"
+              class="block py-2 transition-all duration-200 leading-snug pr-2"
               :class="[
-                item.level === 1 ? 'font-bold mb-2 mt-4' : 'font-normal',
-                item.level > 1 ? `ml-${(item.level-1)*3} text-xs` : '',
+                item.level === 1 ? 'font-bold mb-2 mt-4 text-base' : 'font-normal text-sm',
+                item.level > 1 ? `ml-${(item.level-1)*3}` : '',
                 activeHeaderId === item.id ? 'translate-x-1 font-medium scale-105 origin-left' : ''
               ]"
               :style="getTocItemStyle(item)"
@@ -176,12 +176,11 @@
         </div>
 
         <!-- Decorative / Meta Info -->
-        <div class="mt-auto bg-white/50 dark:bg-gray-800/50 p-4 rounded-xl border border-white/60 dark:border-gray-700 shadow-sm backdrop-blur-sm">
+        <div class="mt-auto p-4 rounded-xl border shadow-sm" :style="tocMetaStyle">
            <div class="text-[10px] uppercase font-bold mb-2" :style="tocMetaTitleStyle">{{ t.note_details }}</div>
            <div class="space-y-2 text-xs text-gray-500 dark:text-gray-400">
              <div class="flex justify-between"><span>{{ t.words }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentWordCount }}</span></div>
              <div class="flex justify-between"><span>{{ t.lines }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ currentLineCount }}</span></div>
-             <div class="flex justify-between"><span>{{ t.format }}:</span> <span class="font-mono text-gray-700 dark:text-gray-300">{{ file.isSource ? 'Code' : 'Markdown' }}</span></div>
            </div>
         </div>
       </aside>
@@ -693,13 +692,29 @@ const resetArticleBackgroundColor = () => {
 
 const articleContainerStyle = computed(() => {
   const style: Record<string, string> = {
-    borderColor: appStore.isDark ? 'rgba(255,255,255,0.08)' : 'var(--primary-100)'
+    borderColor: appStore.isDark ? 'rgba(255,255,255,0.08)' : 'var(--primary-100)',
+    // 让默认文字跟随主题色
+    color: appStore.isDark ? 'var(--primary-100)' : 'var(--primary-900)'
   };
+  
+  // 应用文章背景不透明度设置
+  const opacity = appStore.userSettings.articleBgOpacity / 100;
+  
+  // 始终使用带透明度的背景色
   if (currentMeta.value.backgroundColor) {
-    style.backgroundColor = currentMeta.value.backgroundColor;
+    // 如果有自定义背景色，需要解析并添加透明度
+    const bgColor = currentMeta.value.backgroundColor;
+    style.backgroundColor = applyOpacityToColor(bgColor, opacity);
   } else if (articleBackgroundColor.value) {
-    style.backgroundColor = articleBackgroundColor.value;
+    // 如果用户设置了背景色，添加透明度
+    style.backgroundColor = applyOpacityToColor(articleBackgroundColor.value, opacity);
+  } else {
+    // 使用默认背景色并应用不透明度
+    style.backgroundColor = appStore.isDark 
+      ? `rgba(17, 24, 39, ${opacity})` // gray-900 with opacity
+      : `rgba(255, 255, 255, ${opacity})`; // white with opacity
   }
+  
   return style;
 });
 
@@ -743,4 +758,53 @@ const getTocItemStyle = (item: any) => ({
     ? (appStore.isDark ? 'var(--primary-400)' : 'var(--primary-600)') 
     : (appStore.isDark ? 'rgba(255,255,255,0.6)' : 'var(--primary-800)')
 });
+
+// 目录容器样式（包括标题和导航）
+const tocContainerStyle = computed(() => {
+  const opacity = appStore.userSettings.tocOpacity / 100;
+  return {
+    backgroundColor: appStore.isDark 
+      ? `rgba(31, 41, 55, ${opacity})` // gray-800 with opacity
+      : `rgba(255, 255, 255, ${opacity})` // white with opacity
+  };
+});
+
+// 笔记详情模块样式
+const tocMetaStyle = computed(() => {
+  const opacity = appStore.userSettings.tocOpacity / 100;
+  return {
+    opacity: opacity,
+    backgroundColor: appStore.isDark 
+      ? `rgba(31, 41, 55, ${opacity})` // gray-800 with opacity
+      : `rgba(255, 255, 255, ${opacity})`, // white with opacity
+    borderColor: appStore.isDark 
+      ? `rgba(55, 65, 81, ${opacity})` // gray-700 with opacity
+      : `rgba(255, 255, 255, ${opacity})` // white with opacity
+  };
+});
+
+// 辅助函数：将颜色转换为带透明度的rgba
+function applyOpacityToColor(color: string, opacity: number): string {
+  // 如果已经是rgba格式，替换透明度
+  const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+  if (rgbaMatch) {
+    const [, r, g, b] = rgbaMatch;
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+  
+  // 如果是hex格式，转换为rgba
+  if (color.startsWith('#')) {
+    let hex = color.slice(1);
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+  
+  // 其他格式（如颜色名称），保持原样但添加opacity
+  return color;
+}
 </script>

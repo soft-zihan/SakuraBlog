@@ -63,7 +63,9 @@ const loadGiscus = () => {
   giscusContainer.value.innerHTML = ''
   
   // 构建用于评论映射的唯一标识符（基于文章路径）
-  // 使用 pathname 映射，与旧版本保持一致
+  // 由于应用是SPA（没有使用router），所有文章共享相同的pathname
+  // 最佳方案：使用 url 映射，Giscus会自动包含 query 参数 (?path=xxx)
+  // 这样每篇文章都有唯一的 URL，评论也会独立
   
   // Create new script
   const script = document.createElement('script')
@@ -72,7 +74,7 @@ const loadGiscus = () => {
   script.setAttribute('data-repo-id', config.repoId)
   script.setAttribute('data-category', config.category)
   script.setAttribute('data-category-id', config.categoryId)
-  script.setAttribute('data-mapping', 'pathname')  // 使用 pathname 映射
+  script.setAttribute('data-mapping', 'url')  // 使用 url 映射，包含完整的 URL（含 query 参数）
   script.setAttribute('data-strict', '0')
   script.setAttribute('data-reactions-enabled', '1')
   script.setAttribute('data-emit-metadata', '0')

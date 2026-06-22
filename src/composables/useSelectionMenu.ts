@@ -18,10 +18,10 @@ const getViewerElement = () => activeViewerRef?.value || null
 
 // 格式化类型映射
 const formatClassMap: Record<string, string> = {
-  'highlight-yellow': 'bg-yellow-200 dark:bg-yellow-800/60 rounded px-0.5 transition-colors shadow-sm',
-  'highlight-green': 'bg-green-200 dark:bg-green-800/60 rounded px-0.5 transition-colors shadow-sm',
-  'highlight-blue': 'bg-blue-200 dark:bg-blue-800/60 rounded px-0.5 transition-colors shadow-sm',
-  'highlight-pink': 'bg-pink-200 dark:bg-pink-800/60 rounded px-0.5 transition-colors shadow-sm',
+  'highlight-yellow': 'bg-yellow-200 dark:bg-yellow-800/60 rounded px-0.5 transition-colors shadow-sm sakura-inline-highlight',
+  'highlight-green': 'bg-green-200 dark:bg-green-800/60 rounded px-0.5 transition-colors shadow-sm sakura-inline-highlight',
+  'highlight-blue': 'bg-blue-200 dark:bg-blue-800/60 rounded px-0.5 transition-colors shadow-sm sakura-inline-highlight',
+  'highlight-pink': 'bg-pink-200 dark:bg-pink-800/60 rounded px-0.5 transition-colors shadow-sm sakura-inline-highlight',
   'underline-wavy': 'underline decoration-wavy decoration-sakura-500 underline-offset-4',
   'underline-double': 'underline decoration-double decoration-blue-500 underline-offset-4',
   'highlight-block': 'sakura-block-highlight'

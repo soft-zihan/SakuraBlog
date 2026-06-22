@@ -44,16 +44,23 @@
 
     <!-- View Toggles -->
     <div class="px-6 py-4 flex-shrink-0">
-      <div class="flex p-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 relative" :style="tabContainerStyle">
+      <div class="flex p-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 relative overflow-hidden" :style="tabContainerStyle">
+        <!-- Sliding Indicator -->
+        <div 
+          class="absolute top-1.5 bottom-1.5 rounded-xl z-0 tab-slider"
+          :style="indicatorStyle"
+        ></div>
+        
         <button 
-          v-for="mode in ['latest', 'files', 'lab']"
+          v-for="(mode, index) in ['latest', 'files', 'lab']"
           :key="mode"
-          @click="$emit('update:viewMode', mode)"
-          class="flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1 z-10"
+          @mouseenter="handleTabHover(mode, index)"
+          @mouseleave="hoverIndex = -1"
+          class="flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1 z-10 relative"
           :class="viewMode === mode 
-            ? 'bg-gradient-to-r from-[var(--primary-100)] to-white dark:from-[var(--primary-900)]/40 dark:to-gray-800 text-[var(--primary-800)] dark:text-white shadow-lg ring-2 ring-[var(--primary-400)] dark:ring-[var(--primary-500)] scale-[1.02]'
-            : 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-700/50'"
-          :style="getViewModeStyle(mode)"
+            ? 'text-[var(--primary-800)] dark:text-white'
+            : 'text-gray-500 dark:text-gray-400'"
+          :style="getViewModeStyle(mode, index)"
         >
           {{ mode === 'latest' ? '⏰ ' + t.tab_latest : (mode === 'files' ? '📁 ' + t.tab_files : '🧪 ' + t.tab_lab) }}
         </button>
@@ -229,6 +236,8 @@ const appStore = useAppStore();
 const learningStore = useLearningStore()
 const { prefetchAllPathStats } = useUmamiViewStats()
 
+const hoverIndex = ref(-1);
+
 const props = defineProps<{
   lang: string;
   t: any;
@@ -320,6 +329,13 @@ const handleLabTabClick = (tab: any) => {
   emit('update:activeLabTab', tab.id);
 };
 
+// Handle tab hover - switch immediately with slide animation
+const handleTabHover = (mode: string, index: number) => {
+  if (props.viewMode === mode) return;
+  hoverIndex.value = index;
+  emit('update:viewMode', mode);
+};
+
 const headerGlowStyle = computed(() => ({
   backgroundImage: `linear-gradient(to bottom, ${appStore.isDark ? 'var(--primary-900-30)' : 'var(--primary-100-50)'}, transparent)`
 }))
@@ -351,9 +367,33 @@ const tabContainerStyle = computed(() => ({
   backgroundColor: appStore.isDark ? 'rgba(255,255,255,0.04)' : 'var(--primary-50)'
 }))
 
-const getViewModeStyle = (mode: string) => {
+const indicatorStyle = computed(() => {
+  const activeIndex = ['latest', 'files', 'lab'].indexOf(props.viewMode);
+  const currentIndex = hoverIndex.value >= 0 ? hoverIndex.value : activeIndex;
+  const widthPercent = 33.333;
+  const leftPercent = currentIndex * widthPercent;
+  
+  return {
+    width: `${widthPercent}%`,
+    left: `${leftPercent}%`,
+    transition: 'left 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+    backgroundColor: appStore.isDark 
+      ? 'rgba(255,255,255,0.12)' 
+      : 'rgba(255,255,255,0.95)',
+    boxShadow: appStore.isDark
+      ? '0 4px 12px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+      : '0 4px 12px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
+    border: appStore.isDark
+      ? '1px solid rgba(255,255,255,0.15)'
+      : '1px solid rgba(255,255,255,0.6)',
+  };
+})
+
+const getViewModeStyle = (mode: string, index: number) => {
   if (props.viewMode === mode) {
-    return {}
+    return {
+      color: appStore.isDark ? 'white' : 'var(--primary-800)'
+    }
   }
   return {
     color: appStore.isDark ? 'rgba(255,255,255,0.6)' : 'var(--primary-400)'

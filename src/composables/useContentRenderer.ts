@@ -85,16 +85,21 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     const isRelativeBase = baseUrl === './' || baseUrl === '.'
     const normalizedBase = isRelativeBase ? './' : (baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`)
     const baseHref = new URL(normalizedBase, window.location.href).href
-    const serverPrefix = `${baseHref}notes/`
+
+    // decodeURI first to undo any prior encoding, then encodeURI once — prevents double-encoding
+    const safeEncodeURI = (uri: string) => {
+      try { return encodeURI(decodeURI(uri)) } catch { return encodeURI(uri) }
+    }
 
     // 移除开头的 ./ 但保留 ../
     let cleaned = base.replace(/^\.\//g, '')
 
+    // 如果已经是 notes/ 开头的路径（已处理过），直接返回
+    if (cleaned.startsWith('notes/')) return encodeURI(decodeURI(`${baseHref}${cleaned}`)) + suffix
     // 处理绝对路径 /notes/...
-    if (cleaned.startsWith('/notes/')) return `${encodeURI(`${baseHref}notes/${cleaned.replace(/^\/notes\//, '')}`)}${suffix}`
-    if (cleaned.startsWith('notes/')) return `${encodeURI(`${baseHref}${cleaned}`)}${suffix}`
+    if (cleaned.startsWith('/notes/')) return encodeURI(decodeURI(`${baseHref}notes/${cleaned.replace(/^\/notes\//, '')}`)) + suffix
     // 处理其他绝对路径 /image/... 等
-    if (cleaned.startsWith('/')) return `${encodeURI(`${baseHref}${cleaned.replace(/^\/+/, '')}`)}${suffix}`
+    if (cleaned.startsWith('/')) return encodeURI(decodeURI(`${baseHref}${cleaned.replace(/^\/+/, '')}`)) + suffix
 
     // 处理相对路径 (包括 ../ 开头的)
     const parts = cleaned.split('/')
@@ -108,7 +113,9 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
         parentParts.push(part)
       }
     }
-    return `${encodeURI(`${serverPrefix}${parentParts.join('/')}`)}${suffix}`
+    // decodeURI before encodeURI to prevent double-encoding
+    // (this function may be called on already-encoded URLs from pre-processing)
+    return safeEncodeURI(`${baseHref}${parentParts.join('/')}`) + suffix
   }
 
   const renderPdfEmbed = (href: string, label?: string, title?: string) => {
@@ -183,19 +190,19 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     }
     renderer.image = function (href: string, title: string | null, text: string) {
       if (href && isPdfPath(href)) {
-        const resolved = resolveContentPath(href)
-        return renderPdfEmbed(resolved, text, title || text)
+        // href is already resolved by pre-processing
+        return renderPdfEmbed(href, text, title || text)
       }
       const titleAttr = title ? ` title="${title}"` : ''
-      const safeHref = href ? resolveContentPath(href) : ''
-      return `<img src="${safeHref}" alt="${text}"${titleAttr}>`
+      // href is already resolved by pre-processing, use directly
+      return `<img src="${href}" alt="${text}"${titleAttr}>`
     }
     // 自定义链接渲染：为内部链接添加 data-internal 属性，防止浏览器自动跳转
     renderer.link = function (href: string, title: string | null, text: string) {
       const titleAttr = title ? ` title="${title}"` : ''
       if (href && isPdfPath(href)) {
-        const resolved = resolveContentPath(href)
-        return renderPdfEmbed(resolved, text, title || text)
+        // href is already resolved by pre-processing
+        return renderPdfEmbed(href, text, title || text)
       }
       if (isSupportedInternalLink(href)) {
         // 内部链接：使用 data-href 存储原始路径，href 设为 javascript:void(0) 防止跳转
@@ -235,7 +242,16 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     if (precomputedToc) toc.value = precomputedToc
 
     if (currentFile.value.renderedHtml) {
-      const cacheKey = `${currentFile.value.path}|${currentFile.value.lastModified || ''}|${currentFile.value.renderVersion || ''}|${currentFile.value.renderedHtml.length}|rendered-v1`
+      // Fix image paths in pre-rendered HTML
+      let fixedHtml = currentFile.value.renderedHtml;
+      
+      // Replace markdown image syntax with proper paths
+      fixedHtml = fixedHtml.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, relPath) => {
+        const resolved = resolveContentPath(relPath.trim())
+        return `<img src="${resolved}" alt="${alt}">`
+      })
+      
+      const cacheKey = `${currentFile.value.path}|${currentFile.value.lastModified || ''}|${currentFile.value.renderVersion || ''}|${fixedHtml.length}|rendered-v2`
       const cached = renderCache.get(cacheKey)
       if (cached !== undefined) {
         renderedHtml.value = cached.html
@@ -247,8 +263,8 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
         return
       }
 
-      const sanitized = sanitizeHtml(currentFile.value.renderedHtml)
-      renderedHtml.value = sanitized || currentFile.value.renderedHtml
+      const sanitized = sanitizeHtml(fixedHtml)
+      renderedHtml.value = sanitized || fixedHtml
       renderCache.set(cacheKey, { html: renderedHtml.value, toc: toc.value.slice() })
       renderCacheKeys.push(cacheKey)
       if (renderCacheKeys.length > 25) {
@@ -284,27 +300,14 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
 
     // Image Path Resolution
     if (currentFile.value.path) {
-      const splitImageToken = (raw: string) => {
-        let cleaned = raw.trim()
-        if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
-          cleaned = cleaned.slice(1, -1)
-        }
-        const [pathPart, ...rest] = cleaned.split(/\s+/)
-        return { path: pathPart, tail: rest.join(' ') }
-      }
-
-      rawContent = rawContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, raw) => {
-        const { path, tail } = splitImageToken(raw)
-        const resolved = resolveContentPath(path)
-        const finalToken = tail ? `${resolved} ${tail}` : resolved
-        return `![${alt}](${finalToken})`
+      rawContent = rawContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, relPath) => {
+        const resolved = resolveContentPath(relPath.trim())
+        return `![${alt}](${resolved})`
       })
 
       rawContent = rawContent.replace(/src="([^"]+)"/g, (match, src) => {
-        const { path, tail } = splitImageToken(src)
-        const resolved = resolveContentPath(path)
-        const finalToken = tail ? `${resolved} ${tail}` : resolved
-        return `src="${finalToken}"`
+        const resolved = resolveContentPath(src.trim())
+        return `src="${resolved}"`
       })
     }
 

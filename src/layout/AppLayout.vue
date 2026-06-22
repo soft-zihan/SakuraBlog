@@ -1,13 +1,24 @@
 <template>
   <div class="flex flex-col md:flex-row w-full h-full max-w-[2560px] mx-auto overflow-hidden bg-gradient-to-br from-white/70 via-[var(--primary-50)]/50 to-purple-50/40 dark:from-gray-950/80 dark:via-gray-900/70 dark:to-[var(--primary-900)]/40 backdrop-blur-[3px] border border-white/30 dark:border-gray-800/60 shadow-[0_12px_60px_rgba(15,23,42,0.12)] font-sans transition-colors duration-500 relative" :class="[appStore.userSettings.fontFamily === 'serif' ? 'font-serif' : appStore.userSettings.fontFamily === 'kaiti' ? 'font-kaiti' : 'font-sans', appStore.isDark ? 'dark' : '']">
     
+    <!-- 左边缘触发区域 (仅桌面端) -->
+    <div
+      v-if="!isMobile && !appStore.readingMode"
+      class="fixed left-0 top-0 bottom-0 z-20 hidden md:block"
+      style="width: 30px;"
+      @mouseenter="edgeTrigger.onEnterTrigger"
+      @mouseleave="edgeTrigger.onLeaveTrigger"
+    ></div>
+
     <!-- Left Sidebar: Navigation -->
     <AppSidebar 
       v-if="!isMobile && !appStore.readingMode"
       :class="[
-        appStore.sidebarOpen ? 'md:w-72 lg:w-80' : 'md:w-0 md:opacity-0 md:overflow-hidden md:pointer-events-none'
+        shouldShowSidebar ? 'md:w-72 lg:w-80' : 'md:w-0 md:opacity-0 md:overflow-hidden md:pointer-events-none'
       ]"
       class="fixed md:relative z-40 transition-all duration-300 ease-out"
+      @mouseenter="edgeTrigger.onEnterSidebar"
+      @mouseleave="edgeTrigger.onLeaveSidebar"
       :lang="lang"
       :t="t"
       v-model:viewMode="appStore.viewMode"
@@ -34,7 +45,7 @@
       @select-file="$emit('select-file', $event); if(isMobile) appStore.sidebarOpen = false"
       @select-folder="$emit('select-folder', $event)"
       @open-search="appStore.showSearch = true; if(isMobile) appStore.sidebarOpen = false"
-      @toggle-sidebar="appStore.sidebarOpen = !appStore.sidebarOpen"
+      @toggle-sidebar="handleToggleSidebar"
       @toggle-right-sidebar="appStore.rightSidebarOpen = !appStore.rightSidebarOpen"
       @update:activeLabTab="$emit('update:activeLabTab', $event)"
     />
@@ -255,6 +266,7 @@ import WallpaperLayer from '../components/WallpaperLayer.vue';
 import PetalBackground from '../components/PetalBackground.vue';
 import { useToast } from '../composables/useToast';
 import MiniPlayer from '../components/MiniPlayer.vue';
+import { useSidebarEdgeTrigger } from '../composables/useSidebarEdgeTrigger';
 
 const RightSidebar = defineAsyncComponent(() => import('../components/RightSidebar.vue'));
 
@@ -290,6 +302,17 @@ const { showToast } = useToast();
 
 const lang = computed(() => appStore.lang);
 const t = computed(() => I18N[lang.value]);
+
+// 边缘触发逻辑
+const isDisabled = computed(() => isMobile.value || appStore.readingMode)
+const edgeTrigger = useSidebarEdgeTrigger({
+  triggerWidth: 30,
+  collapseDelay: 400,
+  disabled: isDisabled
+})
+
+// 计算最终是否显示侧边栏(手动打开 OR 自动展开)
+const shouldShowSidebar = computed(() => appStore.sidebarOpen || edgeTrigger.shouldAutoExpand.value)
 
 const mobileToc = computed(() => {
   const file = appStore.currentFile
@@ -486,11 +509,21 @@ const handleScroll = () => {
   });
 };
 
+const handleToggleSidebar = () => {
+  // 切换手动打开状态
+  appStore.sidebarOpen = !appStore.sidebarOpen
+  
+  // 如果现在是关闭状态,强制清除自动展开状态,防止边缘触发立即重新展开
+  if (!appStore.sidebarOpen) {
+    edgeTrigger.forceCollapse()
+  }
+}
+
 const handleHeaderToggleSidebar = () => {
   if (isMobile.value) {
     return;
   }
-  appStore.sidebarOpen = !appStore.sidebarOpen;
+  appStore.sidebarOpen = !appStore.sidebarOpen
 };
 
 const handleHeaderToggleRightSidebar = () => {

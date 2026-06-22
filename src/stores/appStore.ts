@@ -75,6 +75,8 @@ export const useAppStore = defineStore('app', () => {
     articleSortMode: 'date' as 'date' | 'tree',
     articleBackgroundColorLight: '',
     articleBackgroundColorDark: '',
+    articleBgOpacity: 85, // 文章背景不透明度 (0-100)
+    tocOpacity: 100, // 目录不透明度 (0-100)
     wallpaperFill: 'cover' as 'cover' | 'contain' | 'fill',
     autoChangeMode: 'off' as 'off' | 'custom' | 'preset' | 'anime' | 'beauty' | 'bing' | 'search' | 'wallhaven',
     autoChangeTimer: 0,

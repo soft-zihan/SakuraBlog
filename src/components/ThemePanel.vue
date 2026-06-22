@@ -203,6 +203,42 @@
         </div>
 
         <div class="mb-4">
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '文章背景不透明度' : 'Article BG Opacity' }}</div>
+          <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+            <span class="text-xs text-gray-500">0%</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              v-model.number="appStore.userSettings.articleBgOpacity"
+              class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[var(--primary-500)]"
+            />
+            <span class="text-xs text-gray-500">100%</span>
+            <span class="text-xs font-mono font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)] min-w-[3rem] text-right">
+              {{ appStore.userSettings.articleBgOpacity }}%
+            </span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '目录不透明度' : 'TOC Opacity' }}</div>
+          <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+            <span class="text-xs text-gray-500">0%</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              v-model.number="appStore.userSettings.tocOpacity"
+              class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[var(--primary-500)]"
+            />
+            <span class="text-xs text-gray-500">100%</span>
+            <span class="text-xs font-mono font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)] min-w-[3rem] text-right">
+              {{ appStore.userSettings.tocOpacity }}%
+            </span>
+          </div>
+        </div>
+
+        <div class="mb-4">
           <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ lang === 'zh' ? '快捷键' : 'Shortcuts' }}</div>
           <div class="space-y-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between gap-4">
