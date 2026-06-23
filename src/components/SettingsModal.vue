@@ -23,6 +23,51 @@
             {{ hasToken ? (t.github_connected || 'GitHub 已连接') : (t.github_not_connected || '未配置 Token') }}
           </span>
         </div>
+
+        <!-- OAuth 登录按钮 -->
+        <div v-if="isOAuthAvailable()" class="mb-3">
+          <button 
+            @click="handleGitHubLogin"
+            :disabled="isLoggingIn"
+            class="w-full py-2.5 bg-gray-900 dark:bg-gray-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-gray-600 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl"
+          >
+            <svg v-if="!isLoggingIn" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            <span v-if="isLoggingIn" class="animate-spin">⏳</span>
+            {{ isLoggingIn ? '登录中...' : '使用 GitHub 账号登录' }}
+          </button>
+          
+          <p v-if="oauthLoginError" class="text-xs text-red-500 mt-2">{{ oauthLoginError }}</p>
+          <p class="text-xs text-gray-400 mt-1">✨ 授权后可直接使用，无需手动创建 Token</p>
+        </div>
+
+        <!-- OAuth 不可用时的提示 -->
+        <div v-else class="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <p class="text-xs text-blue-600 dark:text-blue-400">
+            💡 OAuth 登录未配置，您可以手动输入 Token 或使用 GitHub OAuth 登录（需管理员配置）
+          </p>
+        </div>
+
+        <!-- 已登录时显示退出按钮 -->
+        <div v-if="hasToken" class="mb-3">
+          <button 
+            @click="handleLogout"
+            class="w-full py-2 border border-red-300 dark:border-red-700 text-red-500 dark:text-red-400 rounded-xl text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            退出 GitHub 登录
+          </button>
+        </div>
+
+        <!-- 分割线 -->
+        <div v-if="hasToken || isOAuthAvailable()" class="relative my-4">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+          </div>
+          <div class="relative flex justify-center text-xs">
+            <span class="px-2 bg-white dark:bg-gray-800 text-gray-400">或手动输入 Token</span>
+          </div>
+        </div>
         
         <!-- Token Input -->
         <div class="mb-3">
@@ -253,6 +298,7 @@ import { useBackup, type BackupFile } from '../composables/useBackup'
 import { useArticleStore } from '../stores/articleStore'
 import { useAppStore } from '../stores/appStore'
 import { useTokenSecurity } from '../composables/useTokenSecurity'
+import { useGitHubOAuth } from '../composables/useGitHubOAuth'
 import { safeLocalStorage } from '@/utils/storage'
 
 const props = defineProps<{
@@ -271,6 +317,16 @@ const articleStore = useArticleStore()
 const appStore = useAppStore()
 const { saveToken, hasToken: checkHasToken, getToken } = useTokenSecurity()
 
+// GitHub OAuth 登录
+const { 
+  initiateLogin, 
+  logout: oauthLogout,
+  isLoggingIn, 
+  loginError: oauthLoginError,
+  hasToken: oauthHasToken,
+  isOAuthAvailable
+} = useGitHubOAuth()
+
 // GitHub Configuration
 const tokenInput = ref('')
 const authorName = ref('')
@@ -282,11 +338,30 @@ const repoName = computed(() => 'SakuraBlog')
 const authorUrl = computed(() => authorName.value.trim() ? `https://github.com/${authorName.value.trim()}` : '')
 const userForkRepo = computed(() => authorName.value.trim() ? `${authorName.value.trim()}/SakuraBlog` : '')
 
-const hasToken = ref(false)
+const hasToken = computed(() => {
+  // 合并 OAuth 和手动 Token 的状态
+  return checkHasToken() || oauthHasToken()
+})
 
 // 初始化检查 token 状态
 const updateTokenStatus = () => {
-  hasToken.value = checkHasToken()
+  // hasToken 现在是 computed，不需要手动更新
+}
+
+// GitHub OAuth 登录处理
+const handleGitHubLogin = () => {
+  initiateLogin()
+}
+
+// 退出登录处理
+const handleLogout = () => {
+  if (confirm('确定要退出 GitHub 登录吗？')) {
+    oauthLogout()
+    authorName.value = ''
+    backupMessage.value = '已退出 GitHub 登录'
+    backupSuccess.value = true
+    setTimeout(() => { backupMessage.value = '' }, 3000)
+  }
 }
 
 const saveGitHubConfig = async () => {

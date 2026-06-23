@@ -1,5 +1,10 @@
 <template>
+  <!-- OAuth 回调页面 -->
+  <OAuthCallback v-if="isOAuthCallback" />
+  
+  <!-- 正常应用 -->
   <AppLayout
+    v-else
     :filtered-file-system="filteredFileSystem"
     :filtered-flat-files="filteredFlatFiles"
     :lab-folder="labFolder"
@@ -147,9 +152,17 @@ import GlobalAudio from './components/GlobalAudio.vue';
 import FloatingSelectionMenu from './components/FloatingSelectionMenu.vue';
 import MainContent from './components/MainContent.vue';
 import Toast from './components/Toast.vue';
+import OAuthCallback from './views/OAuthCallback.vue';
 
 // Async Components
 const DualColumnView = defineAsyncComponent(() => import('./components/lab/DualColumnView.vue'));
+
+// 检测是否为 OAuth 回调页面
+const isOAuthCallback = computed(() => {
+  const pathname = window.location.pathname;
+  return pathname.includes('/oauth/callback') || 
+         new URLSearchParams(window.location.search).has('code');
+});
 const SettingsModal = defineAsyncComponent(() => import('./components/SettingsModal.vue'));
 const DownloadModal = defineAsyncComponent(() => import('./components/DownloadModal.vue'));
 const SearchModal = defineAsyncComponent(() => import('./components/SearchModal.vue'));

@@ -10,9 +10,9 @@
     
     <!-- Header: Title & Icon -->
     <div class="flex justify-between items-start relative z-10 mb-3">
-      <div class="flex items-center gap-2 flex-1 min-w-0">
-        <span class="text-xl shrink-0">{{ getFileIcon(file) }}</span>
-        <span class="font-bold truncate text-sm" :style="titleStyle">
+      <div class="flex items-start gap-2 flex-1 min-w-0">
+        <span class="text-xl shrink-0 mt-0.5">{{ getFileIcon(file) }}</span>
+        <span class="font-bold text-sm leading-snug line-clamp-2" :style="titleStyle" :title="getDisplayName(file.name)">
           {{ getDisplayName(file.name) }}
         </span>
       </div>

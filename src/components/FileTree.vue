@@ -24,8 +24,8 @@
              @dblclick.stop="$emit('toggle-folder', node.path)"
              class="flex-1 flex items-center gap-2 cursor-pointer"
            >
-            <span class="text-lg text-sakura-300">📁</span>
-            <span class="truncate text-sm">{{ node.name }}</span>
+            <span class="text-lg text-sakura-300 shrink-0">📁</span>
+            <span class="text-sm line-clamp-2 leading-snug" :title="node.name">{{ node.name }}</span>
           </div>
         </div>
         
@@ -50,8 +50,8 @@
         class="flex items-center gap-2 px-2 py-1.5 ml-5 rounded-lg cursor-pointer transition-all duration-200 text-sm group"
         :class="currentPath === node.path ? 'bg-sakura-400 text-white shadow-md' : 'hover:bg-sakura-50 text-gray-600 dark:text-gray-200 dark:hover:bg-gray-700/40'"
       >
-        <span class="text-lg group-hover:scale-110 transition-transform">{{ currentPath === node.path ? '🌸' : getFileIcon(node) }}</span>
-        <span class="truncate">{{ node.name }}</span>
+        <span class="text-lg shrink-0 group-hover:scale-110 transition-transform">{{ currentPath === node.path ? '🌸' : getFileIcon(node) }}</span>
+        <span class="line-clamp-2 leading-snug" :title="node.name">{{ node.name }}</span>
       </div>
     </li>
   </ul>
