@@ -1,0 +1,29 @@
+{
+  "intro": "TypeScript 源码：src/stores/highlightsStore.ts。预置笔记聚焦 import/export、类型声明、泛型、异步与常用语法符号。",
+  "notes": [
+    {
+      "matchRegex": "^import \\{ defineStore \\} from 'pinia'\\s*$",
+      "content": "ESM import：import ... from ... 是模块导入语法。导入的名字要与导出方式匹配（default export vs named export）。\n\nPinia 导入：defineStore 来自 pinia。它用于创建 store（全局/模块化状态容器），在组件中通过 useXxxStore() 使用。"
+    },
+    {
+      "matchRegex": "^export type HighlightRecord =\\s*$",
+      "content": "export：对外暴露变量/函数/类型。export const / export function 是最常见的模块边界写法。"
+    },
+    {
+      "matchRegex": "^type InlineAnchor = \\{\\s*$",
+      "content": "type：类型别名，用来描述结构/联合/映射等类型表达式。它只存在于编译期，不会影响运行时。"
+    },
+    {
+      "matchRegex": "^export const useHighlightsStore = defineStore\\(\\s*$",
+      "content": "defineStore(id, setup/options)：Pinia 创建 store 的核心 API。id 是唯一标识；setup 风格 store 用 ref/computed/actions 组织状态与行为。"
+    },
+    {
+      "matchRegex": "^    persist: \\{\\s*$",
+      "content": "持久化配置：persist 常用于 pinia-plugin-persistedstate。它会把指定 state 写入 storage；注意边界（不要持久化敏感信息与临时态）。"
+    },
+    {
+      "matchRegex": "^  byPath: Record<string, HighlightRecord\\[\\]>\\s*$",
+      "content": "Record<K, V>：把一组 key 映射到同一种 value 类型，常用于配置表/字典结构。它能让索引访问更安全。"
+    }
+  ]
+}

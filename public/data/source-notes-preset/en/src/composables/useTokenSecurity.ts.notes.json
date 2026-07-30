@@ -1,0 +1,11 @@
+{
+  "version": "2026.02.01",
+  "intro": "Token security storage: AES-GCM, PBKDF2 key derivation, legacy migration.",
+  "notes": [
+    {
+      "line": 1,
+      "matchRegex": "^export function useTokenSecurity\\(",
+      "content": "Implements AES-256-GCM token encryption with PBKDF2-derived keys and legacy plaintext migration. Browser-side encryption reduces risk but is not equivalent to server-side secret handling."
+    }
+  ]
+}

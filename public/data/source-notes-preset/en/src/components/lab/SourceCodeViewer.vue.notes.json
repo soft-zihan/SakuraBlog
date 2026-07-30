@@ -1,0 +1,29 @@
+{
+  "version": "2026.02.01",
+  "intro": "Source viewer: tree + code + minimap; supports preset and user notes.",
+  "notes": [
+    {
+      "line": 75,
+      "match": "File Introduction Bar",
+      "content": "File intro comes from intros[filePath] in public/data/source-notes-preset.json, and preset notes are rendered under matching code lines when enabled."
+    },
+    {
+      "line": 330,
+      "matchRegex": "^onMounted\\(async \\(\\) => \\{",
+      "content": "onMounted order: load preset notes → restore user notes/collapsed/folded → fetch files.json to build the source tree (fetchPath points to raw/*.txt)."
+    },
+    {
+      "line": 438,
+      "matchRegex": "^const loadPresetNotes\\s*=\\s*async \\(\\) =>",
+      "content": "Preset notes support anchor matching (match/matchRegex) in addition to line numbers to reduce drift when code changes."
+    },
+    {
+      "matchRegex": "const getPresetNotesUrl\\s*=\\s*\\(\\)\\s*=>",
+      "content": "Preset notes are fetched from BASE_URL + data/source-notes-preset.<lang>.json, so the same build can work under GitHub Pages subpaths."
+    },
+    {
+      "matchRegex": "const presetNoteContentByLine\\s*=\\s*computed\\(",
+      "content": "Preset notes are resolved on-demand per file: currentPresetNotes + fileLines → Map(line → content). This is what the UI uses to decide which lines show preset notes."
+    }
+  ]
+}

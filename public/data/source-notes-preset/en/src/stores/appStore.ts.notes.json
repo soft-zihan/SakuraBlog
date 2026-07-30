@@ -1,0 +1,11 @@
+{
+  "version": "2026.02.01",
+  "intro": "Global Pinia store: theme, language, UI toggles, and file system state.",
+  "notes": [
+    {
+      "line": 8,
+      "matchRegex": "defineStore\\('app'",
+      "content": "Global control-panel store: language, dark mode, user settings (incl. reader density), file system state, and main view mode."
+    }
+  ]
+}

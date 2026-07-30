@@ -1,0 +1,30 @@
+{
+  "intro": "组件源码：src/components/lab/stage7-vue-advanced/LabMultiVModel.vue。预置笔记聚焦 v-model:xxx 的语法糖展开、props/emit 约定，以及受控组件心智模型。",
+  "notes": [
+    {
+      "matchRegex": "^<template>\\s*$",
+      "content": "<template>：模板只写表达式。v-model:xxx 是一种“受控组件”写法：值来自父组件，更新通过事件回传。"
+    },
+    {
+      "matchRegex": "^<script setup lang=\"ts\">\\s*$",
+      "content": "<script setup>：这里用 defineComponent + h 声明 NameEditor 子组件，核心是它的 props 与 emits 约定。"
+    },
+    {
+      "matchRegex": "^const first = ref\\(props\\.lang === 'zh' \\? '樱花' : 'Sakura'\\)\\s*$",
+      "content": "父组件状态：first/last 是父组件的“单一事实来源”。模板里 ref 会自动解包，但在 script 中读写需要 .value。"
+    },
+    {
+      "matchRegex": "^\\s{12}v-model:first=\"first\"\\s*$",
+      "content": "多 v-model：v-model:first 会映射到 :first + @update:first。字段名 first 就是你的组件 API 的一部分。"
+    },
+    {
+      "matchRegex": "^const NameEditor = defineComponent\\(\\{\\s*$",
+      "content": "子组件：NameEditor 通过 props 接收 first/last，并通过 emits 发出 update:first/update:last 来请求父组件更新（不能直接改 props）。"
+    },
+    {
+      "matchRegex": "^\\s*'update:first': \\(v: string\\) => typeof v === 'string',\\s*$",
+      "content": "emits 声明：update:first/update:last 是多 v-model 的事件通道。声明后能获得更好的类型提示与运行期校验。"
+    }
+  ]
+}
+

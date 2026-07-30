@@ -1,0 +1,33 @@
+{
+  "intro": "组件源码：src/components/lab/stage6-vue-core/LabListKeys.vue。预置笔记聚焦 v-for 的 :key 语义、组件复用机制，以及“为什么不要用 index”。",
+  "notes": [
+    {
+      "matchRegex": "^<template>\\s*$",
+      "content": "<template>：模板表达式只允许写表达式。列表渲染和条件渲染应使用 v-for/v-if 等指令来表达。"
+    },
+    {
+      "matchRegex": "^<script setup lang=\"ts\">\\s*$",
+      "content": "<script setup>：这里用 defineComponent 在同文件里声明 RowInput，让它拥有“内部状态”（note），更容易观察 key 错用导致的复用错位。"
+    },
+    {
+      "matchRegex": "^const keyMode = ref<'id' \\| 'index'>\\('id'\\)\\s*$",
+      "content": "状态开关：keyMode 控制列表渲染时 :key 用 id 还是 index。这个开关是演示的关键：同一份数据、不同 key 策略，结果会不同。"
+    },
+    {
+      "matchRegex": "^            <RowInput v-for=\"item in items\" :key=\"item\\.id\" :label=\"item\\.label\" :id=\"item\\.id\" :show-local=\"showLocalState\" />\\s*$",
+      "content": "推荐写法：:key=唯一 id。Vue 会把“组件实例”稳定绑定到对应的业务实体，重排/插入时不会把内部状态错绑到别的行。"
+    },
+    {
+      "matchRegex": "^            <RowInput v-for=\"\\(item, index\\) in items\" :key=\"index\" :label=\"item\\.label\" :id=\"item\\.id\" :show-local=\"showLocalState\" />\\s*$",
+      "content": "风险写法：:key=index。只要列表发生插入/删除/重排，Vue 可能会复用错误的组件实例，导致输入值/局部状态跟着位置走。"
+    },
+    {
+      "matchRegex": "^const shuffle = \\(\\) => \\{\\s*$",
+      "content": "重排：shuffle/reverse/prepend 会改变 item 的顺序或索引，从而触发 key 策略差异。列表“不稳定”时更能暴露 index key 的问题。"
+    },
+    {
+      "matchRegex": "^const RowInput = defineComponent\\(\\{\\s*$",
+      "content": "关键机制：RowInput 内部的 note 是组件实例私有状态。key 决定“哪个实例对应哪个 item”，因此 key 错了，状态就会错位。"
+    }
+  ]
+}

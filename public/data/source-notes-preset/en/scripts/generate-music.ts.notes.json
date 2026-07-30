@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "Music generator: scans assets and emits a frontend-friendly playlist data file.",
+  "notes": []
+}

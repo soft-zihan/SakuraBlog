@@ -1,0 +1,37 @@
+{
+  "intro": "组件源码：src/components/lab/stage6-vue-core/LabComputedWatch.vue。预置笔记聚焦 computed/watch/watchEffect 的语义差异、常见写法与清理副作用。",
+  "notes": [
+    {
+      "matchRegex": "^<template>\\s*$",
+      "content": "<template>：模板语法只允许写表达式（如三元、??、?.），不允许写 if/for 语句块或赋值语句。"
+    },
+    {
+      "matchRegex": "^<script setup lang=\"ts\">\\s*$",
+      "content": "<script setup>：Composition API 的语法糖。顶层变量/函数会自动暴露给模板；这里用 ts 类型定义 LogItem，便于日志结构化。"
+    },
+    {
+      "matchRegex": "^const props = defineProps<\\{\\s*$",
+      "content": "defineProps：定义组件输入。这里把 lang 约束为 'en'|'zh'，避免传入不支持的语言值。"
+    },
+    {
+      "match": "v-model.number=\"price\"",
+      "content": "v-model 修饰符：.number 会把输入值做 Number 转换（字符串→数字）。在 range/number 控件上常用，避免后续计算出现字符串拼接。"
+    },
+    {
+      "matchRegex": "^const subtotal = computed\\(\\(\\) => price\\.value \\* qty\\.value\\)\\s*$",
+      "content": "computed：派生值（有缓存）。它只描述“如何从依赖得到结果”，不要在 computed 里做副作用（写日志/请求等）。"
+    },
+    {
+      "match": "stopWatchFn = watch(",
+      "content": "watch：监听某个来源（ref/computed/getter）。返回的 stop 函数可以停止监听；flush 选项控制回调时机（sync/pre/post）。"
+    },
+    {
+      "match": "stopEffectFn = watchEffect(",
+      "content": "watchEffect：自动收集依赖。回调里读取了哪些响应式值，就会订阅哪些依赖；适合“依赖不固定/组合变化”的副作用。"
+    },
+    {
+      "match": "onBeforeUnmount(() => {",
+      "content": "清理副作用：组件卸载前停止 watch/watchEffect，避免离开页面后仍然写日志/触发更新导致内存泄漏或报错。"
+    }
+  ]
+}

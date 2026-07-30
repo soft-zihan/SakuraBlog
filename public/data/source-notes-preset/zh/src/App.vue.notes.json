@@ -1,0 +1,107 @@
+{
+  "version": "2026.02.01",
+  "intro": "根组件：组合全局布局、背景层（壁纸/花瓣）与主视图入口。",
+  "notes": [
+    {
+      "match": "<AppLayout",
+      "content": "顶层布局组件，负责把“全局状态”传给布局壳。\n:prop 表示把一个变量作为属性传入，值会随响应式变化。\n@event 监听子组件发出的事件，触发后执行这里的表达式。\n理解方式：父组件把数据给子组件，子组件用事件告诉父组件发生了什么。"
+    },
+    {
+      "matchRegex": "@open-search=\"appStore\\.showSearch",
+      "content": "模板里的事件处理可以写多条语句，用分号分开。\n它是“模板表达式”，不是完整的 JS 代码块，但能读取响应式状态。\n适合写简单逻辑：更新状态、判断是否是移动端等。"
+    },
+    {
+      "match": "<PetalBackground v-if=\"appStore.showParticles",
+      "content": "v-if 决定是否“创建并插入 DOM”。\n条件为 true 才会渲染组件，为 false 会直接销毁。\n适合控制弹窗/特效等需要省性能的元素。"
+    },
+    {
+      "match": "<Teleport to=\"body\">",
+      "content": "Teleport 把内容渲染到 body 下，视觉上脱离当前层级。\n这样弹窗不受父容器 overflow/层级影响。\n但逻辑仍属于当前组件：状态、事件都在这里管理。"
+    },
+    {
+      "match": "<SettingsModal",
+      "content": "弹窗通常用 v-if 控制“是否存在”。\n@close 是子组件 emit 的事件，父组件用赋值关闭状态。\n思路：子组件只负责发出“我要关闭”，父组件才真正修改状态。"
+    },
+    {
+      "match": "<SearchModal",
+      "content": "这里把函数当作 props 传给子组件。\n子组件可以直接调用这些函数，不必再发事件给父组件。\n当逻辑是“工具函数”时，用函数型 props 很合适。"
+    },
+    {
+      "matchRegex": "<WriteEditor[^>]+:show=",
+      "content": "布尔 props 一般用 :show 绑定开关状态。\n@close 是关闭通知；父组件收到后把 show 改为 false。\n这种模式让弹窗“受控”：开关由父组件统一管理。"
+    },
+    {
+      "matchRegex": "defineAsyncComponent\\(",
+      "occurrence": 1,
+      "content": "defineAsyncComponent 用来“按需加载”组件。\n首次渲染不会下载该组件代码，需要时才加载。\n返回值仍是组件定义，所以用法与普通组件一致。"
+    },
+    {
+      "matchRegex": "import\\s+type\\s+\\{\\s*FileNode",
+      "content": "import type 表示只导入类型，不会进入运行时。\n这能减少打包体积，也避免类型与真实代码混在一起。\n新手理解：它只在编辑器里生效。"
+    },
+    {
+      "matchRegex": "const\\s+appStore\\s*=\\s*useAppStore\\(",
+      "content": "Pinia store 在 setup 顶层调用一次即可。\n返回的是响应式对象，直接读写 state 或调用 action。\n把它看作“全局状态仓库”，便于跨组件共享。"
+    },
+    {
+      "matchRegex": "const\\s+\\{\\s*initSearchIndex",
+      "content": "useSearch() 返回一组函数和状态。\n这里用解构一次性取出需要的部分，代码更简洁。\n注意：解构出的值若是 ref/reactive，依旧保持响应式。"
+    },
+    {
+      "matchRegex": "const\\s+lang\\s*=\\s*computed",
+      "content": "computed 是“根据已有数据算出的新数据”。\n它会缓存结果，依赖变了才重新计算。\n这里把 store.lang 映射成本地计算属性，模板使用更集中。"
+    },
+    {
+      "matchRegex": "const\\s+resourceCategories\\s*=\\s*computed",
+      "content": "resourceCategories 用 computed 生成一个数组配置。\n当语言切换时，t/lang 变化会自动触发重新计算。\n模板读取的是计算结果，所以 UI 会自动更新。"
+    },
+    {
+      "matchRegex": "const\\s+dualColumnMode\\s*=\\s*ref",
+      "content": "ref 是一个带 .value 的响应式容器。\n适合存放布尔、数字、字符串等简单值。\n你修改 ref，模板会自动跟着刷新。"
+    },
+    {
+      "matchRegex": "const\\s+handleOpenLabNoteEvent\\s*=",
+      "content": "这是一个自定义事件处理函数。\nCustomEvent 会把自定义数据放在 detail 里。\n这里根据移动端/桌面端做不同切换，保证体验一致。"
+    },
+    {
+      "matchRegex": "const\\s+handleOpenLabSourceEvent\\s*=",
+      "content": "早返回是常见的写法：条件满足就直接 return。\n这样可以减少 if 嵌套，让逻辑更容易读。\n新手可以把它理解为“先处理特殊情况”。"
+    },
+    {
+      "matchRegex": "const\\s+labTabs\\s*=\\s*computed",
+      "content": "通过 map 把配置数组转换成 UI 使用的数据。\nmap 会返回新数组，不会修改原数组。\n这是前端常见的数据处理方式。"
+    },
+    {
+      "matchRegex": "const\\s+applyUrlState\\s*=\\s*async",
+      "content": "async/await 用来写“同步风格”的异步逻辑。\nURLSearchParams 是浏览器标准 API，用于解析 URL 参数。\n这样就能把网址里的状态还原到页面。"
+    },
+    {
+      "matchRegex": "const\\s+\\{\\s*handleContentClick\\s*\\}\\s*=\\s*useContentClick",
+      "content": "把需要的函数/状态传给 composable 组合逻辑。\n这样 composable 不依赖全局变量，更容易复用与测试。\n这是组合式 API 的核心思路。"
+    },
+    {
+      "matchRegex": "const\\s+handleLinkCapture\\s*=",
+      "content": "这里在捕获阶段拦截点击事件。\nclosest('a') 用来找到最近的链接元素。\npreventDefault 阻止浏览器默认跳转，交给应用内部处理。"
+    },
+    {
+      "matchRegex": "watch\\(\\(\\)\\s*=>\\s*appStore\\.userSettings\\.themeColor",
+      "content": "watch 用于监听某个响应式值的变化。\n这里把主题色写进 CSS 变量，样式立刻生效。\n这是“运行时换肤”的常见实现。"
+    },
+    {
+      "matchRegex": "watch\\(\\(\\)\\s*=>\\s*appStore\\.userSettings\\.autoChangeMode",
+      "content": "watch 的回调可以做副作用，比如定时器。\n当配置变了先清理旧定时器，再创建新的。\n这样避免多个定时器叠加造成性能问题。"
+    },
+    {
+      "matchRegex": "useAppInit\\(",
+      "content": "把初始化逻辑封装到 composable 里。\nApp.vue 保持结构清晰，只负责组织组件。\n复杂流程（如加载文件树/索引）集中处理更易维护。"
+    },
+    {
+      "matchRegex": "onMounted\\(async\\s*\\(\\)\\s*=>",
+      "content": "onMounted 会在 DOM 挂载完成后执行。\n适合注册全局事件、读取尺寸等需要 DOM 的操作。\n注意配合 onUnmounted 做清理。"
+    },
+    {
+      "matchRegex": "onUnmounted\\(\\(\\)\\s*=>",
+      "content": "onUnmounted 用来清理副作用。\n包括移除事件监听、清掉定时器等。\n否则组件多次进入会产生重复绑定。"
+    }
+  ]
+}

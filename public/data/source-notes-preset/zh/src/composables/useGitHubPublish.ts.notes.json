@@ -1,0 +1,18 @@
+{
+  "version": "2026.02.01",
+  "intro": "组合式函数：抽离可复用业务逻辑（Composition API）。",
+  "notes": [
+    {
+      "matchRegex": "export function useGitHubPublish\\(",
+      "content": "静态站点写入能力：通过 GitHub API 执行发布/写入；当没有直推权限时，会走 Fork + PR 的回退路径。"
+    },
+    {
+      "matchRegex": "^\\s*const checkWriteAccess\\s*=\\s*async\\b",
+      "content": "通过仓库 API 返回的 permissions.push 判断用户是否具备写入权限。"
+    },
+    {
+      "matchRegex": "^\\s*const createPullRequest\\s*=\\s*async\\b",
+      "content": "Fork + PR 流程：在无直推权限时仍能提交改动，保持“只用浏览器也能发布”的体验。"
+    }
+  ]
+}

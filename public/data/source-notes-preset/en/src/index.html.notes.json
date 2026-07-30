@@ -1,0 +1,18 @@
+{
+  "version": "2026.02.01",
+  "intro": "HTML entry template: mount point, meta tags, and initial resources.",
+  "notes": [
+    {
+      "match": "<div id=\"app\"",
+      "content": "The app mount point. Vite will load ./main.ts, which creates the Vue app and mounts it onto this element."
+    },
+    {
+      "match": "@keyframes petalFall",
+      "content": "A fallback CSS animation for petals. The runtime petal system is now primarily controlled by the Vue app, but the base keyframes and styles are kept for reliability."
+    },
+    {
+      "match": "type=\"module\" src=\"./main.ts\"",
+      "content": "Vite entry point. This is the only required script tag for bootstrapping the SPA; everything else is bundled from here."
+    }
+  ]
+}

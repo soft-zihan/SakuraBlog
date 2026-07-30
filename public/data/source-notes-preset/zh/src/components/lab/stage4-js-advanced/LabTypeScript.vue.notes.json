@@ -1,0 +1,55 @@
+{
+  "version": "2026.02.01",
+  "intro": "实验室实验组件：LabTypeScript.vue（用于交互式讲解/演示）。",
+  "notes": [
+    {
+      "matchRegex": "^<template>",
+      "content": "这个组件用 Vue 来“演示 TypeScript 语法”。注意模板里显示的代码片段（<pre>）只是字符串渲染，不会被执行，但语法本身与真实 TS 一致。"
+    },
+    {
+      "match": "v-model.number=\"user.age\"",
+      "content": "v-model.number 修饰符：把输入值自动转成 number（等价于在 input 事件里 Number(value)）。常用于表单数值，避免 age 变成字符串。"
+    },
+    {
+      "matchRegex": "^<script setup lang=\"ts\">$",
+      "content": "lang=\"ts\" 开启 TS。TypeScript 在编译阶段做类型检查/补全，运行时仍是 JavaScript。"
+    },
+    {
+      "match": "const tabs = computed<{ id: 'basic' | 'union' | 'interface' | 'generic' | 'utility'; label: string }[]>(() => [",
+      "content": "computed<...>(...)：这里显式给 computed 标注了返回类型（数组元素含 id 与 label）。字面量联合类型可以把 tab.id 限定在固定集合里。"
+    },
+    {
+      "matchRegex": "^const activeTab = ref<'basic' \\| 'union' \\| 'interface' \\| 'generic' \\| 'utility'>\\('basic'\\)$",
+      "content": "ref<'a'|'b'>(...)：用字面量联合类型描述“状态机”。好处是 switch/if 分支会有类型提示，并且写错值会在编译期报错。"
+    },
+    {
+      "match": "let id: string | number",
+      "content": "联合类型 string | number：变量允许是多种类型之一；配合 typeof 守卫可以做类型收窄（narrowing）。"
+    },
+    {
+      "match": "type Status = 'pending' | 'success' | 'error'",
+      "content": "type + 字面量联合：把值限定为几个字符串常量之一。常用于状态、主题、尺寸等“枚举式”字段。"
+    },
+    {
+      "match": "interface User {",
+      "occurrence": 1,
+      "content": "interface 用于描述对象结构（shape）。与 type 类似，但 interface 更适合做扩展（extends）与声明合并。"
+    },
+    {
+      "match": "email?: string",
+      "content": "可选属性 ?:：表示这个字段可能不存在（undefined）。读取时要考虑 user.email 为空的情况。"
+    },
+    {
+      "match": "readonly id: number",
+      "content": "readonly：只读属性，初始化后不允许再次赋值。用于表达“身份/主键不可变”等约束。"
+    },
+    {
+      "match": "numbers: [1, 2, 3] as number[]",
+      "content": "as 类型断言：告诉 TS “把这个值当成 number[] 看”。它不会做运行时转换，只影响类型系统；过度使用会掩盖真实错误。"
+    },
+    {
+      "match": "genericDemo.numbers[0] ?? 'undefined'",
+      "content": "?? 空值合并运算符：只有在左侧为 null/undefined 时才用右侧；比 || 更精确（0/''/false 不会被误判为空）。"
+    }
+  ]
+}

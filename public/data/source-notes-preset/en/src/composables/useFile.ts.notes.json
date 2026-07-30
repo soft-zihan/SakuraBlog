@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "File loading/navigation helpers around FileNode, caching, switching.",
+  "notes": []
+}

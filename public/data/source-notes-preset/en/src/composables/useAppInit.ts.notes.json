@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "App initialization: load files.json, init theme/language, restore state.",
+  "notes": []
+}

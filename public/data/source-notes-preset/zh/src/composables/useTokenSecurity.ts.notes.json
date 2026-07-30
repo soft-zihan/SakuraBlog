@@ -1,0 +1,10 @@
+{
+  "version": "2026.02.01",
+  "intro": "组合式函数：抽离可复用业务逻辑（Composition API）。",
+  "notes": [
+    {
+      "matchRegex": "^export function useTokenSecurity\\(",
+      "content": "Token 安全存储：AES-GCM 加密 + PBKDF2 派生密钥（基于指纹与 salt），并兼容旧版明文 token 迁移。浏览器端加密能降低泄露风险，但不等同于服务端密钥管理。"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "version": "2026.02.01",
+  "intro": "组合式函数：抽离可复用业务逻辑（Composition API）。",
+  "notes": [
+    {
+      "matchRegex": "const currentWallpaperPath = computed",
+      "content": "currentWallpaperPath 负责把 appStore 里保存的“当前壁纸标识”解析成可用的 URL。\n注意要兼容相对路径（./ 或 /），否则“收藏当前壁纸到列表”后可能会回退到默认壁纸。"
+    },
+    {
+      "matchRegex": "anchor\\.href = `\\$\\{proxyBaseUrl\\}/api/wallpaper/file",
+      "content": "静态站点下载远程图片常被 CORS/防盗链阻断。\n这里优先走 Worker 代理下载（Content-Disposition: attachment），保证“点击下载就会下载”。"
+    }
+  ]
+}

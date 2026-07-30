@@ -1,0 +1,18 @@
+{
+  "version": "2026.02.01",
+  "intro": "UI 组件：页面功能块与交互入口。",
+  "notes": [
+    {
+      "matchRegex": "@scroll=\"onBiliScroll\"",
+      "content": "B 站搜索结果列表实现了“滚动到底自动加载更多”。\n这里监听滚动并在接近底部时触发下一页请求。\n注意：要做去重与 loading 状态，避免重复拉取。"
+    },
+    {
+      "matchRegex": "@click=\"playBili\\(track\\)\"",
+      "content": "B 站搜索结果整行可点击播放。\n按钮内部用 @click.stop 防止“点加入/下载”也触发播放。"
+    },
+    {
+      "matchRegex": "@click\\.stop=\"downloadTrack\\(track\\)\"",
+      "content": "播放列表的“下载”走通用下载逻辑：\n- B 站：走 Worker 代理下载\n- 其它来源：优先 blob/data 直下，失败回退打开链接\n并会额外下载封面图（若存在）。"
+    }
+  ]
+}

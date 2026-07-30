@@ -1,0 +1,14 @@
+{
+  "version": "2026.02.01",
+  "intro": "Pinia Store：全局状态/持久化与模块状态管理。",
+  "notes": [
+    {
+      "matchRegex": "async function searchBilibiliPage",
+      "content": "B 站搜索分页：service 层返回 page/numPages 等信息，Store 再映射为 MusicTrack。\nUI 可以用 numPages 判断是否还有下一页，并做“追加 + 去重”。"
+    },
+    {
+      "matchRegex": "async function downloadCoverForTrack",
+      "content": "下载封面图：\n优先走 Worker 的 /api/wallpaper/file 以 attachment 方式下载（解决跨域/防盗链）。\n如果没有配置代理，则尝试 fetch→blob 下载，失败再回退直接打开链接。"
+    }
+  ]
+}

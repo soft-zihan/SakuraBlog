@@ -1,0 +1,18 @@
+{
+  "version": "2026.02.01",
+  "intro": "UI 组件：页面功能块与交互入口。",
+  "notes": [
+    {
+      "matchRegex": "^const downloadSourceCodeWithNotes\\s*=\\s*async\\b",
+      "content": "下载源码时会从 raw/*.txt 拉取“扁平化文件名”的源码文本，并可将预置笔记与用户笔记以注释形式嵌入。"
+    },
+    {
+      "match": "Embed notes as comments",
+      "content": "从下往上插入注释，避免插入后导致后续行号整体偏移。"
+    },
+    {
+      "matchRegex": "const resolvedPresetMap\\s*=\\s*buildPresetNoteMap\\(",
+      "content": "预置笔记先基于 match/matchRegex 对当前内容做行号解析，再与用户笔记合并成统一的插入列表。"
+    }
+  ]
+}

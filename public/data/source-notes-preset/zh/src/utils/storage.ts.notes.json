@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "工具函数：安全 localStorage 与 JSON 读写封装（降级到内存存储）。",
+  "notes": []
+}

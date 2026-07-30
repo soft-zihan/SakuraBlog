@@ -1,0 +1,11 @@
+{
+  "version": "2026.02.01",
+  "intro": "Article reader: Markdown rendering, TOC, likes/favorites, raw/source mode, editing toolbar.",
+  "notes": [
+    {
+      "line": 106,
+      "matchRegex": "=\\s*useContentRenderer\\(",
+      "content": "Two rendering branches: Markdown → HTML via useContentRenderer, or raw/source view with an optional rawEditor edit mode."
+    }
+  ]
+}

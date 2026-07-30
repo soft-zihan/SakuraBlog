@@ -1,0 +1,21 @@
+{
+  "version": "2026.02.01",
+  "intro": "Pre-build script: mirror notes/, export raw/, generate files.json (notes + source tree).",
+  "notes": [
+    {
+      "line": 14,
+      "match": "Generating File Tree",
+      "content": "A pre-build script:\n- Mirrors notes/ → public/notes/ for runtime fetch\n- Rebuilds public/raw/ and exports source files as raw/*.txt for the Source Viewer\n- Generates public/data/files.json combining notes trees + project source tree\n- Uses git log timestamps to avoid unreliable CI mtimes"
+    },
+    {
+      "line": 69,
+      "matchRegex": "function getGitLastModified\\(",
+      "content": "Uses git log timestamps for lastModified because filesystem mtimes are unreliable in CI."
+    },
+    {
+      "line": 106,
+      "matchRegex": "function scanDirectory\\(",
+      "content": "scanDirectory builds both the notes tree and the source code tree; source files are exported as raw/*.txt for fetchability."
+    }
+  ]
+}

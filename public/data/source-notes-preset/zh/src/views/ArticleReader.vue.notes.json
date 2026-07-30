@@ -1,0 +1,10 @@
+{
+  "version": "2026.02.01",
+  "intro": "源码文件：建议结合源码查看器按模块阅读。",
+  "notes": [
+    {
+      "matchRegex": "=\\s*useContentRenderer\\(",
+      "content": "阅读器的核心分支：Markdown 渲染（useContentRenderer）与 raw/source 查看（含可选的 rawEditor 编辑保存）。"
+    }
+  ]
+}

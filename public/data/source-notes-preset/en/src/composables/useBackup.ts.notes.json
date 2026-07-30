@@ -1,0 +1,5 @@
+{
+  "version": "2026.02.01",
+  "intro": "Backup/restore: local import/export and GitHub-based cloud backup (excluding token).",
+  "notes": []
+}
