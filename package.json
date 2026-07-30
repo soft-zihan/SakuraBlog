@@ -3,10 +3,11 @@
   "version": "1.1",
   "type": "module",
   "scripts": {
-    "gen-all": "npm run gen-tree && npm run gen-raw && npm run gen-music && npm run gen-wallpapers",
+    "gen-all": "npm run gen-gushiwen && npm run gen-tree && npm run gen-raw && npm run gen-music && npm run gen-wallpapers",
     "dev": "npm run gen-all && vite --host 127.0.0.1 --port 3000",
     "build": "npm run gen-all && vite build",
     "preview": "vite preview",
+    "gen-gushiwen": "tsx scripts/generate-gushiwen.ts",
     "gen-tree": "tsx scripts/generate-tree.ts",
     "gen-raw": "tsx scripts/generate-raw.ts",
     "gen-music": "tsx scripts/generate-music.ts",

@@ -175,7 +175,7 @@
       <SidebarFilterPanel v-if="viewMode === 'latest' || viewMode === 'files'" :lang="lang" :file-system="fileSystem" />
 
       <!-- Latest View (only for latest mode) -->
-      <div v-if="viewMode === 'latest'" class="space-y-3 pb-20">
+      <div v-if="viewMode === 'latest'" class="space-y-3 pb-20 animate-fade-in">
           <div v-if="filteredFlatFiles.length === 0" class="text-center text-gray-400 py-10 text-sm italic">
           {{ t.no_notes }}
         </div>

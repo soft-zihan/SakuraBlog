@@ -4,14 +4,14 @@
       <div 
         ref="localScrollContainerRef"
         class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar w-full"
-        :style="{ padding: 'var(--reader-page-padding, 1.5rem)' }"
+        :style="{ padding: 'var(--reader-page-padding, 1.5rem)', transform: 'translateZ(0)' }"
       >
         <div 
-           class="w-full mx-auto rounded-[2rem] shadow-[0_18px_60px_rgba(15,23,42,0.18)] border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] animate-fade-in backdrop-blur-xl transition-all duration-300 relative"
+           class="w-full mx-auto rounded-[2rem] shadow-lg border border-white/60 dark:border-gray-700/60 min-h-[calc(100%-2rem)] relative"
            :class="[fontSizeClass, articleStyleClass, appStore.sidebarOpen ? 'max-w-4xl xl:max-w-5xl' : 'max-w-5xl xl:max-w-7xl']"
            :style="[{ padding: 'var(--reader-card-padding, 2.5rem)' }, articleContainerStyle]"
         >
-          <div v-if="overlayVisible" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-20 rounded-[2rem] backdrop-blur-sm">
+          <div v-if="overlayVisible" class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-20 rounded-[2rem]">
             <div class="flex flex-col items-center gap-4">
                <div class="animate-spin text-4xl">🌸</div>
                <div class="text-sm font-bold animate-pulse" :style="loadingTextStyle">{{ overlayLabel }}</div>
@@ -562,18 +562,31 @@ watch(markdownViewerRef, (el) => {
   emit('markdown-viewer-change', el)
 }, { immediate: true })
 
-watch([currentFile, isRawMode], () => {
+watch([currentFile, isRawMode], async () => {
   const seq = ++renderSeq
+
+  const contentReady =
+    !isRawMode.value &&
+    currentFile.value &&
+    !currentFile.value.isSource &&
+    (
+      (typeof currentFile.value.renderedHtml === 'string' && currentFile.value.renderedHtml.length > 0) ||
+      (typeof currentFile.value.content === 'string' && currentFile.value.content.length > 0)
+    )
+
+  if (contentReady) {
+    // 内容已就绪，先保持遮罩，渲染完成后再移除
+    rendering.value = true
+    updateRenderedContent()
+    generateToc()
+    // 等待 Vue 更新 DOM 后移除遮罩
+    await nextTick()
+    if (seq === renderSeq) rendering.value = false
+    return
+  }
+
+  // 内容未就绪，显示加载遮罩
   rendering.value = true
-  Promise.resolve()
-    .then(() => nextTick())
-    .then(() => new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve())))
-    .then(() => updateRenderedContent())
-    .catch(() => {})
-    .finally(() => {
-      generateToc()
-      if (seq === renderSeq) rendering.value = false
-    })
 }, { immediate: true });
 
 // Raw Editor

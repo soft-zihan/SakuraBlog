@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="article-card group p-4 bg-white/40 dark:bg-gray-800/40 border border-white/60 dark:border-gray-700 rounded-2xl hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg dark:hover:shadow-black/20 cursor-pointer transition-all duration-300 animate-fade-in relative overflow-hidden backdrop-blur-sm"
+    class="article-card group p-4 bg-white/40 dark:bg-gray-800/40 border border-white/60 dark:border-gray-700 rounded-2xl hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg dark:hover:shadow-black/20 cursor-pointer transition-all duration-300 relative overflow-hidden backdrop-blur-sm"
     :class="{ 'ring-2 bg-white dark:bg-gray-800 shadow-md': isActive }"
     :style="isActive ? activeRingStyle : undefined"
     @click="emit('click')"

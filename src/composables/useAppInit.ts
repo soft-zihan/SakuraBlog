@@ -150,12 +150,9 @@ export function useAppInit(
 
   onMounted(async () => {
     searchApi.setFetchFunction(fetchFileContent);
+    // 立即开始加载古诗文，不等待 initFileSystem 完成
+    loadRandomPoem()
     await initFileSystem();
-    runWhenIdle(() => {
-      if (appStore.currentFile || appStore.currentFolder) return
-      if (appStore.viewMode !== 'latest') return
-      loadRandomPoem()
-    })
     runWhenIdle(() => {
       musicStore.loadPlaylist()
     })

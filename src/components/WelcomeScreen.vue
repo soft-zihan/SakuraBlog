@@ -25,7 +25,7 @@
         <div class="bg-white/40 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 dark:border-gray-700/50 shadow-lg font-kaiti">
           <div class="text-center">
             <div class="text-2xl md:text-3xl font-bold tracking-wide text-[var(--primary-600)] dark:text-[var(--primary-300)] poem-font">
-              {{ welcomePoem?.title || (lang === 'zh' ? '随机古诗文' : 'Random Poem') }}
+              {{ welcomePoem?.title }}
             </div>
             <div v-if="welcomePoemAuthorLine" class="mt-2 text-base text-gray-500 dark:text-gray-400 poem-font">
               {{ welcomePoemAuthorLine }}

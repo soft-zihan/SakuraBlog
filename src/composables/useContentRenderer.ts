@@ -18,9 +18,11 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
   let isRendering = false
   let rerenderRequested = false
   let headingIdCount = new Map<string, number>()
-  // Optimization: cache header positions
-  let headerPositionsCache: Map<string, number> | null = null
   let isScrollingToHeader = false
+  // IntersectionObserver for async header tracking (no forced sync layout)
+  let headerObserver: IntersectionObserver | null = null
+  // Track which headers are currently visible, keyed by id
+  const visibleHeaders = new Set<string>()
 
   const normalizeHeadingText = (input: string) => {
     return input
@@ -248,7 +250,20 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
       // Replace markdown image syntax with proper paths
       fixedHtml = fixedHtml.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, relPath) => {
         const resolved = resolveContentPath(relPath.trim())
-        return `<img src="${resolved}" alt="${alt}">`
+        return `<img src="${resolved}" alt="${alt}" loading="lazy">`
+      })
+
+      // Also fix <img src="..."> tags that come from pre-rendered HTML
+      fixedHtml = fixedHtml.replace(/<img\s([^>]*?)src="([^"]+)"([^>]*?)>/g, (match, before, src, after) => {
+        // Skip data URIs, blob URLs, and already-absolute URLs
+        if (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http://') || src.startsWith('https://')) {
+          return match
+        }
+        const resolved = resolveContentPath(src.trim())
+        // Add loading="lazy" if not already present
+        const hasLoading = /loading\s*=/.test(before) || /loading\s*=/.test(after)
+        const loadingAttr = hasLoading ? '' : ' loading="lazy"'
+        return `<img ${before}src="${resolved}"${loadingAttr}${after}>`
       })
       
       const cacheKey = `${currentFile.value.path}|${currentFile.value.lastModified || ''}|${currentFile.value.renderVersion || ''}|${fixedHtml.length}|rendered-v2`
@@ -256,10 +271,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
       if (cached !== undefined) {
         renderedHtml.value = cached.html
         toc.value = precomputedToc || cached.toc
-        headerPositionsCache = null
-        nextTick(() => {
-          updateActiveHeader()
-        })
+        nextTick(() => setupHeaderObserver())
         return
       }
 
@@ -271,10 +283,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
         const keyToDelete = renderCacheKeys.shift()
         if (keyToDelete) renderCache.delete(keyToDelete)
       }
-      headerPositionsCache = null
-      nextTick(() => {
-        updateActiveHeader()
-      })
+      nextTick(() => setupHeaderObserver())
       return
     }
 
@@ -288,11 +297,7 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     if (cached !== undefined) {
       renderedHtml.value = cached.html
       toc.value = precomputedToc || cached.toc
-      // Force position cache invalidation
-      headerPositionsCache = null
-      nextTick(() => {
-        updateActiveHeader()
-      })
+      nextTick(() => setupHeaderObserver())
       return
     }
 
@@ -338,13 +343,8 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
         if (keyToDelete) renderCache.delete(keyToDelete)
       }
       
-      // Force position cache invalidation
-      headerPositionsCache = null
-      
-      // Trigger active header update
-      nextTick(() => {
-        updateActiveHeader()
-      })
+      // Re-setup observer after content render
+      nextTick(() => setupHeaderObserver())
     } catch (e) {
       console.error("Marked render error:", e)
       const errorHtml = `<div class="text-red-500 font-bold">Error rendering Markdown. Please check console.</div><pre>${rawContent}</pre>`
@@ -366,53 +366,58 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
   }
 
   /**
-   * Update active header with optimization
-   * Uses throttled scroll handling and cached positions
+   * Setup / teardown IntersectionObserver for active header tracking.
+   * IntersectionObserver is fully async — no forced sync layout during scroll.
    */
-  const updateActiveHeader = () => {
-    // Skip update if we are auto-scrolling to avoid flickering
-    if (isScrollingToHeader) return
+  const setupHeaderObserver = () => {
+    // Tear down previous observer
+    if (headerObserver) {
+      headerObserver.disconnect()
+      headerObserver = null
+    }
+    visibleHeaders.clear()
 
     const container = scrollContainer?.value || null
-    if (!container) return
-    const scrollPosition = container.scrollTop
-    
-    // Invalidate position cache if null
-    if (!headerPositionsCache) {
-      headerPositionsCache = new Map()
-      const containerRect = container.getBoundingClientRect()
-      // Relative offset base
-      const baseTop = containerRect.top - container.scrollTop
-      
-      for (const item of toc.value) {
-        const el = document.getElementById(item.id)
-        if (el) {
-          const elRect = el.getBoundingClientRect()
-          // Store relative top position to the container content area
-          headerPositionsCache.set(item.id, elRect.top - baseTop)
-        }
-      }
-    }
+    if (!container || toc.value.length === 0) return
 
-    const offset = 120
-    let active = ''
-    
-    // Efficient lookup using cached positions
-    for (const item of toc.value) {
-      const top = headerPositionsCache.get(item.id)
-      if (top !== undefined) {
-        if (top <= scrollPosition + offset) {
-          active = item.id
-        } else {
-          // Since TOC is ordered, we can break early if we passed the scroll point
-          // Assuming document order matches TOC order (mostly true)
-          // break 
+    // rootMargin: extend detection area 120px above viewport top
+    // so the active header is the one the user has scrolled past
+    headerObserver = new IntersectionObserver(
+      (entries) => {
+        if (isScrollingToHeader) return
+
+        for (const entry of entries) {
+          const id = entry.target.id
+          if (entry.isIntersecting) {
+            visibleHeaders.add(id)
+          } else {
+            visibleHeaders.delete(id)
+          }
         }
+
+        // Pick the last visible header in TOC order
+        let active = ''
+        for (const item of toc.value) {
+          if (visibleHeaders.has(item.id)) {
+            active = item.id
+          }
+        }
+        if (active && active !== activeHeaderId.value) {
+          activeHeaderId.value = active
+        }
+      },
+      {
+        root: container,
+        // Extend the detection area 120px above the viewport top
+        rootMargin: '120px 0px 0px 0px',
+        threshold: 0,
       }
-    }
-    
-    if (active && active !== activeHeaderId.value) {
-      activeHeaderId.value = active
+    )
+
+    // Observe all heading elements referenced by TOC
+    for (const item of toc.value) {
+      const el = document.getElementById(item.id)
+      if (el) headerObserver.observe(el)
     }
   }
 
@@ -437,8 +442,8 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
       // Smooth scroll duration is browser dependent, 800ms is a safe bet
       setTimeout(() => {
         isScrollingToHeader = false
-        // One final check to correct any drift
-        updateActiveHeader()
+        // Re-sync observer after scroll settles
+        setupHeaderObserver()
       }, 800)
     }
   }
@@ -452,21 +457,24 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     return idx * 28
   })
 
+  // Re-create observer when TOC changes (new article or content rendered)
+  watch(toc, () => {
+    nextTick(() => setupHeaderObserver())
+  })
+
+  // Bind scroll container reference (needed for observer root)
   if (scrollContainer) {
     watch(scrollContainer, (el) => {
-      if (boundScrollContainer && boundScrollContainer !== el) {
-        boundScrollContainer.removeEventListener('scroll', updateActiveHeader)
-      }
-      if (el && boundScrollContainer !== el) {
-        el.addEventListener('scroll', updateActiveHeader)
-      }
       boundScrollContainer = el
+      // Re-create observer with new root
+      nextTick(() => setupHeaderObserver())
     }, { immediate: true })
   }
 
   onUnmounted(() => {
-    if (boundScrollContainer) {
-      boundScrollContainer.removeEventListener('scroll', updateActiveHeader)
+    if (headerObserver) {
+      headerObserver.disconnect()
+      headerObserver = null
     }
   })
 
@@ -478,7 +486,6 @@ export function useContentRenderer(currentFile: Ref<FileNode | null>, isRawMode:
     setupMarkedRenderer,
     updateRenderedContent,
     generateToc,
-    updateActiveHeader,
     scrollToHeader
   }
 }
