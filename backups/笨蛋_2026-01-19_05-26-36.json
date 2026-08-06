@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "author": "笨蛋",
+    "timestamp": "2026-01-19T05:26:36.161Z",
+    "version": "1.0",
+    "note": "此备份不包含 GitHub Token，恢复后需要重新设置"
+  },
+  "data": {
+    "lang": "zh-CN",
+    "publish_tags_zh": [
+      "测试"
+    ],
+    "custom_folders": [
+      "/测试边界"
+    ],
+    "author_name": "笨蛋",
+    "music_currentTrackFilename": "你若三冬-兰音Reine.m4s",
+    "custom_folders_zh": [
+      "notes/zh/测试"
+    ],
+    "music_fab_position": {
+      "bottom": 8,
+      "right": 8
+    },
+    "github_repo_name": "soft-zihan.github.io",
+    "lab_active_tab_zh": "note1-html-css",
+    "publish_author": "测试备份名",
+    "app": {
+      "lang": "zh",
+      "isDark": false,
+      "currentWallpaperFilename": "wallpaper-light.jpg",
+      "userSettings": {
+        "fontSize": "normal",
+        "fontFamily": "sans",
+        "petalSpeed": "off",
+        "bannerMode": "hide"
+      },
+      "showParticles": false
+    },
+    "article": {
+      "likedArticles": [],
+      "favorites": [],
+      "articleStats": {
+        "zh/Linux命令行/04_实战/06_常用场景速查.md": {
+          "likes": 0
+        },
+        "zh/Linux命令行/01_基础/01_文件管理.md": {
+          "likes": 0
+        }
+      },
+      "userFingerprint": "x2g20a",
+      "selectedTags": [
+        "测试tag1",
+        "1/19",
+        "notag"
+      ],
+      "showFavoritesOnly": false
+    },
+    "giscus-session": "14987b61d443d47cb05e4466oc3lrxZqFQihJQfYBy6K6NF1NmNQOVK/Bac1c69fekNpTDbCh+CrQ7uj2wAzLq2IXHUElrnBHypP8IL4IrcJkCOSITDjTksqxea+1NZChBjuby/nUY9VHDtB1DQ=",
+    "music_isPlaying": false,
+    "github_repo_owner": "soft-zihan",
+    "sakura_source_code_notes": {
+      "index.html": []
+    },
+    "author_url": "https://github.com/soft-zihan/soft-zihan.github.io",
+    "music": {
+      "volume": 0.22,
+      "playMode": "single"
+    }
+  }
+}
